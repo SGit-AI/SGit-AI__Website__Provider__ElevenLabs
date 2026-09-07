@@ -210,6 +210,15 @@ def inline(text, ctx):
 
     text = INLINE_CODE.sub(stash, text)
     text = shortcodes_inline(text, ctx)
+    # GFM autolinks. Without this, <https://example.com/x> reaches the browser as an
+    # unknown tag and the URL disappears from the page entirely — which is how §4's
+    # vendor citation shipped with its URL invisible. Every quote there is supposed to
+    # carry the product, the URL and the date read; two of the three were arriving.
+    text = re.sub(
+        r"<(https?://[^>\s]+)>",
+        lambda m: f'<a href="{m.group(1)}" rel="noopener">{m.group(1)}</a>',
+        text,
+    )
     placeholders = {}
 
     def stash_html(fragment):

@@ -142,6 +142,15 @@ def check_relative_urls():
             fail(f"{js.relative_to(OUT)}: fetch of a root-absolute URL {m.group(1)} — use EL.asset()")
 
 
+def check_no_swallowed_urls(_seen=set()):
+    """A bare <https://…> in markdown reaches the browser as an unknown tag and the
+    URL vanishes. It is invisible in the source and invisible on the page, which is
+    the worst combination, so the build refuses it."""
+    for p in pages():
+        for m in re.finditer(r"<https?:[^>]*>", p.read_text()):
+            fail(f"{p.relative_to(OUT)}: a bare URL is being parsed as a tag: {m.group(0)[:60]}")
+
+
 def check_nine_sections():
     text = (OUT / "index.html").read_text()
     wanted = ["1 · Disclosure", "2 · What it grants", "3 · Which pattern", "4 · Where the key goes",
@@ -254,7 +263,7 @@ def main():
         sys.exit(2)
     for fn in [check_version_agreement, check_links, check_relative_urls, check_canonical_host, check_vault_key_tripwire,
                check_non_affiliation, check_forbidden_words, check_sgtts_tense, check_no_third_party,
-               check_js_origins, check_shortcodes, check_nine_sections,
+               check_js_origins, check_shortcodes, check_no_swallowed_urls, check_nine_sections,
                check_every_claim_cited, check_key_bar_and_pattern_box, check_cname, check_markdown_twins]:
         fn()
     if failures:

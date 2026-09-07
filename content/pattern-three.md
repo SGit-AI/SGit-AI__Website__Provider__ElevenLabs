@@ -46,9 +46,10 @@ What the host would do, in order:
 
 ## Why this is the only pattern where the bound holds
 
-<div class="beforeafter"><div class="ba now"><h4>The bench today — pattern 0 with a ceiling</h4><p>A key box at the top of the page. Your full account key, in the page's own JavaScript, calling the vendor directly. Bounded by the plan's monthly quota and nothing else {{claim:no-per-key-spend-limit}}.</p><p>The code that spends the money <b>holds the credential that authorises it</b>. Every safety property is a property of your restraint.</p><pre class="lang-js">const key = localStorage.getItem('el.keys.v1');
+<div class="beforeafter"><div class="ba now"><h4>The bench today — pattern 0 with a ceiling</h4><p>A key box at the top of the page. Your full account key, in the page's own JavaScript, calling the vendor directly. Bounded by the plan's monthly quota and nothing else {{claim:no-per-key-spend-limit}}.</p><p>The code that spends the money <b>holds the credential that authorises it</b>. Every safety property is a property of your restraint.</p><pre class="lang-js">const { items } = JSON.parse(
+  localStorage.getItem('el.keys.v1'));
 fetch('https://api.elevenlabs.io/v1/…', {
-  headers: { 'xi-api-key': key }
+  headers: { 'xi-api-key': items[0].key }
 });</pre></div><div class="ba then"><h4>The same page under pattern 3 — specified</h4><p>No key box. No key in the page, in storage, or in the network tab. The app asks; the host spends, meters and refuses.</p><p>The bounded thing <b>cannot reach the bounding thing</b>: the terms live below the permission floor, in the vault, with the content they govern. {{claim:sg-tts-spec}}</p><pre class="lang-js">const { audio, alignment, cost } =
   await sg.tts.speak({ text, timestamps: true });
 // no key, anywhere in this frame</pre></div></div>

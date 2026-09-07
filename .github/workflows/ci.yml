@@ -56,4 +56,6 @@ jobs:
           node-version: "20"
       - run: tools/check-js.sh
       - name: lab.js self-test in a browser (no network used)
-        run: CHROME="$(command -v chromium-browser || command -v chromium || command -v google-chrome)" tools/test-labs.sh
+        # test-labs.sh finds chromium or google-chrome itself, and fails loudly
+        # if the runner image has neither — a skipped test is worse than a red one.
+        run: tools/test-labs.sh

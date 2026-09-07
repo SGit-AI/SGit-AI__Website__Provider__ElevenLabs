@@ -37,9 +37,14 @@ repository and the ledger row changes state, with the date.
 
 ## 3 · Things skipped in this version, and why
 
-- **DNS was not confirmed.** `docs/CNAME` is set to `elevenlabs.providers.sgit.ai`, following the brief.
-  Note that this repository's own description says `elevenlabs.provider.sgit.ai` (singular). **Somebody who
-  owns the zone must confirm which is right before this goes live**; it is a one-line change in `build.py`.
+- **DNS was not confirmed, and the custom domain is not attached.** `docs/CNAME` is set to
+  `elevenlabs.providers.sgit.ai`, following the brief. Note that this repository's own description says
+  `elevenlabs.provider.sgit.ai` (singular). **Somebody who owns the zone must confirm which is right**; it
+  is a one-line change to `DOMAIN` in `build.py`. Two consequences until it is attached in
+  Settings → Pages: the site serves at `sgit-ai.github.io/SGit-AI__Website__Provider__ElevenLabs/` (which
+  works — every internal URL is relative), and every page's `canonical`/`og:url` points at a domain that
+  does not resolve yet. With an Actions-based deploy the `CNAME` file in the artifact does not attach the
+  domain by itself; the repository setting does.
 - **The pipeline expects a `dev` branch, and this repository has none.** The estate's
   convention is `dev` = release branch (validate → tag → deploy), `main` = deploy-only.
   Until `dev` exists, `main` is treated as a release branch too; create `dev` and drop

@@ -21,6 +21,11 @@
   var EL = (window.EL = {});
 
   EL.API = API;
+  /** Where the site root is, relative to this page. The document declares it
+   *  (<html data-root="../">) so a page works at the domain root, under a
+   *  GitHub Pages project path, from a local directory, or in a vault frame. */
+  EL.root = (document.documentElement.getAttribute('data-root') || '');
+  EL.asset = function (p) { return EL.root + String(p).replace(/^\//, ''); };
   EL.RATES = {                        // $ per 1,000 characters, list, Sep 2026 — vendor docs
     eleven_v3: 0.10, eleven_multilingual_v2: 0.10, eleven_flash_v2_5: 0.05,
     eleven_turbo_v2_5: 0.05, eleven_flash_v2: 0.05, eleven_turbo_v2: 0.05

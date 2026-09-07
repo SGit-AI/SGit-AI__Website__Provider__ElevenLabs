@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-root="../../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,14 +14,14 @@
 <meta property="og:description" content="Fire waves of parallel generations at 1, 2, 4, 8… until something fails, and record the request timeline, the 429s and the highest wave that survived. The one open item on this site that costs money to close.">
 <meta name="twitter:card" content="summary">
 <link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<script src="/assets/lab.js"></script>
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<script src="../../assets/lab.js"></script>
 </head>
 <body data-lab="1">
-<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<nav class="site"><div class="row"><a class="brand" href="../../index.html">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="../../versions/index.html" title="Site release history">v0.1.1</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="../../index.html">The report</a></div><div class="ni"><a class="nl here" href="../../experiments/index.html">Experiments</a></div><div class="ni"><a class="nl" href="../../bench/index.html">Bench</a></div><div class="ni"><a class="nl" href="../../patterns/index.html">Patterns</a></div><div class="ni"><a class="nl" href="../../comparison/index.html">Comparison</a></div><div class="ni"><a class="nl" href="../../ledger/index.html">Ledger</a></div><div class="ni"><a class="nl" href="../../disclosures/index.html">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
 <main class="doc">
-<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Concurrency probe — where is the wall?</p>
+<p class="crumb"><a href="../../index.html">elevenlabs.providers.sgit.ai</a> / <a href="../../experiments/index.html">experiments</a> / Concurrency probe — where is the wall?</p>
 <h1>Concurrency probe — where is the wall?</h1>
 <p class="lead">Concurrent request limits scale with the plan, and a render that fires every scene at once — 10 to 16 requests — meets that limit before it meets any other. <strong>We have never provoked one.</strong> This lab does, deliberately, for a few cents.</p>
 
@@ -29,12 +29,12 @@
 <div class="patternbox">
   <div class="ttl">Which pattern this is — read before you paste anything</div>
   <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
-  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  <a href="../../patterns/index.html">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
   their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
   is empty until you fill it.</p>
   <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
   except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
-  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  when you are done. The version of this page with no key box at all is <a href="../../pattern-three/index.html">pattern three</a>,
   and it does not exist yet.</p>
 </div>
 <div id="keybar" class="keybar"></div>
@@ -189,14 +189,14 @@
 </script>
 
 <h2 id="what-this-tests">What this tests</h2>
-<p>A <code>429</code> mid-render is the most likely first failure on a small plan <a class="chip st-u" href="/ledger/#claim-concurrency-unknown" title="Code we wrote and have never executed.">written, not run</a>, and it is a bad failure: it arrives after you have paid for the requests that succeeded, halfway through a render, with a partly-built video. The number that prevents it — the semaphore width — is a plan-specific fact that nobody has measured for this account.</p>
+<p>A <code>429</code> mid-render is the most likely first failure on a small plan <a class="chip st-u" href="../../ledger/index.html#claim-concurrency-unknown" title="Code we wrote and have never executed.">written, not run</a>, and it is a bad failure: it arrives after you have paid for the requests that succeeded, halfway through a render, with a partly-built video. The number that prevents it — the semaphore width — is a plan-specific fact that nobody has measured for this account.</p>
 <p>The ramp mode fires waves of 1, 2, 4, 8… and stops at the first wave with a failure. The wave before that is your answer.</p>
 <h2 id="how-to-read-the-result">How to read the result</h2>
-<ul><li><strong>The timeline column</strong> places each request by when it started and sizes it by how long it took. In a healthy wave the bars start together and end together; when they start together and finish in a staircase, requests are being queued somewhere between you and the model.</li><li><strong>A 429 is not a bug</strong>, it is the platform's own bound doing its job — the same class of event as <a href="/patterns/">the 402 on the sibling provider</a>, which is the one piece of evidence on this site that a bound is enforceable in practice <a class="chip st-v" href="/ledger/#claim-openrouter-402" title="Verified by execution on this date, by us.">verified 3 Sep 2026</a>.</li><li><strong>Distinguish 429 from 5xx and from a network error.</strong> The vendor's error table maps them: 401 key, 402 quota or plan, 422 validation, 429 concurrency or rate, 5xx theirs <a class="chip st-d" href="/ledger/#claim-error-table" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. A <code>network</code> row in this table usually means CORS or a host CSP, not the API <a class="chip st-v" href="/ledger/#claim-csp-blocks" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>.</li></ul>
+<ul><li><strong>The timeline column</strong> places each request by when it started and sizes it by how long it took. In a healthy wave the bars start together and end together; when they start together and finish in a staircase, requests are being queued somewhere between you and the model.</li><li><strong>A 429 is not a bug</strong>, it is the platform's own bound doing its job — the same class of event as <a href="../../patterns/index.html">the 402 on the sibling provider</a>, which is the one piece of evidence on this site that a bound is enforceable in practice <a class="chip st-v" href="../../ledger/index.html#claim-openrouter-402" title="Verified by execution on this date, by us.">verified 3 Sep 2026</a>.</li><li><strong>Distinguish 429 from 5xx and from a network error.</strong> The vendor's error table maps them: 401 key, 402 quota or plan, 422 validation, 429 concurrency or rate, 5xx theirs <a class="chip st-d" href="../../ledger/index.html#claim-error-table" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. A <code>network</code> row in this table usually means CORS or a host CSP, not the API <a class="chip st-v" href="../../ledger/index.html#claim-csp-blocks" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>.</li></ul>
 <h2 id="what-to-do-with-the-number">What to do with the number</h2>
-<p>Put it in the semaphore. In the pipeline this came from, that is <code>limits.maxConcurrent</code> in the vault's terms file — which is also exactly the field <a href="/pattern-three/">the pattern-three host</a> would enforce on behalf of an app that cannot be trusted to enforce it itself <a class="chip st-s" href="/ledger/#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a>. Until somebody runs this, that field holds a guess.</p>
-<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
-<a href="/disclosures/">Disclosures &rarr;</a></p>
+<p>Put it in the semaphore. In the pipeline this came from, that is <code>limits.maxConcurrent</code> in the vault's terms file — which is also exactly the field <a href="../../pattern-three/index.html">the pattern-three host</a> would enforce on behalf of an app that cannot be trusted to enforce it itself <a class="chip st-s" href="../../ledger/index.html#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a>. Until somebody runs this, that field holds a guess.</p>
+<p class="pagenav"><a href="../../ledger/index.html">Every claim on this site, with its state &rarr;</a>
+<a href="../../disclosures/index.html">Disclosures &rarr;</a></p>
 </main>
 <footer class="site"><div class="cols">
   <div>
@@ -205,31 +205,31 @@
     <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
        Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
        <code>7d1916aca5f3</code>, 7 September 2026.</p>
-    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+    <p class="verline">site <a href="../../versions/index.html">v0.1.1</a> &middot; <a href="../../ledger/index.html">the ledger</a> &middot; <a href="../../disclosures/index.html">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
   </div>
   <div>
     <h4>The report</h4>
-    <a href="/">ElevenLabs, nine sections</a>
-    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
-    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
-    <a href="/examples/">Example files</a>
-    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+    <a href="../../index.html">ElevenLabs, nine sections</a>
+    <a href="../../index.html#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="../../index.html#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="../../examples/index.html">Example files</a>
+    <a href="../../providers/openrouter/index.html">OpenRouter (structural stub)</a>
   </div>
   <div>
     <h4>Experiments</h4>
-    <a href="/experiments/">All experiments</a>
-    <a href="/bench/">The test bench</a>
-    <a href="/experiments/captions/">Captions studio</a>
-    <a href="/experiments/concurrency/">Concurrency probe</a>
-    <a href="/experiments/cost/">Cost model (no key)</a>
+    <a href="../../experiments/index.html">All experiments</a>
+    <a href="../../bench/index.html">The test bench</a>
+    <a href="../../experiments/captions/index.html">Captions studio</a>
+    <a href="../../experiments/concurrency/index.html">Concurrency probe</a>
+    <a href="../../experiments/cost/index.html">Cost model (no key)</a>
   </div>
   <div>
     <h4>The argument</h4>
-    <a href="/patterns/">The four patterns</a>
-    <a href="/comparison/">Comparison matrix</a>
-    <a href="/pattern-three/">Pattern three: sg.tts</a>
-    <a href="/ledger/">Claim ledger</a>
-    <a href="/disclosures/">Disclosures</a>
+    <a href="../../patterns/index.html">The four patterns</a>
+    <a href="../../comparison/index.html">Comparison matrix</a>
+    <a href="../../pattern-three/index.html">Pattern three: sg.tts</a>
+    <a href="../../ledger/index.html">Claim ledger</a>
+    <a href="../../disclosures/index.html">Disclosures</a>
   </div>
 </div>
 <div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site

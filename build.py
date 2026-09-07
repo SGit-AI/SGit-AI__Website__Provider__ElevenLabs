@@ -667,6 +667,33 @@ BLOCKS = {
 # ------------------------------------------------------------------ shell ----
 
 
+def rel_prefix(url):
+    """How far a page sits below the site root: "" at /, "../" at /bench/."""
+    depth = len([x for x in url.strip("/").split("/") if x])
+    return "../" * depth
+
+
+def relativise(doc, prefix):
+    """Rewrite every root-absolute internal URL to one relative to this page.
+
+    The site has to work wherever it is served from — the custom domain, a
+    GitHub Pages project path (/<repo>/), a local directory, or inside a vault
+    app frame, which has no origin at all. Root-absolute URLs work in exactly
+    one of those, and the site spent its first deploy unstyled because of it.
+    Directory URLs become explicit index.html so file:// works too.
+    """
+
+    def one(m):
+        attr, target = m.group(1), m.group(2)
+        path, _, frag = target.partition("#")
+        path = path.lstrip("/")
+        if path == "" or path.endswith("/"):
+            path += "index.html"
+        return f'{attr}="{prefix}{path}{"#" + frag if frag else ""}"'
+
+    return re.sub(r'\b(href|src)="(/[^"]*)"', one, doc)
+
+
 def nav_html(current):
     items = []
     for label, href in NAV:
@@ -744,12 +771,13 @@ def page_html(page, ctx, body):
             f'{html.escape(str(prov.get("note", "")))} '
             f'When the vault moves ahead, this page is behind &mdash; and says so rather than guessing.</p>'
         )
+    prefix = rel_prefix(page["url"])
     lab = ' data-lab="1"' if fm.get("kind") == "experiment" or fm.get("app") else ""
     # lab.js is NOT deferred: each lab's own inline <script> runs during parse and
     # needs window.EL to exist by then. It is 12 KB, same-origin, and uncached only once.
     scripts = '<script src="/assets/lab.js"></script>' if lab else '<script src="/assets/site.js" defer></script>'
-    return f"""<!doctype html>
-<html lang="en">
+    return relativise(f"""<!doctype html>
+<html lang="en" data-root="{prefix}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -783,7 +811,7 @@ def page_html(page, ctx, body):
 {footer_html()}
 </body>
 </html>
-"""
+""", prefix)
 
 
 # ------------------------------------------------------------------ build ----

@@ -76,7 +76,7 @@
 
   $('btnLoadPls').onclick = async function () {
     try {
-      var xml = await (await fetch('/files/pronunciations.pls')).text();
+      var xml = await (await fetch(EL.asset('files/pronunciations.pls'))).text();
       var doc = new DOMParser().parseFromString(xml, 'application/xml');
       rules = [].slice.call(doc.getElementsByTagName('lexeme')).map(function (lx) {
         var g = lx.getElementsByTagName('grapheme')[0], a = lx.getElementsByTagName('alias')[0], p = lx.getElementsByTagName('phoneme')[0];

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Multi-speaker dialogue &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="One request, several voices, consistent pacing across the turns — a two-voice cut is one endpoint away from a single-narrator reel.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/experiments/dialogue/">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/lab.js"></script>
+</head>
+<body data-lab="1">
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><span class="stage-pill">v1</span><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Multi-speaker dialogue</p>
+<h1>Multi-speaker dialogue</h1>
+<p class="lead">A question and an answer, in two voices, generated in <strong>one</strong> call so the pacing holds across the turn. Concatenating two separate generations does not give you this, and the difference is audible.</p>
+
+<aside class="toc"><b>On this page</b><a class="lv2" href="#what-this-tests">What this tests</a><a class="lv2" href="#what-to-listen-for">What to listen for</a><a class="lv2" href="#cost-and-availability">Cost and availability</a></aside>
+<div class="patternbox">
+  <div class="ttl">Which pattern this is — read before you paste anything</div>
+  <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
+  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
+  is empty until you fill it.</p>
+  <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
+  except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
+  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  and it does not exist yet.</p>
+</div>
+<div id="keybar" class="keybar"></div>
+
+<div class="lab" id="lab-dialogue">
+  <section>
+    <h2>1 · The exchange</h2>
+    <p class="small">One request, several voices, consistent pacing across the turns — which is the thing you cannot get
+      by generating each line separately and concatenating. A two-voice cut (a question and an answer) is one endpoint
+      away from a single-narrator reel.</p>
+    <div class="row"><button class="secondary" id="btnVoices">Load voices</button>
+      <button class="secondary" id="btnAdd">Add a turn</button>
+      <select id="model" style="max-width:22rem"></select>
+      <span class="est" id="est"></span></div>
+    <div id="turns" style="margin-top:.7rem"></div>
+    <div class="row" style="margin-top:.7rem"><button id="btnGo">Generate the dialogue</button>
+      <label class="inline"><input type="checkbox" id="withTs" checked> with timestamps</label></div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section>
+    <h2>2 · The result</h2>
+    <audio id="player" controls></audio>
+    <div class="words" id="words"></div>
+    <div class="row"><button class="secondary" id="btnSrt">Download .srt</button>
+      <button class="secondary" id="btnDl">Download audio</button>
+      <span class="est" id="info"></span></div>
+    <p class="small dim">If this endpoint is not on your plan the call comes back 402 or 404 — that is the vendor
+      answering a question about your account, not a bug in this page. Read the log.</p>
+  </section>
+
+  <section><h2>3 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var turns = [
+    { voice: '', text: 'So where does the key actually live?' },
+    { voice: '', text: 'Sealed in the vault, under the write key. The application asks the host; the host spends and meters. The page never sees it.' }
+  ];
+  var out = null, blob = null;
+
+  EL.fillModels($('model'), ['eleven_v3', 'eleven_multilingual_v2']);
+  draw();
+
+  $('btnVoices').onclick = async function () {
+    try { await EL.loadVoices(null); draw(); EL.status('status', EL.voices.length + ' voices loaded.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+  $('btnAdd').onclick = function () { turns.push({ voice: turns.length ? turns[turns.length - 1].voice : '', text: '' }); draw(); };
+
+  function options(sel) {
+    if (!EL.voices) return '<option value="">— load voices —</option>';
+    return '<option value="">— pick —</option>' + EL.voices.map(function (v) {
+      return '<option value="' + EL.esc(v.voice_id) + '"' + (v.voice_id === sel ? ' selected' : '') + '>' + EL.esc(v.name) + ' · ' + EL.esc(v.category || '') + '</option>';
+    }).join('');
+  }
+  function draw() {
+    var host = $('turns'); host.innerHTML = '';
+    turns.forEach(function (t, i) {
+      var row = document.createElement('div');
+      row.className = 'row fill';
+      row.style.marginBottom = '.4rem';
+      row.innerHTML = '<select data-v="' + i + '" style="max-width:16rem">' + options(t.voice) + '</select>' +
+        '<input type="text" data-t="' + i + '" value="' + EL.esc(t.text) + '" placeholder="what this voice says">' +
+        '<button class="secondary" data-x="' + i + '" style="flex:0 0 auto">×</button>';
+      host.appendChild(row);
+    });
+    host.querySelectorAll('[data-v]').forEach(function (el) { el.onchange = function () { turns[+el.dataset.v].voice = el.value; }; });
+    host.querySelectorAll('[data-t]').forEach(function (el) { el.oninput = function () { turns[+el.dataset.t].text = el.value; est(); }; });
+    host.querySelectorAll('[data-x]').forEach(function (el) { el.onclick = function () { turns.splice(+el.dataset.x, 1); draw(); est(); }; });
+    est();
+  }
+  function est() {
+    var chars = turns.reduce(function (a, t) { return a + t.text.length; }, 0);
+    $('est').textContent = turns.length + ' turns · ' + chars + ' chars · estimated ' + EL.money(EL.estimate(chars, $('model').value));
+  }
+
+  $('btnGo').onclick = async function () {
+    var inputs = turns.filter(function (t) { return t.voice && t.text.trim(); })
+      .map(function (t) { return { text: t.text.trim(), voice_id: t.voice }; });
+    if (inputs.length < 2) return EL.status('status', 'Two turns with a voice and some text, at least.', 'warn');
+    EL.status('status', 'Generating…');
+    try {
+      var path = '/text-to-dialogue' + ($('withTs').checked ? '/with-timestamps' : '') + '?output_format=mp3_44100_128';
+      var r = await EL.post(path, { inputs: inputs, model_id: $('model').value });
+      var words = [];
+      if ($('withTs').checked) {
+        var j = await r.res.json();
+        var bin = atob(j.audio_base64), arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        blob = new Blob([arr], { type: 'audio/mpeg' });
+        words = EL.groupWords(j.alignment || j.normalized_alignment);
+      } else blob = await r.res.blob();
+      out = { words: words };
+      $('player').src = URL.createObjectURL(blob); $('player').play().catch(function () {});
+      EL.renderWords($('words'), words); EL.karaoke($('player'), $('words'), words);
+      $('info').textContent = words.length ? (words.length + ' timed words, ending at ' + words[words.length - 1].e.toFixed(2) + ' s') : '';
+      EL.status('status', 'Done in ' + r.ms + ' ms · ' + (blob.size / 1024).toFixed(0) + ' KB.', 'ok');
+    } catch (e) { EL.status('status', e.message, 'err'); }
+  };
+  $('btnSrt').onclick = function () { if (out && out.words.length) EL.download('dialogue.srt', EL.srt(EL.buildCues(out.words))); };
+  $('btnDl').onclick = function () { if (blob) EL.download('dialogue.mp3', blob); };
+})();
+</script>
+
+<h2 id="what-this-tests">What this tests</h2>
+<p><code>POST /v1/text-to-dialogue</code> takes <code>inputs: [{ text, voice_id }, …]</code> and renders the whole exchange in one request with consistent pacing <a class="chip st-d" href="/ledger/#claim-dialogue-endpoint" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. The <code>/with-timestamps</code> variant returns the same character-level alignment as ordinary speech, so <a href="/experiments/captions/">everything the captions studio does</a> works on a dialogue too.</p>
+<p>For a single-narrator explainer this is one endpoint away rather than a rewrite, and it changes what a script can be: a rhetorical question that is actually asked by somebody else lands differently from one the narrator asks themselves.</p>
+<h2 id="what-to-listen-for">What to listen for</h2>
+<ul><li><strong>The seam.</strong> Generate the same two lines separately, concatenate them by hand, and compare. If the single-call version does not sound more like a conversation, the endpoint is not earning its keep for your material.</li><li><strong>Turn-taking pace.</strong> Real exchanges overlap slightly and vary their gaps; a model that leaves an identical pause after every turn sounds like a phone tree.</li><li><strong>Whether the voices stay distinct</strong> when the text is technical and both speakers use the same vocabulary.</li></ul>
+<h2 id="cost-and-availability">Cost and availability</h2>
+<p>Billed as characters, at the model's rate — the same arithmetic as ordinary speech <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. Availability is per-account: if the endpoint is not on your plan the call comes back 402 or 404 <a class="chip st-d" href="/ledger/#claim-error-table" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>, which is the vendor answering a question about your subscription rather than a fault in this page. The log shows the status and the <code>detail</code> body, which is the useful part.</p>
+<p>Nobody here has run it <a class="chip st-u" href="/ledger/#claim-labs-unrun" title="Code we wrote and have never executed.">written, not run</a>.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site v1.0.0 &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

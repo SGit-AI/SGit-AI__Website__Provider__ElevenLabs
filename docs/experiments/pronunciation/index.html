@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pronunciation lab — lexicons, and the test nobody has run &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="Edit a PLS lexicon in the browser, create a versioned dictionary from rules, then generate the same text with and without it. The A/B that turns a hypothesis into a lexicon.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/experiments/pronunciation/">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/lab.js"></script>
+</head>
+<body data-lab="1">
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><span class="stage-pill">v1</span><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Pronunciation lab — lexicons, and the test nobody has run</p>
+<h1>Pronunciation lab — lexicons, and the test nobody has run</h1>
+<p class="lead">In this pipeline <strong>the narration text is the caption text</strong>, so every pronunciation hack is on screen where viewers read it as a typo. A dictionary moves the hack off the screen. Whether these particular rules work has never been tested by anybody.</p>
+
+<aside class="toc"><b>On this page</b><a class="lv2" href="#the-problem-concretely">The problem, concretely</a><a class="lv2" href="#the-two-rule-types-and-the-trap">The two rule types, and the trap</a><a class="lv2" href="#the-open-item">The open item</a><a class="lv2" href="#a-shortcut-worth-knowing">A shortcut worth knowing</a></aside>
+<div class="patternbox">
+  <div class="ttl">Which pattern this is — read before you paste anything</div>
+  <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
+  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
+  is empty until you fill it.</p>
+  <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
+  except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
+  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  and it does not exist yet.</p>
+</div>
+<div id="keybar" class="keybar"></div>
+
+<div class="lab" id="lab-pron">
+  <section>
+    <h2>1 · The lexicon</h2>
+    <div class="row"><button class="secondary" id="btnLoadPls">Load the estate's pronunciations.pls</button>
+      <button class="secondary" id="btnAdd">Add a rule</button>
+      <button class="secondary" id="btnPls">Download as .pls</button>
+      <span class="est" id="lexInfo">No rules loaded.</span></div>
+    <div class="tablewrap" style="max-height:300px;overflow:auto"><table id="rules"><thead><tr><th>Grapheme</th><th>Type</th><th>Alias or phoneme</th><th></th></tr></thead><tbody></tbody></table></div>
+    <p class="small dim"><b>alias</b> rules are text substitution and work on every model. <b>phoneme</b> rules (IPA)
+      are honoured only by <code>eleven_flash_v2</code> and <code>eleven_v3</code> — every other model ignores them
+      <em>silently</em>, which is the failure this lab exists to make visible.</p>
+  </section>
+
+  <section>
+    <h2>2 · Upload it, and pin a version</h2>
+    <div class="row fill">
+      <input type="text" id="dictName" placeholder="dictionary name — e.g. sgit-estate" value="sgit-estate">
+      <button id="btnCreate">Create from rules</button>
+    </div>
+    <div class="row fill" style="margin-top:.5rem">
+      <input type="text" id="dictId" class="mono" placeholder="pronunciation_dictionary_id">
+      <input type="text" id="dictVer" class="mono" placeholder="version_id">
+      <button class="secondary" id="btnRemember">Remember on this device</button>
+    </div>
+    <div class="status" id="dictStatus">Creating a dictionary costs nothing; only generating speech does.</div>
+  </section>
+
+  <section>
+    <h2>3 · A/B — the same text, with and without the dictionary</h2>
+    <label for="text">Text. The default is the names sample: the one nobody has listened to yet.</label>
+    <textarea id="text" style="min-height:80px">sgit.ai, SG/Vault, SGraph, AIUC-1, SHA-256, llms.txt, OWASP, José Bota, VoiceDebrief, PT-BR, v0.1.29.</textarea>
+    <div class="samplechips" id="samples"></div>
+    <div class="grid3">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select>
+        <button class="secondary" id="btnVoices" style="margin-top:.4rem">Load voices</button></div>
+      <div><label for="model">Model</label><select id="model"></select></div>
+      <div><label>&nbsp;</label><button id="btnRun">Generate both</button>
+        <span class="est" id="cost" style="display:block;margin-top:.4rem"></span></div>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="grid2" style="margin-top:.8rem">
+      <div><h4 style="margin:.2rem 0">Without the dictionary</h4><audio id="playA" controls></audio><div class="words" id="wordsA"></div></div>
+      <div><h4 style="margin:.2rem 0">With it</h4><audio id="playB" controls></audio><div class="words" id="wordsB"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 · Write down what you heard</h2>
+    <p class="small">This is the open item the whole site keeps pointing at. Mark each name, then copy the report into the
+      repository or the vault — it is the difference between a hypothesis and a lexicon.</p>
+    <div class="tablewrap"><table id="heard"><thead><tr><th>Token</th><th>Without</th><th>With</th><th>Should sound like</th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button class="secondary" id="btnMd">Copy the report as markdown</button></div>
+  </section>
+
+  <section><h2>5 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var rules = [], A = null, B = null;
+  var PIN = 'el.dict.v1';
+
+  EL.fillModels($('model'), ['eleven_v3', 'eleven_flash_v2_5', 'eleven_multilingual_v2', 'eleven_turbo_v2_5']);
+  EL.sampleChips($('samples'), $('text'), cost);
+  try {
+    var pin = JSON.parse(localStorage.getItem(PIN) || '{}');
+    if (pin.id) { $('dictId').value = pin.id; $('dictVer').value = pin.version || ''; }
+  } catch (e) {}
+
+  function cost() {
+    var n = $('text').value.length;
+    $('cost').textContent = n + ' chars × 2 generations = ' + EL.money(EL.estimate(n, $('model').value) * 2);
+  }
+  $('text').oninput = cost; $('model').onchange = cost; cost();
+
+  $('btnLoadPls').onclick = async function () {
+    try {
+      var xml = await (await fetch('/files/pronunciations.pls')).text();
+      var doc = new DOMParser().parseFromString(xml, 'application/xml');
+      rules = [].slice.call(doc.getElementsByTagName('lexeme')).map(function (lx) {
+        var g = lx.getElementsByTagName('grapheme')[0], a = lx.getElementsByTagName('alias')[0], p = lx.getElementsByTagName('phoneme')[0];
+        return { grapheme: g ? g.textContent : '', type: p ? 'phoneme' : 'alias', value: (p || a || {}).textContent || '' };
+      }).filter(function (r) { return r.grapheme; });
+      drawRules();
+      EL.status('dictStatus', rules.length + ' rules loaded from this site — a file, not a call to the vendor.', 'ok');
+    } catch (e) { EL.status('dictStatus', e.message, 'err'); }
+  };
+  $('btnAdd').onclick = function () { rules.push({ grapheme: '', type: 'alias', value: '' }); drawRules(); };
+
+  function drawRules() {
+    var tb = $('rules').querySelector('tbody'); tb.innerHTML = '';
+    rules.forEach(function (r, i) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><input type="text" class="mono" data-g="' + i + '" value="' + EL.esc(r.grapheme) + '"></td>' +
+        '<td><select data-t="' + i + '"><option' + (r.type === 'alias' ? ' selected' : '') + '>alias</option>' +
+        '<option' + (r.type === 'phoneme' ? ' selected' : '') + '>phoneme</option></select></td>' +
+        '<td><input type="text" class="mono" data-v="' + i + '" value="' + EL.esc(r.value) + '"></td>' +
+        '<td><button class="secondary" data-x="' + i + '">×</button></td>';
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('[data-g]').forEach(function (el) { el.oninput = function () { rules[+el.dataset.g].grapheme = el.value; }; });
+    tb.querySelectorAll('[data-v]').forEach(function (el) { el.oninput = function () { rules[+el.dataset.v].value = el.value; }; });
+    tb.querySelectorAll('[data-t]').forEach(function (el) { el.onchange = function () { rules[+el.dataset.t].type = el.value; }; });
+    tb.querySelectorAll('[data-x]').forEach(function (el) { el.onclick = function () { rules.splice(+el.dataset.x, 1); drawRules(); }; });
+    $('lexInfo').textContent = rules.length + ' rules · ' + rules.filter(function (r) { return r.type === 'phoneme'; }).length + ' phoneme';
+    drawHeard();
+  }
+
+  $('btnPls').onclick = function () {
+    var body = rules.map(function (r) {
+      return '  <lexeme><grapheme>' + EL.esc(r.grapheme) + '</grapheme><' + r.type + '>' + EL.esc(r.value) + '</' + r.type + '></lexeme>';
+    }).join('\n');
+    EL.download('pronunciations.pls',
+      '<?xml version="1.0" encoding="UTF-8"?>\n<lexicon version="1.0" xmlns="http://www.w3.org/2005/01/pronunciation-lexicon" alphabet="ipa" xml:lang="en-GB">\n' +
+      body + '\n</lexicon>\n', 'application/xml');
+  };
+
+  $('btnCreate').onclick = async function () {
+    if (!rules.length) return EL.status('dictStatus', 'No rules to send.', 'warn');
+    try {
+      EL.status('dictStatus', 'Creating…');
+      var r = await EL.post('/pronunciation-dictionaries/add-from-rules', {
+        name: $('dictName').value.trim() || 'lexicon',
+        rules: rules.map(function (x) {
+          return x.type === 'phoneme'
+            ? { type: 'phoneme', string_to_replace: x.grapheme, phoneme: x.value, alphabet: 'ipa' }
+            : { type: 'alias', string_to_replace: x.grapheme, alias: x.value };
+        })
+      });
+      var j = await r.res.json();
+      $('dictId').value = j.id || j.pronunciation_dictionary_id || '';
+      $('dictVer').value = j.version_id || '';
+      EL.status('dictStatus', 'Created. Pin these two ids — a dictionary is versioned and a request names one version.', 'ok');
+    } catch (e) { EL.status('dictStatus', e.message, 'err'); }
+  };
+  $('btnRemember').onclick = function () {
+    try { localStorage.setItem(PIN, JSON.stringify({ id: $('dictId').value.trim(), version: $('dictVer').value.trim() })); } catch (e) {}
+    EL.status('dictStatus', 'Pinned on this device.', 'ok');
+  };
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('status', v.length + ' voices.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  $('btnRun').onclick = async function () {
+    var voice = $('voice').value; if (!voice) return EL.status('status', 'Pick a voice.', 'warn');
+    var text = $('text').value.trim();
+    var base = { text: text, voice: voice, model: $('model').value, timestamps: true, seed: 42 };
+    $('btnRun').disabled = true;
+    try {
+      EL.status('status', 'Generating without the dictionary…');
+      A = await EL.speak(base);
+      $('playA').src = A.url; EL.renderWords($('wordsA'), A.words); EL.karaoke($('playA'), $('wordsA'), A.words);
+      if ($('dictId').value.trim() && $('dictVer').value.trim()) {
+        EL.status('status', 'Generating with the dictionary…');
+        B = await EL.speak(Object.assign({}, base, { dictId: $('dictId').value.trim(), dictVersion: $('dictVer').value.trim() }));
+        $('playB').src = B.url; EL.renderWords($('wordsB'), B.words); EL.karaoke($('playB'), $('wordsB'), B.words);
+        EL.status('status', 'Both done. Listen to each, then fill in section 4. Spent about ' + EL.money(A.cost + B.cost) + '.', 'ok');
+      } else {
+        EL.status('status', 'Generated the "without" side only — create or paste a dictionary id and version for the comparison.', 'warn');
+      }
+      drawHeard();
+    } catch (e) { EL.status('status', e.message, 'err'); }
+    finally { $('btnRun').disabled = false; }
+  };
+
+  function drawHeard() {
+    var tokens = $('text').value.split(/[\s,]+/).filter(function (t) { return t && /[A-Za-z0-9]/.test(t); });
+    var tb = $('heard').querySelector('tbody'); tb.innerHTML = '';
+    tokens.forEach(function (t, i) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><code>' + EL.esc(t) + '</code></td>' +
+        '<td><select data-a="' + i + '"><option value="">?</option><option>right</option><option>wrong</option></select></td>' +
+        '<td><select data-b="' + i + '"><option value="">?</option><option>right</option><option>wrong</option></select></td>' +
+        '<td><input type="text" data-n="' + i + '" placeholder="how it should sound"></td>';
+      tb.appendChild(tr);
+    });
+  }
+
+  $('btnMd').onclick = function () {
+    var tb = $('heard').querySelector('tbody');
+    var rows = [].slice.call(tb.children).map(function (tr) {
+      return [tr.children[0].textContent, tr.querySelector('[data-a]').value || '?', tr.querySelector('[data-b]').value || '?',
+        tr.querySelector('[data-n]').value || ''];
+    });
+    EL.copy(EL.toMarkdown(['Token', 'Without dictionary', 'With dictionary', 'Should sound like'], rows,
+      'Pronunciation test — model ' + $('model').value + ', voice ' + $('voice').value +
+      ', dictionary ' + ($('dictId').value || 'none')), 'status');
+  };
+})();
+</script>
+
+<h2 id="the-problem-concretely">The problem, concretely</h2>
+<p>Four script files in the source vault contain, verbatim: <code>sgit dot ai</code>, <code>A I U C one</code>, <code>S H A two five six</code>, <code>llms dot txt</code>, <code>version zero point one point twenty-nine</code>. Each of those is a workaround for a text-to-speech engine, and each of them is drawn on screen under the picture, where a viewer reads it as a mistake.</p>
+<p>With a dictionary the script says <code>sgit.ai</code> and the voice still says it correctly. That is a change a viewer notices before they notice the voice.</p>
+<h2 id="the-two-rule-types-and-the-trap">The two rule types, and the trap</h2>
+<div class="tablewrap"><table><thead><tr><th>Rule</th><th>What it does</th><th>Works on</th></tr></thead><tbody><tr><td><strong>alias</strong></td><td>text substitution before synthesis: <code>sgit.ai</code> → <code>ess-git dot A I</code></td><td>every model</td></tr><tr><td><strong>phoneme</strong></td><td>exact pronunciation in IPA or CMU Arpabet</td><td><strong><code>eleven_flash_v2</code> and <code>eleven_v3</code> only</strong></td></tr></tbody></table></div>
+<p>Other models ignore phoneme rules <strong>silently</strong> <a class="chip st-d" href="/ledger/#claim-phoneme-models" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a> — no error, no warning, just the old pronunciation. That is the trap this lab is built to expose: generate with a phoneme rule on <code>eleven_multilingual_v2</code> and listen to nothing happen. Up to three dictionaries may be attached to a request, and each request pins a <strong>version</strong>, so a dictionary edit does not silently change an old render.</p>
+<h2 id="the-open-item">The open item</h2>
+<p>The lexicon shipped on this site — <a href="/files/pronunciations.pls"><code>pronunciations.pls</code></a> — is <strong>a hypothesis</strong> <a class="chip st-u" href="/ledger/#claim-lexicon-hypothesis" title="Code we wrote and have never executed.">written, not run</a>. It has never been uploaded and not one alias in it has been heard. Neither has the prior question: which names the model gets wrong <strong>without</strong> any dictionary at all <a class="chip st-u" href="/ledger/#claim-names-test" title="Code we wrote and have never executed.">written, not run</a>.</p>
+<p>Section 4 is the point of the page. Generate both sides, listen, mark each token right or wrong, copy the markdown, and the site gains its first piece of evidence about pronunciation. The default text is the names sample; it costs about <strong>$0.02 for both sides</strong> on v3 <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</p>
+<h2 id="a-shortcut-worth-knowing">A shortcut worth knowing</h2>
+<p>On <code>eleven_v3</code> you can write IPA inline in the text between slashes — <code>/ˈsɪdʒɪt/</code> — which is a fast way to find a transcription that works <em>before</em> committing it to a dictionary version <a class="chip st-u" href="/ledger/#claim-labs-unrun" title="Code we wrote and have never executed.">written, not run</a>. Find it inline, then move it into a rule; do not ship inline phonetics in narration text, because that text is what appears on screen.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site v1.0.0 &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

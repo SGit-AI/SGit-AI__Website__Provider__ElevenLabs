@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Experiments — twelve labs against one API &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="A dozen browser labs that exercise the ElevenLabs API feature by feature: voices, models, settings, timestamps, lexicons, concurrency, alignment, dialogue, sound, key scope and cost. Your key, your browser, nothing sent anywhere else.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/experiments/">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><span class="stage-pill">v1</span><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / Experiments — twelve labs against one API</p>
+<h1>Experiments — twelve labs against one API</h1>
+<p class="lead">This site is a report, and a report is worth more when the reader can re-run it. These are the labs the evaluation <em>should</em> have had — one per feature, each with the method written down, each printing a result you can paste back as evidence.</p>
+<p class="prov">Prose from the video vault at commit <code>7d1916aca5f3</code>, 7 September 2026. The bench came from the source vault; the other eleven labs were written for this site. When the vault moves ahead, this page is behind &mdash; and says so rather than guessing.</p>
+<aside class="toc"><b>On this page</b><a class="lv2" href="#how-these-are-built">How these are built</a><a class="lv2" href="#what-to-run-first">What to run first</a><a class="lv2" href="#what-a-lab-is-not">What a lab is not</a></aside>
+<div class="patternbox">
+  <div class="ttl">Which pattern this is — read before you paste anything</div>
+  <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
+  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
+  is empty until you fill it.</p>
+  <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
+  except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
+  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  and it does not exist yet.</p>
+</div>
+<div id="keybar" class="keybar"></div>
+
+<div class="warnbox"><p><b>Every lab here is unrun by its authors.</b> <a class="chip st-u" href="/ledger/#claim-labs-unrun" title="Code we wrote and have never executed.">written, not run</a> They were written against the vendor's published request and response shapes by a session with no network access to the API and no key <a class="chip st-v" href="/ledger/#claim-egress-blocked" title="Verified by execution on this date, by us.">verified 4–5 Sep 2026</a>. The one exception is <a href="/bench/">the bench</a>, which a human ran from their own browser on 5 September 2026 — and which is the source of every <span class="chip st-v" title="Verified by execution on this date, by us.">verified</span> claim on this site. If a lab is broken, the log at the bottom of it will tell you how, and <a href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs">the repository</a> is where that becomes a fix.</p></div>
+<div class="cards cards-tight"><a class="card" href="/bench/"><span class="tag">core</span><h3>The bench — text to speech, with timestamps</h3><p>The test bench: connect with your own key, list voices and models, generate with character-level timestamps, watch the words light up, build an SRT. The one page on this site that has actually been run.</p><p class="small">GET /user/subscription · /voices · /models · POST /text-to-speech/{id}/with-timestamps</p><div class="chips"><span class="chip st-v" title="Verified by execution on this date, by us.">verified</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/voices/"><span class="tag">choosing</span><h3>Voice explorer</h3><p>List every voice the key can reach, filter by accent, gender and use case, shortlist candidates, and hear any of them say your own line rather than the vendor&#x27;s demo sentence.</p><p class="small">GET /v1/voices · POST /v1/text-to-speech/{id}</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/models/"><span class="tag">choosing</span><h3>Model A/B — latency, size and cost on one text</h3><p>Race eleven_v3, multilingual_v2, flash and turbo over the same text and voice: wall-clock latency, bytes returned, spoken duration and cost per model, with the results as a markdown table.</p><p class="small">POST /v1/text-to-speech/{id}/with-timestamps</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/voice-settings/"><span class="tag">choosing</span><h3>Voice-settings sweep</h3><p>Sweep one voice setting at a time — stability, similarity boost, style, speed — with everything else held constant and the seed fixed, then write down what you heard.</p><p class="small">POST /v1/text-to-speech/{id}/with-timestamps</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/captions/"><span class="tag">timing</span><h3>Captions studio — from character timings to SRT</h3><p>Tune the cue rule against real alignment data: break at N characters, on a gap, or after N seconds. Live cue table, karaoke preview, SRT and VTT download. Works with no key if you paste an alignment.</p><p class="small">POST /v1/text-to-speech/{id}/with-timestamps · or no call at all</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/pronunciation/"><span class="tag">text</span><h3>Pronunciation lab — lexicons, and the test nobody has run</h3><p>Edit a PLS lexicon in the browser, create a versioned dictionary from rules, then generate the same text with and without it. The A/B that turns a hypothesis into a lexicon.</p><p class="small">POST /v1/pronunciation-dictionaries/add-from-rules · POST /v1/text-to-speech/{id}/with-timestamps</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/concurrency/"><span class="tag">operations</span><h3>Concurrency probe — where is the wall?</h3><p>Fire waves of parallel generations at 1, 2, 4, 8… until something fails, and record the request timeline, the 429s and the highest wave that survived. The one open item on this site that costs money to close.</p><p class="small">POST /v1/text-to-speech/{id}</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/align-verify/"><span class="tag">timing</span><h3>Align and verify — subtitles for old renders, and a QA gate for new ones</h3><p>Forced alignment of audio you already have to the script it speaks, and Scribe transcription diffed against the expected text — the automatic version of catching an error by watching the video.</p><p class="small">POST /v1/forced-alignment · POST /v1/speech-to-text</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/sound/"><span class="tag">beyond speech</span><h3>Sound effects and music</h3><p>The sound-generation and music endpoints, with a per-second cost meter — and the house rule they were evaluated against: a two-second sting under the title slide, and nothing else.</p><p class="small">POST /v1/sound-generation · POST /v1/music</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/dialogue/"><span class="tag">beyond speech</span><h3>Multi-speaker dialogue</h3><p>One request, several voices, consistent pacing across the turns — a two-voice cut is one endpoint away from a single-narrator reel.</p><p class="small">POST /v1/text-to-dialogue/with-timestamps</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/key-scope/"><span class="tag">operations</span><h3>Key scope and quota probe</h3><p>Read-only probes of every endpoint class your key can reach, plus the subscription object — and the field that does not exist anywhere in it: a per-key spend limit.</p><p class="small">GET /v1/user/subscription · /v1/user · /v1/voices · /v1/models · /v1/pronunciation-dictionaries · /v1/history · /v1/dubbing</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/cost/"><span class="tag">no key needed</span><h3>Cost model — no key, no network</h3><p>Paste a script or a reel.json and get characters, requests, per-model cost and plan fit, with every constant visible. Runs entirely in your browser; makes no network call at all.</p><p class="small">none — this page makes no network call</p><div class="chips"><span class="chip st-p" title="Arithmetic, not an invoice. The workings are shown.">projected</span></div><span class="go">Open the lab &rarr;</span></a><a class="card" href="/experiments/text-handling/"><span class="tag">text</span><h3>Text handling — normalisation, stitching and seeds</h3><p>Three A/Bs that decide how a script should be written: does the model normalise numbers reliably, does passing neighbouring scenes as context change the read, and does a fixed seed actually repeat?</p><p class="small">POST /v1/text-to-speech/{id}/with-timestamps</p><div class="chips"><span class="chip st-u" title="Code we wrote and have never executed.">written, not run</span></div><span class="go">Open the lab &rarr;</span></a></div>
+<h2 id="how-these-are-built">How these are built</h2>
+<p>Every lab shares one runtime, <a href="/assets/lab.js"><code>lab.js</code></a> — about 350 lines, no dependencies, no build step, readable in one sitting. That is deliberate: a site whose argument is <em>watch where your credential goes</em> should let you watch. It does three things and nothing else.</p>
+<ol><li><strong>Keeps your keys in <code>localStorage</code>,</strong> several of them, named, switchable — so a scoped key and a full key can be compared without retyping either. Nothing is sent to this site; there is no server here to send it to.</li><li><strong>Calls exactly one host,</strong> <code>api.elevenlabs.io</code>, with your key in the <code>xi-api-key</code> header <a class="chip st-d" href="/ledger/#claim-api-key-shape" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>, and logs every request it makes at the bottom of the page. A CI check on this repository fails the build if any other network origin appears in the built site <a class="chip st-v" href="/ledger/#claim-keys-local-only" title="Verified by execution on this date, by us.">verified 7 Sep 2026</a>.</li><li><strong>Does the shared arithmetic</strong> — characters to cost, alignment to words to cues, results to markdown you can paste back into whatever keeps your evidence.</li></ol>
+<h2 id="what-to-run-first">What to run first</h2>
+<p>If you have a key and ten minutes, in this order — it closes the four oldest open items on the <a href="/ledger/#open-items">ledger</a> for about <strong>fifteen cents</strong>:</p>
+<ol><li><a href="/bench/">The bench</a>, section 5 — <strong>the names test</strong>. Nobody has pressed this button since 5 September <a class="chip st-u" href="/ledger/#claim-names-test" title="Code we wrote and have never executed.">written, not run</a>. Two minutes, and the site can finally say which names the model gets wrong.</li><li><a href="/experiments/pronunciation/">The pronunciation lab</a> — attach the lexicon and hear whether the aliases fix them <a class="chip st-u" href="/ledger/#claim-lexicon-hypothesis" title="Code we wrote and have never executed.">written, not run</a>.</li><li><a href="/experiments/concurrency/">The concurrency probe</a> — find the wall, so the semaphore holds a measurement instead of a guess <a class="chip st-u" href="/ledger/#claim-concurrency-unknown" title="Code we wrote and have never executed.">written, not run</a>.</li><li><a href="/experiments/captions/">The captions studio</a> — tune the cue rule against a real script and tell us what numbers you landed on <a class="chip st-u" href="/ledger/#claim-cue-rule" title="Code we wrote and have never executed.">written, not run</a>.</li></ol>
+<p>The <a href="/experiments/cost/">cost model</a> needs no key at all and answers the question people usually ask first.</p>
+<h2 id="what-a-lab-is-not">What a lab is not</h2>
+<p>It is not a product, it is not a proxy, and it is not a pattern to copy into an application you ship. Each of these asks you to put a full account credential into a web page, which is <a href="/patterns/">pattern 0 with a ceiling</a> — defensible for the key's owner testing their own key, indefensible for anything with users. The publishable version of these pages has no key box at all, and it is <a href="/pattern-three/">specified rather than built</a> <a class="chip st-s" href="/ledger/#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a>.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site v1.0.0 &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Text handling — normalisation, stitching and seeds &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="Three A/Bs that decide how a script should be written: does the model normalise numbers reliably, does passing neighbouring scenes as context change the read, and does a fixed seed actually repeat?">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/experiments/text-handling/">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/lab.js"></script>
+</head>
+<body data-lab="1">
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><span class="stage-pill">v1</span><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Text handling — normalisation, stitching and seeds</p>
+<h1>Text handling — normalisation, stitching and seeds</h1>
+<p class="lead">Three questions that decide <strong>how a script is written</strong>, not how it sounds. Each is a controlled A/B: same voice, same seed, one variable. Together they are the difference between rewriting four script files and leaving them alone.</p>
+
+<aside class="toc"><b>On this page</b><a class="lv2" href="#1-does-it-normalise-numbers-reliably">1 · Does it normalise numbers reliably?</a><a class="lv2" href="#2-does-stitching-change-the-read">2 · Does stitching change the read?</a><a class="lv2" href="#3-does-a-seed-repeat">3 · Does a seed repeat?</a><a class="lv2" href="#what-this-costs-and-what-it-settles">What this costs, and what it settles</a></aside>
+<div class="patternbox">
+  <div class="ttl">Which pattern this is — read before you paste anything</div>
+  <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
+  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
+  is empty until you fill it.</p>
+  <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
+  except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
+  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  and it does not exist yet.</p>
+</div>
+<div id="keybar" class="keybar"></div>
+
+<div class="lab" id="lab-text">
+  <section>
+    <h2>1 · Setup</h2>
+    <div class="grid3">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select>
+        <button class="secondary" id="btnVoices" style="margin-top:.4rem">Load voices</button></div>
+      <div><label for="model">Model</label><select id="model"></select></div>
+      <div><label for="seed">Seed — the same number should give the same read</label>
+        <input type="text" id="seed" class="mono" value="42"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>2 · Normalisation — <code>apply_text_normalization</code></h2>
+    <p class="small">Our scripts spell numbers out — <em>"two thousand seven hundred and eighty-eight"</em> — because two
+      earlier providers needed it, and because the narration text is also the caption text. If the model normalises
+      reliably, the script can say <code>2,788</code> and the caption band gets its digits back. This is the A/B that
+      decides whether four script files get rewritten.</p>
+    <label for="tNorm">Text</label>
+    <textarea id="tNorm" style="min-height:70px">The graph holds 2,788 nodes and 11,610 edges, built on 2026-09-03, against ISO 42001 and SHA-256.</textarea>
+    <div class="row"><button id="btnNorm">Generate: auto · on · off</button><span class="est" id="normCost"></span></div>
+    <div class="status" id="normStatus"></div>
+    <div class="tablewrap"><table id="normTab"><thead><tr><th>Setting</th><th>Latency</th><th>Spoken</th><th>Listen</th><th>What you heard</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>3 · Stitching — <code>previous_text</code> and <code>next_text</code></h2>
+    <p class="small">A scene-by-scene render generates every scene cold, so each one starts as if the last had never
+      happened. Passing the neighbouring scenes as context costs nothing — context text is not billed as generated
+      characters — and is supposed to keep prosody continuous across the cut. Whether it audibly does is the question.</p>
+    <div class="grid3">
+      <div><label for="prev">Previous scene (context, not spoken)</label><textarea id="prev" style="min-height:70px">The server stores ciphertext under opaque ids.</textarea></div>
+      <div><label for="mid">This scene (spoken)</label><textarea id="mid" style="min-height:70px">It never sees a filename, a commit message, or a byte of your content.</textarea></div>
+      <div><label for="next">Next scene (context, not spoken)</label><textarea id="next" style="min-height:70px">So sharing a vault is sharing a key, and nothing else.</textarea></div>
+    </div>
+    <div class="row"><button id="btnStitch">Generate: cold · stitched</button><span class="est" id="stitchCost"></span></div>
+    <div class="status" id="stitchStatus"></div>
+    <div class="grid2">
+      <div><h4 style="margin:.2rem 0">Cold</h4><audio id="playCold" controls></audio></div>
+      <div><h4 style="margin:.2rem 0">With neighbours as context</h4><audio id="playWarm" controls></audio></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 · Determinism — does a seed actually repeat?</h2>
+    <p class="small">The vendor calls the seed best-effort. A render that can be reproduced byte for byte in a year is
+      worth knowing about; one that cannot is worth knowing about sooner. Two generations, same seed, same everything:
+      compare the byte length and the word timings.</p>
+    <div class="row"><button id="btnSeed">Generate twice with the same seed</button><span class="est" id="seedInfo"></span></div>
+    <div class="status" id="seedStatus"></div>
+    <div class="tablewrap"><table id="seedTab"><thead><tr><th>Run</th><th>Bytes</th><th>Words</th><th>Last word ends</th><th>Max per-word drift</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>5 · Report</h2>
+    <div class="row"><button class="secondary" id="btnMd">Copy everything as markdown</button></div>
+  </section>
+
+  <section><h2>6 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var normRows = [], seedRows = [], notes = {};
+
+  EL.fillModels($('model'));
+  function cost() {
+    var n = $('tNorm').value.length, m = $('mid').value.length;
+    $('normCost').textContent = '3 × ' + n + ' chars = ' + EL.money(EL.estimate(n, $('model').value) * 3);
+    $('stitchCost').textContent = '2 × ' + m + ' chars = ' + EL.money(EL.estimate(m, $('model').value) * 2) + ' — context text is not billed';
+    $('seedInfo').textContent = '2 × ' + m + ' chars = ' + EL.money(EL.estimate(m, $('model').value) * 2);
+  }
+  ['tNorm', 'mid'].forEach(function (id) { $(id).oninput = cost; });
+  $('model').onchange = cost; cost();
+
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('normStatus', v.length + ' voices.', 'ok'); }
+    catch (e) { EL.status('normStatus', e.message, 'err'); }
+  };
+  function base() {
+    return { voice: $('voice').value, model: $('model').value, timestamps: true, seed: $('seed').value };
+  }
+  function need() { if (!$('voice').value) { EL.status('normStatus', 'Pick a voice first.', 'warn'); return false; } return true; }
+
+  $('btnNorm').onclick = async function () {
+    if (!need()) return;
+    normRows = []; $('normTab').querySelector('tbody').innerHTML = '';
+    var modes = ['auto', 'on', 'off'];
+    for (var i = 0; i < modes.length; i++) {
+      EL.status('normStatus', 'apply_text_normalization = ' + modes[i] + ' …');
+      try {
+        var r = await EL.speak(Object.assign(base(), { text: $('tNorm').value.trim(), normalize: modes[i] }));
+        normRows.push({ mode: modes[i], r: r });
+      } catch (e) { normRows.push({ mode: modes[i], err: e.message }); }
+      drawNorm();
+    }
+    EL.status('normStatus', 'Three reads of the same line. Listen for the numbers and the date.', 'ok');
+  };
+  function drawNorm() {
+    var tb = $('normTab').querySelector('tbody'); tb.innerHTML = '';
+    normRows.forEach(function (x, i) {
+      var tr = document.createElement('tr');
+      if (x.err) tr.innerHTML = '<td><code>' + x.mode + '</code></td><td colspan="4" class="small" style="color:#b91c1c">' + EL.esc(x.err) + '</td>';
+      else {
+        var end = x.r.words.length ? x.r.words[x.r.words.length - 1].e.toFixed(2) + ' s' : '—';
+        tr.innerHTML = '<td><code>' + x.mode + '</code></td><td class="small">' + x.r.ms + ' ms</td><td class="small">' + end +
+          '</td><td><button class="secondary" data-p="' + i + '">play</button></td>' +
+          '<td><input type="text" data-n="' + x.mode + '" placeholder="did it say the digits?"></td>';
+      }
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('[data-p]').forEach(function (el) { el.onclick = function () { new Audio(normRows[+el.dataset.p].r.url).play(); }; });
+    tb.querySelectorAll('[data-n]').forEach(function (el) { el.oninput = function () { notes[el.dataset.n] = el.value; }; });
+  }
+
+  $('btnStitch').onclick = async function () {
+    if (!need()) return;
+    try {
+      EL.status('stitchStatus', 'Cold…');
+      var cold = await EL.speak(Object.assign(base(), { text: $('mid').value.trim() }));
+      $('playCold').src = cold.url;
+      EL.status('stitchStatus', 'Stitched…');
+      var warm = await EL.speak(Object.assign(base(), {
+        text: $('mid').value.trim(), previousText: $('prev').value.trim(), nextText: $('next').value.trim()
+      }));
+      $('playWarm').src = warm.url;
+      var a = cold.words.length ? cold.words[cold.words.length - 1].e : 0, b = warm.words.length ? warm.words[warm.words.length - 1].e : 0;
+      EL.status('stitchStatus', 'Cold ' + a.toFixed(2) + ' s, stitched ' + b.toFixed(2) + ' s (' +
+        (a ? (((b - a) / a) * 100).toFixed(1) : '?') + '% difference in length). The charge is the same: ' +
+        EL.money(cold.cost) + ' each — the context text is not billed.', 'ok');
+    } catch (e) { EL.status('stitchStatus', e.message, 'err'); }
+  };
+
+  $('btnSeed').onclick = async function () {
+    if (!need()) return;
+    seedRows = [];
+    try {
+      for (var i = 0; i < 2; i++) {
+        EL.status('seedStatus', 'Run ' + (i + 1) + ' of 2…');
+        seedRows.push(await EL.speak(Object.assign(base(), { text: $('mid').value.trim() })));
+      }
+      var tb = $('seedTab').querySelector('tbody'); tb.innerHTML = '';
+      seedRows.forEach(function (r, i) {
+        var drift = '—';
+        if (i === 1 && seedRows[0].words.length === r.words.length) {
+          drift = Math.max.apply(null, r.words.map(function (w, k) { return Math.abs(w.s - seedRows[0].words[k].s); })).toFixed(3) + ' s';
+        } else if (i === 1) drift = 'different word count — not deterministic';
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + (i + 1) + '</td><td>' + r.bytes + '</td><td>' + r.words.length + '</td><td>' +
+          (r.words.length ? r.words[r.words.length - 1].e.toFixed(3) + ' s' : '—') + '</td><td>' + drift + '</td>';
+        tb.appendChild(tr);
+      });
+      var same = seedRows[0].bytes === seedRows[1].bytes;
+      EL.status('seedStatus', same
+        ? 'Identical byte length across two runs with seed ' + $('seed').value + '. Promising — check the drift column too.'
+        : 'Different byte lengths (' + seedRows[0].bytes + ' vs ' + seedRows[1].bytes + '). The seed is best-effort, and this is what that means.',
+        same ? 'ok' : 'warn');
+    } catch (e) { EL.status('seedStatus', e.message, 'err'); }
+  };
+
+  $('btnMd').onclick = function () {
+    var rows = normRows.map(function (x) {
+      return ['normalization ' + x.mode, x.err ? 'error' : x.r.ms + ' ms',
+        x.err ? x.err : (x.r.words.length ? x.r.words[x.r.words.length - 1].e.toFixed(2) + ' s' : '—'), notes[x.mode] || ''];
+    });
+    seedRows.forEach(function (r, i) { rows.push(['seed run ' + (i + 1), r.ms + ' ms', r.bytes + ' bytes, ' + r.words.length + ' words', '']); });
+    EL.copy(EL.toMarkdown(['Case', 'Latency', 'Result', 'What you heard'], rows,
+      'Text handling — model ' + $('model').value + ', voice ' + $('voice').value + ', seed ' + $('seed').value), 'normStatus');
+  };
+})();
+</script>
+
+<h2 id="1-does-it-normalise-numbers-reliably">1 · Does it normalise numbers reliably?</h2>
+<p>The scripts in the source estate spell numbers out — <em>"two thousand seven hundred and eighty-eight"</em> — because two earlier engines needed it. But <strong>the narration text is the caption text</strong>, so the caption band shows the words rather than the digits, and a graph slide that says "2,788 nodes" on screen is better than one that says it in longhand.</p>
+<p><code>apply_text_normalization</code> takes <code>auto</code>, <code>on</code> or <code>off</code>. If <code>auto</code> reliably reads <code>2,788</code> as the number and <code>2026-09-03</code> as a date, four script files can be rewritten and the caption band improves everywhere. If it is unreliable, the longhand stays. This lab generates all three settings on the same line so the difference is audible rather than argued about.</p>
+<p>Note what the alignment gives you here: <code>alignment</code> is over the text you <strong>sent</strong>, <code>normalized_alignment</code> over what the model actually <strong>read</strong> — so a caption showing your text should use the first, and a caption showing what was spoken should use the second <a class="chip st-v" href="/ledger/#claim-timestamps-roundtrip" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>.</p>
+<h2 id="2-does-stitching-change-the-read">2 · Does stitching change the read?</h2>
+<p>Every scene in a scene-by-scene render is generated cold. <code>previous_text</code> and <code>next_text</code> pass the neighbouring scenes as context so prosody carries across the cut — and <strong>context text is not billed</strong> <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>, so if it helps at all it is free.</p>
+<p>The measurable part is small: spoken length usually changes a little. The audible part is the whole point — whether the reel sounds like one read or like sixteen. Listen to the two clips back to back with the following scene in mind.</p>
+<h2 id="3-does-a-seed-repeat">3 · Does a seed repeat?</h2>
+<p>The vendor documents <code>seed</code> as best-effort determinism. For a pipeline that wants to re-render a video a year from now and get the same file, "best-effort" is the difference between an archive and a lottery ticket.</p>
+<p>Two generations, identical everything, same seed. Compare byte length and per-word drift. <strong>Identical byte lengths are promising, not proof</strong> — an encoder can produce the same length from a different waveform — but a <em>different</em> byte length settles it in the other direction immediately. If the seed does not hold, the reproducible-render answer is to commit the audio files rather than the parameters.</p>
+<h2 id="what-this-costs-and-what-it-settles">What this costs, and what it settles</h2>
+<p>About <strong>$0.05</strong> for all three sections on v3 at the default texts <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. What it settles: whether four script files get rewritten, whether the render passes neighbouring scenes, and whether renders are reproducible from parameters or need their audio archived. None of it has been run <a class="chip st-u" href="/ledger/#claim-labs-unrun" title="Code we wrote and have never executed.">written, not run</a>.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site v1.0.0 &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<div class="lab" id="lab-text">
+  <section>
+    <h2>1 · Setup</h2>
+    <div class="grid3">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select>
+        <button class="secondary" id="btnVoices" style="margin-top:.4rem">Load voices</button></div>
+      <div><label for="model">Model</label><select id="model"></select></div>
+      <div><label for="seed">Seed — the same number should give the same read</label>
+        <input type="text" id="seed" class="mono" value="42"></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>2 · Normalisation — <code>apply_text_normalization</code></h2>
+    <p class="small">Our scripts spell numbers out — <em>"two thousand seven hundred and eighty-eight"</em> — because two
+      earlier providers needed it, and because the narration text is also the caption text. If the model normalises
+      reliably, the script can say <code>2,788</code> and the caption band gets its digits back. This is the A/B that
+      decides whether four script files get rewritten.</p>
+    <label for="tNorm">Text</label>
+    <textarea id="tNorm" style="min-height:70px">The graph holds 2,788 nodes and 11,610 edges, built on 2026-09-03, against ISO 42001 and SHA-256.</textarea>
+    <div class="row"><button id="btnNorm">Generate: auto · on · off</button><span class="est" id="normCost"></span></div>
+    <div class="status" id="normStatus"></div>
+    <div class="tablewrap"><table id="normTab"><thead><tr><th>Setting</th><th>Latency</th><th>Spoken</th><th>Listen</th><th>What you heard</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>3 · Stitching — <code>previous_text</code> and <code>next_text</code></h2>
+    <p class="small">A scene-by-scene render generates every scene cold, so each one starts as if the last had never
+      happened. Passing the neighbouring scenes as context costs nothing — context text is not billed as generated
+      characters — and is supposed to keep prosody continuous across the cut. Whether it audibly does is the question.</p>
+    <div class="grid3">
+      <div><label for="prev">Previous scene (context, not spoken)</label><textarea id="prev" style="min-height:70px">The server stores ciphertext under opaque ids.</textarea></div>
+      <div><label for="mid">This scene (spoken)</label><textarea id="mid" style="min-height:70px">It never sees a filename, a commit message, or a byte of your content.</textarea></div>
+      <div><label for="next">Next scene (context, not spoken)</label><textarea id="next" style="min-height:70px">So sharing a vault is sharing a key, and nothing else.</textarea></div>
+    </div>
+    <div class="row"><button id="btnStitch">Generate: cold · stitched</button><span class="est" id="stitchCost"></span></div>
+    <div class="status" id="stitchStatus"></div>
+    <div class="grid2">
+      <div><h4 style="margin:.2rem 0">Cold</h4><audio id="playCold" controls></audio></div>
+      <div><h4 style="margin:.2rem 0">With neighbours as context</h4><audio id="playWarm" controls></audio></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 · Determinism — does a seed actually repeat?</h2>
+    <p class="small">The vendor calls the seed best-effort. A render that can be reproduced byte for byte in a year is
+      worth knowing about; one that cannot is worth knowing about sooner. Two generations, same seed, same everything:
+      compare the byte length and the word timings.</p>
+    <div class="row"><button id="btnSeed">Generate twice with the same seed</button><span class="est" id="seedInfo"></span></div>
+    <div class="status" id="seedStatus"></div>
+    <div class="tablewrap"><table id="seedTab"><thead><tr><th>Run</th><th>Bytes</th><th>Words</th><th>Last word ends</th><th>Max per-word drift</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>5 · Report</h2>
+    <div class="row"><button class="secondary" id="btnMd">Copy everything as markdown</button></div>
+  </section>
+
+  <section><h2>6 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var normRows = [], seedRows = [], notes = {};
+
+  EL.fillModels($('model'));
+  function cost() {
+    var n = $('tNorm').value.length, m = $('mid').value.length;
+    $('normCost').textContent = '3 × ' + n + ' chars = ' + EL.money(EL.estimate(n, $('model').value) * 3);
+    $('stitchCost').textContent = '2 × ' + m + ' chars = ' + EL.money(EL.estimate(m, $('model').value) * 2) + ' — context text is not billed';
+    $('seedInfo').textContent = '2 × ' + m + ' chars = ' + EL.money(EL.estimate(m, $('model').value) * 2);
+  }
+  ['tNorm', 'mid'].forEach(function (id) { $(id).oninput = cost; });
+  $('model').onchange = cost; cost();
+
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('normStatus', v.length + ' voices.', 'ok'); }
+    catch (e) { EL.status('normStatus', e.message, 'err'); }
+  };
+  function base() {
+    return { voice: $('voice').value, model: $('model').value, timestamps: true, seed: $('seed').value };
+  }
+  function need() { if (!$('voice').value) { EL.status('normStatus', 'Pick a voice first.', 'warn'); return false; } return true; }
+
+  $('btnNorm').onclick = async function () {
+    if (!need()) return;
+    normRows = []; $('normTab').querySelector('tbody').innerHTML = '';
+    var modes = ['auto', 'on', 'off'];
+    for (var i = 0; i < modes.length; i++) {
+      EL.status('normStatus', 'apply_text_normalization = ' + modes[i] + ' …');
+      try {
+        var r = await EL.speak(Object.assign(base(), { text: $('tNorm').value.trim(), normalize: modes[i] }));
+        normRows.push({ mode: modes[i], r: r });
+      } catch (e) { normRows.push({ mode: modes[i], err: e.message }); }
+      drawNorm();
+    }
+    EL.status('normStatus', 'Three reads of the same line. Listen for the numbers and the date.', 'ok');
+  };
+  function drawNorm() {
+    var tb = $('normTab').querySelector('tbody'); tb.innerHTML = '';
+    normRows.forEach(function (x, i) {
+      var tr = document.createElement('tr');
+      if (x.err) tr.innerHTML = '<td><code>' + x.mode + '</code></td><td colspan="4" class="small" style="color:#b91c1c">' + EL.esc(x.err) + '</td>';
+      else {
+        var end = x.r.words.length ? x.r.words[x.r.words.length - 1].e.toFixed(2) + ' s' : '—';
+        tr.innerHTML = '<td><code>' + x.mode + '</code></td><td class="small">' + x.r.ms + ' ms</td><td class="small">' + end +
+          '</td><td><button class="secondary" data-p="' + i + '">play</button></td>' +
+          '<td><input type="text" data-n="' + x.mode + '" placeholder="did it say the digits?"></td>';
+      }
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('[data-p]').forEach(function (el) { el.onclick = function () { new Audio(normRows[+el.dataset.p].r.url).play(); }; });
+    tb.querySelectorAll('[data-n]').forEach(function (el) { el.oninput = function () { notes[el.dataset.n] = el.value; }; });
+  }
+
+  $('btnStitch').onclick = async function () {
+    if (!need()) return;
+    try {
+      EL.status('stitchStatus', 'Cold…');
+      var cold = await EL.speak(Object.assign(base(), { text: $('mid').value.trim() }));
+      $('playCold').src = cold.url;
+      EL.status('stitchStatus', 'Stitched…');
+      var warm = await EL.speak(Object.assign(base(), {
+        text: $('mid').value.trim(), previousText: $('prev').value.trim(), nextText: $('next').value.trim()
+      }));
+      $('playWarm').src = warm.url;
+      var a = cold.words.length ? cold.words[cold.words.length - 1].e : 0, b = warm.words.length ? warm.words[warm.words.length - 1].e : 0;
+      EL.status('stitchStatus', 'Cold ' + a.toFixed(2) + ' s, stitched ' + b.toFixed(2) + ' s (' +
+        (a ? (((b - a) / a) * 100).toFixed(1) : '?') + '% difference in length). The charge is the same: ' +
+        EL.money(cold.cost) + ' each — the context text is not billed.', 'ok');
+    } catch (e) { EL.status('stitchStatus', e.message, 'err'); }
+  };
+
+  $('btnSeed').onclick = async function () {
+    if (!need()) return;
+    seedRows = [];
+    try {
+      for (var i = 0; i < 2; i++) {
+        EL.status('seedStatus', 'Run ' + (i + 1) + ' of 2…');
+        seedRows.push(await EL.speak(Object.assign(base(), { text: $('mid').value.trim() })));
+      }
+      var tb = $('seedTab').querySelector('tbody'); tb.innerHTML = '';
+      seedRows.forEach(function (r, i) {
+        var drift = '—';
+        if (i === 1 && seedRows[0].words.length === r.words.length) {
+          drift = Math.max.apply(null, r.words.map(function (w, k) { return Math.abs(w.s - seedRows[0].words[k].s); })).toFixed(3) + ' s';
+        } else if (i === 1) drift = 'different word count — not deterministic';
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + (i + 1) + '</td><td>' + r.bytes + '</td><td>' + r.words.length + '</td><td>' +
+          (r.words.length ? r.words[r.words.length - 1].e.toFixed(3) + ' s' : '—') + '</td><td>' + drift + '</td>';
+        tb.appendChild(tr);
+      });
+      var same = seedRows[0].bytes === seedRows[1].bytes;
+      EL.status('seedStatus', same
+        ? 'Identical byte length across two runs with seed ' + $('seed').value + '. Promising — check the drift column too.'
+        : 'Different byte lengths (' + seedRows[0].bytes + ' vs ' + seedRows[1].bytes + '). The seed is best-effort, and this is what that means.',
+        same ? 'ok' : 'warn');
+    } catch (e) { EL.status('seedStatus', e.message, 'err'); }
+  };
+
+  $('btnMd').onclick = function () {
+    var rows = normRows.map(function (x) {
+      return ['normalization ' + x.mode, x.err ? 'error' : x.r.ms + ' ms',
+        x.err ? x.err : (x.r.words.length ? x.r.words[x.r.words.length - 1].e.toFixed(2) + ' s' : '—'), notes[x.mode] || ''];
+    });
+    seedRows.forEach(function (r, i) { rows.push(['seed run ' + (i + 1), r.ms + ' ms', r.bytes + ' bytes, ' + r.words.length + ' words', '']); });
+    EL.copy(EL.toMarkdown(['Case', 'Latency', 'Result', 'What you heard'], rows,
+      'Text handling — model ' + $('model').value + ', voice ' + $('voice').value + ', seed ' + $('seed').value), 'normStatus');
+  };
+})();
+</script>

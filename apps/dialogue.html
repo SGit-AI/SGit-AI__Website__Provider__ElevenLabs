@@ -1,0 +1,102 @@
+<div class="lab" id="lab-dialogue">
+  <section>
+    <h2>1 · The exchange</h2>
+    <p class="small">One request, several voices, consistent pacing across the turns — which is the thing you cannot get
+      by generating each line separately and concatenating. A two-voice cut (a question and an answer) is one endpoint
+      away from a single-narrator reel.</p>
+    <div class="row"><button class="secondary" id="btnVoices">Load voices</button>
+      <button class="secondary" id="btnAdd">Add a turn</button>
+      <select id="model" style="max-width:22rem"></select>
+      <span class="est" id="est"></span></div>
+    <div id="turns" style="margin-top:.7rem"></div>
+    <div class="row" style="margin-top:.7rem"><button id="btnGo">Generate the dialogue</button>
+      <label class="inline"><input type="checkbox" id="withTs" checked> with timestamps</label></div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section>
+    <h2>2 · The result</h2>
+    <audio id="player" controls></audio>
+    <div class="words" id="words"></div>
+    <div class="row"><button class="secondary" id="btnSrt">Download .srt</button>
+      <button class="secondary" id="btnDl">Download audio</button>
+      <span class="est" id="info"></span></div>
+    <p class="small dim">If this endpoint is not on your plan the call comes back 402 or 404 — that is the vendor
+      answering a question about your account, not a bug in this page. Read the log.</p>
+  </section>
+
+  <section><h2>3 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var turns = [
+    { voice: '', text: 'So where does the key actually live?' },
+    { voice: '', text: 'Sealed in the vault, under the write key. The application asks the host; the host spends and meters. The page never sees it.' }
+  ];
+  var out = null, blob = null;
+
+  EL.fillModels($('model'), ['eleven_v3', 'eleven_multilingual_v2']);
+  draw();
+
+  $('btnVoices').onclick = async function () {
+    try { await EL.loadVoices(null); draw(); EL.status('status', EL.voices.length + ' voices loaded.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+  $('btnAdd').onclick = function () { turns.push({ voice: turns.length ? turns[turns.length - 1].voice : '', text: '' }); draw(); };
+
+  function options(sel) {
+    if (!EL.voices) return '<option value="">— load voices —</option>';
+    return '<option value="">— pick —</option>' + EL.voices.map(function (v) {
+      return '<option value="' + EL.esc(v.voice_id) + '"' + (v.voice_id === sel ? ' selected' : '') + '>' + EL.esc(v.name) + ' · ' + EL.esc(v.category || '') + '</option>';
+    }).join('');
+  }
+  function draw() {
+    var host = $('turns'); host.innerHTML = '';
+    turns.forEach(function (t, i) {
+      var row = document.createElement('div');
+      row.className = 'row fill';
+      row.style.marginBottom = '.4rem';
+      row.innerHTML = '<select data-v="' + i + '" style="max-width:16rem">' + options(t.voice) + '</select>' +
+        '<input type="text" data-t="' + i + '" value="' + EL.esc(t.text) + '" placeholder="what this voice says">' +
+        '<button class="secondary" data-x="' + i + '" style="flex:0 0 auto">×</button>';
+      host.appendChild(row);
+    });
+    host.querySelectorAll('[data-v]').forEach(function (el) { el.onchange = function () { turns[+el.dataset.v].voice = el.value; }; });
+    host.querySelectorAll('[data-t]').forEach(function (el) { el.oninput = function () { turns[+el.dataset.t].text = el.value; est(); }; });
+    host.querySelectorAll('[data-x]').forEach(function (el) { el.onclick = function () { turns.splice(+el.dataset.x, 1); draw(); est(); }; });
+    est();
+  }
+  function est() {
+    var chars = turns.reduce(function (a, t) { return a + t.text.length; }, 0);
+    $('est').textContent = turns.length + ' turns · ' + chars + ' chars · estimated ' + EL.money(EL.estimate(chars, $('model').value));
+  }
+
+  $('btnGo').onclick = async function () {
+    var inputs = turns.filter(function (t) { return t.voice && t.text.trim(); })
+      .map(function (t) { return { text: t.text.trim(), voice_id: t.voice }; });
+    if (inputs.length < 2) return EL.status('status', 'Two turns with a voice and some text, at least.', 'warn');
+    EL.status('status', 'Generating…');
+    try {
+      var path = '/text-to-dialogue' + ($('withTs').checked ? '/with-timestamps' : '') + '?output_format=mp3_44100_128';
+      var r = await EL.post(path, { inputs: inputs, model_id: $('model').value });
+      var words = [];
+      if ($('withTs').checked) {
+        var j = await r.res.json();
+        var bin = atob(j.audio_base64), arr = new Uint8Array(bin.length);
+        for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+        blob = new Blob([arr], { type: 'audio/mpeg' });
+        words = EL.groupWords(j.alignment || j.normalized_alignment);
+      } else blob = await r.res.blob();
+      out = { words: words };
+      $('player').src = URL.createObjectURL(blob); $('player').play().catch(function () {});
+      EL.renderWords($('words'), words); EL.karaoke($('player'), $('words'), words);
+      $('info').textContent = words.length ? (words.length + ' timed words, ending at ' + words[words.length - 1].e.toFixed(2) + ' s') : '';
+      EL.status('status', 'Done in ' + r.ms + ' ms · ' + (blob.size / 1024).toFixed(0) + ' KB.', 'ok');
+    } catch (e) { EL.status('status', e.message, 'err'); }
+  };
+  $('btnSrt').onclick = function () { if (out && out.words.length) EL.download('dialogue.srt', EL.srt(EL.buildCues(out.words))); };
+  $('btnDl').onclick = function () { if (blob) EL.download('dialogue.mp3', blob); };
+})();
+</script>

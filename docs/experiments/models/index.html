@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Model A/B — latency, size and cost on one text &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="Race eleven_v3, multilingual_v2, flash and turbo over the same text and voice: wall-clock latency, bytes returned, spoken duration and cost per model, with the results as a markdown table.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/experiments/models/">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/lab.js"></script>
+</head>
+<body data-lab="1">
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><span class="stage-pill">v1</span><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Model A/B — latency, size and cost on one text</p>
+<h1>Model A/B — latency, size and cost on one text</h1>
+<p class="lead">Four models, one text, one voice, several runs each. The vendor's model table tells you the price and the character limit; it cannot tell you what <strong>your</strong> text sounds like or how long <strong>your</strong> connection takes to get it.</p>
+
+<aside class="toc"><b>On this page</b><a class="lv2" href="#what-this-tests">What this tests</a><a class="lv2" href="#method">Method</a><a class="lv2" href="#what-to-write-down">What to write down</a></aside>
+<div class="patternbox">
+  <div class="ttl">Which pattern this is — read before you paste anything</div>
+  <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
+  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
+  is empty until you fill it.</p>
+  <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
+  except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
+  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  and it does not exist yet.</p>
+</div>
+<div id="keybar" class="keybar"></div>
+
+<div class="lab" id="lab-models">
+  <section>
+    <h2>1 · The text, and the models to race</h2>
+    <label for="text">One text, every model. Keep it representative of your workload — a scene, not a word.</label>
+    <textarea id="text">This is the vault, opened read-only in the SG/Vault browser. The presenter app, the deck, the screenshots and the sources: four megabytes, encrypted before they left the author's machine.</textarea>
+    <div class="samplechips" id="samples"></div>
+    <div id="picks" class="row" style="margin-top:.7rem"></div>
+    <div class="grid3">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select></div>
+      <div><label for="runs">Runs per model — more than one, or you are timing the weather</label>
+        <input type="number" id="runs" value="2" min="1" max="5"></div>
+      <div><label>Speed <span id="vSpeed">1.00</span></label><input type="range" id="speed" min="0.7" max="1.2" step="0.05" value="1"></div>
+    </div>
+    <div class="row" style="margin-top:.7rem">
+      <button class="secondary" id="btnVoices">Load voices</button>
+      <span class="est"><b id="chars">0</b> chars × <b id="nruns">0</b> generations = estimated <b id="cost">$0.000</b></span>
+      <button id="btnRun">Run the comparison</button>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section>
+    <h2>2 · Results</h2>
+    <div class="tablewrap"><table id="tbl"><thead><tr><th>Model</th><th>Run</th><th>Latency</th><th>Bytes</th>
+      <th>Spoken length</th><th>Cost</th><th>Listen</th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button class="secondary" id="btnMd">Copy results as markdown</button>
+      <span class="est" id="summary"></span></div>
+  </section>
+
+  <section><h2>3 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var rows = [];
+  var picked = {};
+
+  EL.MODELS.forEach(function (m) {
+    var id = 'm_' + m[0];
+    var lab = document.createElement('label');
+    lab.className = 'inline';
+    lab.innerHTML = '<input type="checkbox" id="' + id + '" ' + (m[0] === 'eleven_v3' || m[0] === 'eleven_flash_v2_5' ? 'checked' : '') + '> <code>' + m[0] + '</code>';
+    $('picks').appendChild(lab);
+    lab.querySelector('input').onchange = function (e) { picked[m[0]] = e.target.checked; est(); };
+    picked[m[0]] = m[0] === 'eleven_v3' || m[0] === 'eleven_flash_v2_5';
+  });
+  EL.sampleChips($('samples'), $('text'), est);
+  $('speed').oninput = function () { $('vSpeed').textContent = (+$('speed').value).toFixed(2); };
+
+  function chosen() { return Object.keys(picked).filter(function (k) { return picked[k]; }); }
+  function est() {
+    var n = $('text').value.length, runs = +$('runs').value || 1, ms = chosen();
+    var total = ms.reduce(function (a, m) { return a + EL.estimate(n, m) * runs; }, 0);
+    $('chars').textContent = n; $('nruns').textContent = ms.length * runs; $('cost').textContent = EL.money(total);
+  }
+  $('text').oninput = est; $('runs').oninput = est; est();
+
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('status', v.length + ' voices loaded.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  $('btnRun').onclick = async function () {
+    var voice = $('voice').value;
+    if (!voice) return EL.status('status', 'Load voices and pick one — a model comparison on different voices compares nothing.', 'warn');
+    var text = $('text').value.trim(), models = chosen(), runs = +$('runs').value || 1;
+    if (!text || !models.length) return;
+    $('btnRun').disabled = true;
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = ''; rows = [];
+    try {
+      for (var i = 0; i < models.length; i++) {
+        for (var r = 1; r <= runs; r++) {
+          EL.status('status', 'Generating ' + models[i] + ', run ' + r + ' of ' + runs + '…');
+          var out;
+          try {
+            out = await EL.speak({ text: text, voice: voice, model: models[i], speed: $('speed').value, timestamps: true });
+          } catch (e) {
+            add(models[i], r, null, e.message); continue;
+          }
+          add(models[i], r, out, null);
+        }
+      }
+      EL.status('status', 'Done. ' + rows.length + ' generations, estimated ' +
+        EL.money(rows.reduce(function (a, x) { return a + (x.cost || 0); }, 0)) + ' spent.', 'ok');
+      summarise();
+    } finally { $('btnRun').disabled = false; }
+  };
+
+  function add(model, run, out, err) {
+    var spoken = out && out.words.length ? out.words[out.words.length - 1].e : null;
+    rows.push({ model: model, run: run, ms: out ? out.ms : null, bytes: out ? out.bytes : null, spoken: spoken, cost: out ? out.cost : 0, err: err });
+    var slowest = Math.max.apply(null, rows.map(function (x) { return x.ms || 0; })) || 1;
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    rows.forEach(function (x, idx) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><code>' + x.model + '</code></td><td>' + x.run + '</td>' +
+        (x.err ? '<td colspan="5" class="small" style="color:#b91c1c">' + EL.esc(x.err) + '</td>' :
+          '<td>' + EL.bar(x.ms, slowest, false, ' ms') + '</td>' +
+          '<td class="small">' + (x.bytes / 1024).toFixed(0) + ' KB</td>' +
+          '<td class="small">' + (x.spoken != null ? x.spoken.toFixed(2) + ' s' : '—') + '</td>' +
+          '<td class="small">' + EL.money(x.cost) + '</td>' +
+          '<td><button class="secondary" data-play="' + idx + '">play</button></td>');
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('[data-play]').forEach(function (el) {
+      el.onclick = function () {
+        var o = outs[+el.getAttribute('data-play')];
+        if (!o) return;
+        var a = document.createElement('audio'); a.src = o.url; a.play();
+      };
+    });
+    outs.push(out);
+  }
+  var outs = [];
+
+  function summarise() {
+    var byModel = {};
+    rows.forEach(function (r) { if (r.ms) (byModel[r.model] = byModel[r.model] || []).push(r); });
+    var parts = Object.keys(byModel).map(function (m) {
+      var xs = byModel[m], mean = xs.reduce(function (a, x) { return a + x.ms; }, 0) / xs.length;
+      var len = xs.filter(function (x) { return x.spoken; });
+      return m + ': ' + Math.round(mean) + ' ms mean' + (len.length ? ', ' + (len.reduce(function (a, x) { return a + x.spoken; }, 0) / len.length).toFixed(2) + ' s spoken' : '');
+    });
+    $('summary').textContent = parts.join(' · ');
+  }
+
+  $('btnMd').onclick = function () {
+    EL.copy(EL.toMarkdown(
+      ['Model', 'Run', 'Latency ms', 'KB', 'Spoken s', 'Cost $', 'Error'],
+      rows.map(function (r) {
+        return ['`' + r.model + '`', r.run, r.ms == null ? '—' : r.ms, r.bytes == null ? '—' : (r.bytes / 1024).toFixed(0),
+          r.spoken == null ? '—' : r.spoken.toFixed(2), r.cost.toFixed(4), r.err || ''];
+      }),
+      'Model comparison — ' + $('text').value.length + ' characters, voice ' + $('voice').value
+    ), 'status');
+  };
+})();
+</script>
+
+<h2 id="what-this-tests">What this tests</h2>
+<p>The published differences between the models are price, character limit and a one-line character sketch <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a> <a class="chip st-d" href="/ledger/#claim-char-limits" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. The differences that decide a pipeline are:</p>
+<ul><li><strong>Latency under your own network</strong>, which is the number that determines whether a 16-scene render takes ten seconds or two minutes. Our only measurement is three samples of one model from one connection: 5.0–5.8 s <a class="chip st-v" href="/ledger/#claim-latency-5s" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>. That is not a distribution, and this lab exists to replace it with one.</li><li><strong>Spoken duration for identical text</strong>, which changes how much script fits a 60-second cut. Two models reading the same words at the same nominal speed do not produce the same length.</li><li><strong>Whether the expensive model is audibly better on this text.</strong> Half the price is half the price; if flash is indistinguishable on your workload, that is the finding.</li></ul>
+<h2 id="method">Method</h2>
+<p>Same voice, same text, same speed, several runs per model — because one run per model times the weather, not the model. Runs are sequential, not parallel: parallel runs would measure the concurrency limit instead, which is <a href="/experiments/concurrency/">a different lab</a> with a different failure mode <a class="chip st-u" href="/ledger/#claim-concurrency-unknown" title="Code we wrote and have never executed.">written, not run</a>.</p>
+<p>The cost estimate above the button is the whole spend, computed before anything is sent: characters × rate × runs × models.</p>
+<h2 id="what-to-write-down">What to write down</h2>
+<p>Latency mean and spread per model, spoken duration per model, and — the part no table can give you — whether you could tell them apart with your eyes closed. The <strong>Copy results as markdown</strong> button produces a table with a timestamp; paste it into the repository that cares about the answer.</p>
+<p>Our own projection says v3 costs about what the incumbent provider costs and flash costs half <a class="chip st-p" href="/ledger/#claim-projected-reel-costs" title="Arithmetic, not an invoice. The workings are shown.">projected</a>. Whether the extra buys anything on a technical explainer is exactly the question this lab is for, and we have not answered it <a class="chip st-u" href="/ledger/#claim-labs-unrun" title="Code we wrote and have never executed.">written, not run</a>.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site v1.0.0 &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

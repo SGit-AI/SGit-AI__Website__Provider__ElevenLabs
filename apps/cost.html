@@ -1,0 +1,127 @@
+<div class="lab" id="lab-cost">
+  <div class="note"><p><b>This lab needs no key and makes no network call at all.</b> Everything below is arithmetic in
+    your browser on text you paste. It is here because a cost model you can check is worth more than a price you are told.</p></div>
+
+  <section>
+    <h2>1 · Your script</h2>
+    <label for="text">Paste narration. One scene per line, or paste a <code>reel.json</code> — this page pulls the
+      <code>narration</code> fields out of it.</label>
+    <textarea id="text" style="min-height:150px">This is the vault, opened read-only in the SG/Vault browser.
+The presenter app, the deck, the screenshots and the sources: four megabytes, encrypted before they left the author's machine.
+Fifty-three controls, a hundred and forty-four requirements, two thousand seven hundred and eighty-eight nodes.</textarea>
+    <div class="row"><label class="inline"><input type="checkbox" id="perLine" checked> one request per line, as a scene-by-scene render does</label>
+      <span class="est" id="counts"></span></div>
+  </section>
+
+  <section>
+    <h2>2 · What it would cost</h2>
+    <div class="tiles" id="tiles"></div>
+    <div class="tablewrap"><table id="tbl"><thead><tr><th>Model</th><th>Rate / 1k chars</th><th>Characters</th><th>Requests</th><th>Cost</th><th>Per-request limit</th></tr></thead><tbody></tbody></table></div>
+    <p class="small dim">Rates are the vendor's September 2026 list prices as read on 5 September 2026, hard-coded in
+      <a href="/assets/lab.js">lab.js</a> where you can check them. They move. Nothing here calls the vendor to confirm them.</p>
+  </section>
+
+  <section>
+    <h2>3 · Against what we actually paid</h2>
+    <div class="tablewrap"><table id="cmp"><thead><tr><th>Reel</th><th>Words</th><th>Chars</th><th>Paid (gpt-audio, measured)</th><th>flash here</th><th>v3 here</th></tr></thead><tbody></tbody></table></div>
+    <p class="small dim">The left-hand numbers are measured invoices from a different provider on named dates; the two
+      right-hand columns are this page's arithmetic. Only one of those is evidence.</p>
+  </section>
+
+  <section>
+    <h2>4 · Does a plan cover it?</h2>
+    <div class="row fill">
+      <div><label for="perMonth">Videos per month</label><input type="number" id="perMonth" value="12" min="1"></div>
+      <div><label for="plan">Plan</label><select id="plan">
+        <option value="10000">Starter — $6, 10,000 chars</option>
+        <option value="220000" selected>Creator — $22, 220,000 chars</option>
+        <option value="990000">Pro — $99, 990,000 chars</option>
+      </select></div>
+    </div>
+    <div class="status" id="planStatus"></div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var MEASURED = [
+    ['AIUC-1 landscape 3:46', 599, 3600, 0.2997],
+    ['AIUC-1 portrait 2:09', 318, 1900, 0.1708],
+    ['VoiceDebrief deck landscape 4:17', 699, 4200, null],
+    ['VoiceDebrief deck portrait 2:51', 480, 2900, null],
+    ['VoiceDebrief pitch landscape 1:55', 304, 1800, 0.1554],
+    ['VoiceDebrief pitch portrait 1:24', 190, 1150, 0.1112]
+  ];
+
+  function scenes() {
+    var raw = $('text').value.trim();
+    if (raw.startsWith('{') || raw.startsWith('[')) {
+      try {
+        var j = JSON.parse(raw), out = [];
+        (function walk(node) {
+          if (!node || typeof node !== 'object') return;
+          if (Array.isArray(node)) return node.forEach(walk);
+          Object.keys(node).forEach(function (k) {
+            if ((k === 'narration' || k === 'narrationShorts' || k === 'intro' || k === 'outro') && typeof node[k] === 'string') out.push(node[k]);
+            else walk(node[k]);
+          });
+        })(j);
+        if (out.length) return out;
+      } catch (e) { /* fall through: it is prose, not JSON */ }
+    }
+    return raw.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+  }
+
+  function render() {
+    var ss = scenes();
+    var chars = ss.reduce(function (a, s) { return a + s.length; }, 0);
+    var words = ss.reduce(function (a, s) { return a + s.split(/\s+/).filter(Boolean).length; }, 0);
+    var reqs = $('perLine').checked ? ss.length : 1;
+    $('counts').textContent = ss.length + ' scenes · ' + words + ' words · ' + chars + ' characters · ' +
+      (words ? (chars / words).toFixed(1) : 0) + ' chars per word';
+
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    EL.MODELS.forEach(function (m) {
+      var rate = EL.RATES[m[0]], cost = (chars / 1000) * rate, limit = EL.LIMITS[m[0]];
+      var longest = Math.max.apply(null, ss.map(function (s) { return s.length; }).concat([0]));
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><code>' + m[0] + '</code></td><td>$' + rate.toFixed(2) + '</td><td>' + chars.toLocaleString() +
+        '</td><td>' + reqs + '</td><td><b>' + EL.money(cost) + '</b></td><td class="small' +
+        (longest > limit ? '" style="color:#b91c1c"' : ' dim"') + '>' + limit.toLocaleString() +
+        (longest > limit ? ' — your longest scene is ' + longest + ', it will 422' : '') + '</td>';
+      tb.appendChild(tr);
+    });
+
+    var v3 = (chars / 1000) * 0.10, flash = (chars / 1000) * 0.05;
+    $('tiles').innerHTML =
+      '<div class="tile cool"><b>' + EL.money(flash) + '</b><span>this script on flash or turbo</span><em>' + chars.toLocaleString() + ' chars × $0.05/1k</em></div>' +
+      '<div class="tile cool"><b>' + EL.money(v3) + '</b><span>this script on v3 or multilingual v2</span><em>' + chars.toLocaleString() + ' chars × $0.10/1k</em></div>' +
+      '<div class="tile"><b>' + reqs + '</b><span>requests a scene-by-scene render would fire</span><em>concurrency is the untested risk, not price</em></div>' +
+      '<div class="tile"><b>' + (words ? (chars / words).toFixed(1) : '—') + '</b><span>characters per word in your text</span><em>our own scripts run about 6.0</em></div>';
+
+    var cb = $('cmp').querySelector('tbody'); cb.innerHTML = '';
+    MEASURED.forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td class="small">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td>' +
+        '<td>' + (r[3] == null ? '<span class="dim">— local model, $0</span>' : '<b>$' + r[3].toFixed(4) + '</b>') + '</td>' +
+        '<td>' + EL.money((r[2] / 1000) * 0.05) + '</td><td>' + EL.money((r[2] / 1000) * 0.10) + '</td>';
+      cb.appendChild(tr);
+    });
+
+    var per = chars, n = +$('perMonth').value || 1, quota = +$('plan').value;
+    var need = per * n;
+    EL.status('planStatus', need <= quota
+      ? (n + ' videos of this size is ' + need.toLocaleString() + ' characters — ' + Math.round((need / quota) * 100) +
+         '% of that plan\'s ' + quota.toLocaleString() + '. It fits, with room for ' + Math.floor((quota - need) / per) + ' more.')
+      : (n + ' videos of this size is ' + need.toLocaleString() + ' characters — ' + Math.round((need / quota) * 100) +
+         '% of that plan\'s ' + quota.toLocaleString() + '. It does not fit: that plan covers ' + Math.floor(quota / per) +
+         ' of these, and the overage is pay-as-you-go.'),
+      need <= quota ? 'ok' : 'warn');
+  }
+
+  ['text', 'perMonth'].forEach(function (id) { $(id).oninput = render; });
+  ['perLine', 'plan'].forEach(function (id) { $(id).onchange = render; });
+  render();
+})();
+</script>

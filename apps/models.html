@@ -1,0 +1,139 @@
+<div class="lab" id="lab-models">
+  <section>
+    <h2>1 · The text, and the models to race</h2>
+    <label for="text">One text, every model. Keep it representative of your workload — a scene, not a word.</label>
+    <textarea id="text">This is the vault, opened read-only in the SG/Vault browser. The presenter app, the deck, the screenshots and the sources: four megabytes, encrypted before they left the author's machine.</textarea>
+    <div class="samplechips" id="samples"></div>
+    <div id="picks" class="row" style="margin-top:.7rem"></div>
+    <div class="grid3">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select></div>
+      <div><label for="runs">Runs per model — more than one, or you are timing the weather</label>
+        <input type="number" id="runs" value="2" min="1" max="5"></div>
+      <div><label>Speed <span id="vSpeed">1.00</span></label><input type="range" id="speed" min="0.7" max="1.2" step="0.05" value="1"></div>
+    </div>
+    <div class="row" style="margin-top:.7rem">
+      <button class="secondary" id="btnVoices">Load voices</button>
+      <span class="est"><b id="chars">0</b> chars × <b id="nruns">0</b> generations = estimated <b id="cost">$0.000</b></span>
+      <button id="btnRun">Run the comparison</button>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section>
+    <h2>2 · Results</h2>
+    <div class="tablewrap"><table id="tbl"><thead><tr><th>Model</th><th>Run</th><th>Latency</th><th>Bytes</th>
+      <th>Spoken length</th><th>Cost</th><th>Listen</th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button class="secondary" id="btnMd">Copy results as markdown</button>
+      <span class="est" id="summary"></span></div>
+  </section>
+
+  <section><h2>3 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var rows = [];
+  var picked = {};
+
+  EL.MODELS.forEach(function (m) {
+    var id = 'm_' + m[0];
+    var lab = document.createElement('label');
+    lab.className = 'inline';
+    lab.innerHTML = '<input type="checkbox" id="' + id + '" ' + (m[0] === 'eleven_v3' || m[0] === 'eleven_flash_v2_5' ? 'checked' : '') + '> <code>' + m[0] + '</code>';
+    $('picks').appendChild(lab);
+    lab.querySelector('input').onchange = function (e) { picked[m[0]] = e.target.checked; est(); };
+    picked[m[0]] = m[0] === 'eleven_v3' || m[0] === 'eleven_flash_v2_5';
+  });
+  EL.sampleChips($('samples'), $('text'), est);
+  $('speed').oninput = function () { $('vSpeed').textContent = (+$('speed').value).toFixed(2); };
+
+  function chosen() { return Object.keys(picked).filter(function (k) { return picked[k]; }); }
+  function est() {
+    var n = $('text').value.length, runs = +$('runs').value || 1, ms = chosen();
+    var total = ms.reduce(function (a, m) { return a + EL.estimate(n, m) * runs; }, 0);
+    $('chars').textContent = n; $('nruns').textContent = ms.length * runs; $('cost').textContent = EL.money(total);
+  }
+  $('text').oninput = est; $('runs').oninput = est; est();
+
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('status', v.length + ' voices loaded.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  $('btnRun').onclick = async function () {
+    var voice = $('voice').value;
+    if (!voice) return EL.status('status', 'Load voices and pick one — a model comparison on different voices compares nothing.', 'warn');
+    var text = $('text').value.trim(), models = chosen(), runs = +$('runs').value || 1;
+    if (!text || !models.length) return;
+    $('btnRun').disabled = true;
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = ''; rows = [];
+    try {
+      for (var i = 0; i < models.length; i++) {
+        for (var r = 1; r <= runs; r++) {
+          EL.status('status', 'Generating ' + models[i] + ', run ' + r + ' of ' + runs + '…');
+          var out;
+          try {
+            out = await EL.speak({ text: text, voice: voice, model: models[i], speed: $('speed').value, timestamps: true });
+          } catch (e) {
+            add(models[i], r, null, e.message); continue;
+          }
+          add(models[i], r, out, null);
+        }
+      }
+      EL.status('status', 'Done. ' + rows.length + ' generations, estimated ' +
+        EL.money(rows.reduce(function (a, x) { return a + (x.cost || 0); }, 0)) + ' spent.', 'ok');
+      summarise();
+    } finally { $('btnRun').disabled = false; }
+  };
+
+  function add(model, run, out, err) {
+    var spoken = out && out.words.length ? out.words[out.words.length - 1].e : null;
+    rows.push({ model: model, run: run, ms: out ? out.ms : null, bytes: out ? out.bytes : null, spoken: spoken, cost: out ? out.cost : 0, err: err });
+    var slowest = Math.max.apply(null, rows.map(function (x) { return x.ms || 0; })) || 1;
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    rows.forEach(function (x, idx) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><code>' + x.model + '</code></td><td>' + x.run + '</td>' +
+        (x.err ? '<td colspan="5" class="small" style="color:#b91c1c">' + EL.esc(x.err) + '</td>' :
+          '<td>' + EL.bar(x.ms, slowest, false, ' ms') + '</td>' +
+          '<td class="small">' + (x.bytes / 1024).toFixed(0) + ' KB</td>' +
+          '<td class="small">' + (x.spoken != null ? x.spoken.toFixed(2) + ' s' : '—') + '</td>' +
+          '<td class="small">' + EL.money(x.cost) + '</td>' +
+          '<td><button class="secondary" data-play="' + idx + '">play</button></td>');
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('[data-play]').forEach(function (el) {
+      el.onclick = function () {
+        var o = outs[+el.getAttribute('data-play')];
+        if (!o) return;
+        var a = document.createElement('audio'); a.src = o.url; a.play();
+      };
+    });
+    outs.push(out);
+  }
+  var outs = [];
+
+  function summarise() {
+    var byModel = {};
+    rows.forEach(function (r) { if (r.ms) (byModel[r.model] = byModel[r.model] || []).push(r); });
+    var parts = Object.keys(byModel).map(function (m) {
+      var xs = byModel[m], mean = xs.reduce(function (a, x) { return a + x.ms; }, 0) / xs.length;
+      var len = xs.filter(function (x) { return x.spoken; });
+      return m + ': ' + Math.round(mean) + ' ms mean' + (len.length ? ', ' + (len.reduce(function (a, x) { return a + x.spoken; }, 0) / len.length).toFixed(2) + ' s spoken' : '');
+    });
+    $('summary').textContent = parts.join(' · ');
+  }
+
+  $('btnMd').onclick = function () {
+    EL.copy(EL.toMarkdown(
+      ['Model', 'Run', 'Latency ms', 'KB', 'Spoken s', 'Cost $', 'Error'],
+      rows.map(function (r) {
+        return ['`' + r.model + '`', r.run, r.ms == null ? '—' : r.ms, r.bytes == null ? '—' : (r.bytes / 1024).toFixed(0),
+          r.spoken == null ? '—' : r.spoken.toFixed(2), r.cost.toFixed(4), r.err || ''];
+      }),
+      'Model comparison — ' + $('text').value.length + ' characters, voice ' + $('voice').value
+    ), 'status');
+  };
+})();
+</script>

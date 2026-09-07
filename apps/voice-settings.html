@@ -1,0 +1,136 @@
+<div class="lab" id="lab-settings">
+  <section>
+    <h2>1 · The line, and the knob to sweep</h2>
+    <label for="text">The line. Short: this lab generates it once per value.</label>
+    <textarea id="text" style="min-height:80px">And here is the argument. A control is not a row in a list — it is what its edges say it is.</textarea>
+    <div class="samplechips" id="samples"></div>
+    <div class="grid3">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select></div>
+      <div><label for="model">Model</label><select id="model"></select></div>
+      <div><label for="param">Sweep</label><select id="param">
+        <option value="stability">stability — 0 to 1</option>
+        <option value="similarity">similarity_boost — 0 to 1</option>
+        <option value="style">style — 0 to 1, costs latency</option>
+        <option value="speed">speed — 0.7 to 1.2, the vendor's range</option>
+      </select></div>
+    </div>
+    <label for="values">Values, comma separated</label>
+    <input type="text" id="values" class="mono" value="0, 0.35, 0.5, 0.75, 1">
+    <div class="row" style="margin-top:.6rem">
+      <button class="secondary" id="btnVoices">Load voices</button>
+      <span class="est"><b id="chars">0</b> chars × <b id="n">0</b> values = estimated <b id="cost">$0.000</b></span>
+      <button id="btnRun">Sweep</button>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section>
+    <h2>2 · The sweep</h2>
+    <p class="small dim">Held constant: everything not being swept. That is the whole method — one knob at a time, same
+      seed where you set one, same text, same voice. Listen twice before you write anything down.</p>
+    <div class="row"><label class="inline" style="margin:0"><input type="checkbox" id="useSeed" checked>
+      fix the seed at</label><input type="text" id="seed" class="mono" value="42" style="max-width:8rem"></div>
+    <div class="tablewrap"><table id="tbl"><thead><tr><th>Value</th><th>Latency</th><th>Spoken length</th><th>Bytes</th>
+      <th>Listen</th><th>Your note</th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button class="secondary" id="btnMd">Copy as markdown</button>
+      <span class="est" id="summary"></span></div>
+  </section>
+
+  <section><h2>3 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var results = [];
+
+  EL.fillModels($('model'));
+  EL.sampleChips($('samples'), $('text'), est);
+  function vals() {
+    return $('values').value.split(',').map(function (x) { return parseFloat(x.trim()); }).filter(function (x) { return !isNaN(x); });
+  }
+  function est() {
+    var n = $('text').value.length, k = vals().length;
+    $('chars').textContent = n; $('n').textContent = k;
+    $('cost').textContent = EL.money(EL.estimate(n, $('model').value) * k);
+  }
+  ['text', 'values', 'model'].forEach(function (id) { $(id).oninput = est; $(id).onchange = est; });
+  $('param').onchange = function () {
+    $('values').value = $('param').value === 'speed' ? '0.7, 0.85, 1, 1.1, 1.2' : '0, 0.35, 0.5, 0.75, 1';
+    est();
+  };
+  est();
+
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('status', v.length + ' voices.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  $('btnRun').onclick = async function () {
+    var voice = $('voice').value; if (!voice) return EL.status('status', 'Pick a voice first.', 'warn');
+    var text = $('text').value.trim(), param = $('param').value, list = vals();
+    if (!text || !list.length) return;
+    if (param === 'speed' && list.some(function (v) { return v < 0.7 || v > 1.2; }))
+      EL.status('status', 'Values outside 0.7–1.2 will come back 422 — that is the vendor validating, not this page.', 'warn');
+    results = []; $('tbl').querySelector('tbody').innerHTML = '';
+    $('btnRun').disabled = true;
+    try {
+      for (var i = 0; i < list.length; i++) {
+        var o = { text: text, voice: voice, model: $('model').value, timestamps: true };
+        o[param] = list[i];
+        if ($('useSeed').checked && $('seed').value) o.seed = $('seed').value;
+        EL.status('status', param + ' = ' + list[i] + ' …');
+        try { var r = await EL.speak(o); results.push({ v: list[i], r: r }); }
+        catch (e) { results.push({ v: list[i], err: e.message }); }
+        draw();
+      }
+      EL.status('status', 'Swept ' + results.length + ' values of ' + param + '. Estimated ' +
+        EL.money(results.reduce(function (a, x) { return a + (x.r ? x.r.cost : 0); }, 0)) + '.', 'ok');
+    } finally { $('btnRun').disabled = false; }
+  };
+
+  function draw() {
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    var slowest = Math.max.apply(null, results.map(function (x) { return x.r ? x.r.ms : 0; })) || 1;
+    results.forEach(function (x, i) {
+      var tr = document.createElement('tr');
+      if (x.err) {
+        tr.innerHTML = '<td><code>' + x.v + '</code></td><td colspan="5" class="small" style="color:#b91c1c">' + EL.esc(x.err) + '</td>';
+      } else {
+        var spoken = x.r.words.length ? x.r.words[x.r.words.length - 1].e : null;
+        tr.innerHTML = '<td><code>' + x.v + '</code></td>' +
+          '<td>' + EL.bar(x.r.ms, slowest, false, ' ms') + '</td>' +
+          '<td class="small">' + (spoken != null ? spoken.toFixed(2) + ' s' : '—') + '</td>' +
+          '<td class="small">' + (x.r.bytes / 1024).toFixed(0) + ' KB</td>' +
+          '<td><button class="secondary" data-play="' + i + '">play</button></td>' +
+          '<td><input type="text" data-note="' + i + '" placeholder="what you heard"></td>';
+      }
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('[data-play]').forEach(function (el) {
+      el.onclick = function () { var a = new Audio(results[+el.getAttribute('data-play')].r.url); a.play(); };
+    });
+    tb.querySelectorAll('[data-note]').forEach(function (el) {
+      el.oninput = function () { results[+el.getAttribute('data-note')].note = el.value; };
+    });
+    var lens = results.filter(function (x) { return x.r && x.r.words.length; });
+    if (lens.length > 1) {
+      var a = lens[0].r.words[lens[0].r.words.length - 1].e, b = lens[lens.length - 1].r.words[lens[lens.length - 1].r.words.length - 1].e;
+      $('summary').textContent = 'Spoken length across the sweep: ' + a.toFixed(2) + ' s → ' + b.toFixed(2) + ' s (' +
+        (((b - a) / a) * 100).toFixed(1) + '%).';
+    }
+  }
+
+  $('btnMd').onclick = function () {
+    EL.copy(EL.toMarkdown(
+      [$('param').value, 'Latency ms', 'Spoken s', 'KB', 'Heard'],
+      results.map(function (x) {
+        if (x.err) return [x.v, 'error', '—', '—', x.err];
+        var spoken = x.r.words.length ? x.r.words[x.r.words.length - 1].e.toFixed(2) : '—';
+        return [x.v, x.r.ms, spoken, (x.r.bytes / 1024).toFixed(0), x.note || ''];
+      }),
+      'Voice-settings sweep — ' + $('param').value + ', model ' + $('model').value + ', voice ' + $('voice').value
+    ), 'status');
+  };
+})();
+</script>

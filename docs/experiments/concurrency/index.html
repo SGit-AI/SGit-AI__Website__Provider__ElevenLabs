@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Concurrency probe — where is the wall? &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="Fire waves of parallel generations at 1, 2, 4, 8… until something fails, and record the request timeline, the 429s and the highest wave that survived. The one open item on this site that costs money to close.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/experiments/concurrency/">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/lab.js"></script>
+</head>
+<body data-lab="1">
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><span class="stage-pill">v1</span><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Concurrency probe — where is the wall?</p>
+<h1>Concurrency probe — where is the wall?</h1>
+<p class="lead">Concurrent request limits scale with the plan, and a render that fires every scene at once — 10 to 16 requests — meets that limit before it meets any other. <strong>We have never provoked one.</strong> This lab does, deliberately, for a few cents.</p>
+
+<aside class="toc"><b>On this page</b><a class="lv2" href="#what-this-tests">What this tests</a><a class="lv2" href="#how-to-read-the-result">How to read the result</a><a class="lv2" href="#what-to-do-with-the-number">What to do with the number</a></aside>
+<div class="patternbox">
+  <div class="ttl">Which pattern this is — read before you paste anything</div>
+  <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
+  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
+  is empty until you fill it.</p>
+  <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
+  except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
+  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  and it does not exist yet.</p>
+</div>
+<div id="keybar" class="keybar"></div>
+
+<div class="warnbox"><p><b>This is the one lab here that can cost more than pennies.</b> It generates real audio, in parallel, until something breaks. The estimate above the button is the worst case for the numbers you have set, computed before anything is sent — read it. Use the shortest text you can and the cheapest model; you are measuring a queue, not a voice.</p></div>
+<div class="lab" id="lab-conc">
+  <section>
+    <h2>1 · The probe</h2>
+    <p class="small">Fires real generations in parallel and records where the wall is. This is the only lab here that can
+      cost more than pennies if you set the numbers high — the estimate below is the whole spend, before you press anything.</p>
+    <div class="grid3">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select>
+        <button class="secondary" id="btnVoices" style="margin-top:.4rem">Load voices</button></div>
+      <div><label for="model">Model</label><select id="model"></select>
+        <label for="text">Text — keep it tiny; this measures the queue, not the model</label>
+        <input type="text" id="text" value="Encrypted before it left the machine."></div>
+      <div><label for="mode">Mode</label><select id="mode">
+          <option value="ramp">ramp — waves at 1, 2, 4, 8… until something fails</option>
+          <option value="flat">flat — one wave, N requests at once</option>
+        </select>
+        <label for="n">Requests per wave (flat) / ceiling (ramp)</label>
+        <input type="number" id="n" value="8" min="1" max="32"></div>
+    </div>
+    <div class="row" style="margin-top:.7rem">
+      <span class="est">Worst case <b id="reqs">0</b> requests × <b id="chars">0</b> chars = estimated <b id="cost">$0.000</b></span>
+      <label class="inline"><input type="checkbox" id="ok"> I have read the estimate</label>
+      <button id="btnRun">Run the probe</button>
+      <button class="secondary" id="btnStop">Stop</button>
+    </div>
+    <div class="status" id="status">Nothing fired yet.</div>
+  </section>
+
+  <section>
+    <h2>2 · What happened</h2>
+    <div class="tiles tiles-sm" id="tiles"></div>
+    <div class="tablewrap" style="max-height:420px;overflow:auto">
+      <table id="tbl"><thead><tr><th>#</th><th>Wave</th><th>Status</th><th>Latency</th><th style="width:38%">Timeline</th><th>Detail</th></tr></thead><tbody></tbody></table>
+    </div>
+    <p class="small dim">One hue for every request: the bar's <em>length</em> is the measurement and its <em>position</em>
+      is when it ran. Red means the request failed, and the status column always says so in words — the colour is never
+      the only signal.</p>
+    <div class="row"><button class="secondary" id="btnMd">Copy the run as markdown</button></div>
+  </section>
+
+  <section><h2>3 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var rows = [], t0 = 0, stop = false;
+
+  EL.fillModels($('model'));
+  $('model').value = 'eleven_flash_v2_5';
+  function est() {
+    var n = +$('n').value || 1, chars = $('text').value.length;
+    var total = $('mode').value === 'ramp' ? waves(n).reduce(function (a, w) { return a + w; }, 0) : n;
+    $('reqs').textContent = total; $('chars').textContent = chars;
+    $('cost').textContent = EL.money(EL.estimate(chars, $('model').value) * total);
+  }
+  function waves(ceiling) { var out = [], c = 1; while (c <= ceiling) { out.push(c); c *= 2; } return out; }
+  ['n', 'text', 'model', 'mode'].forEach(function (id) { $(id).oninput = est; $(id).onchange = est; });
+  est();
+
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('status', v.length + ' voices.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+  $('btnStop').onclick = function () { stop = true; EL.status('status', 'Stopping after the current wave.', 'warn'); };
+
+  $('btnRun').onclick = async function () {
+    if (!$('ok').checked) return EL.status('status', 'Tick the box: this one spends money in parallel.', 'warn');
+    var voice = $('voice').value; if (!voice) return EL.status('status', 'Pick a voice.', 'warn');
+    rows = []; stop = false; t0 = performance.now(); draw();
+    $('btnRun').disabled = true;
+    var plan = $('mode').value === 'ramp' ? waves(+$('n').value || 1) : [+$('n').value || 1];
+    try {
+      for (var w = 0; w < plan.length && !stop; w++) {
+        var size = plan[w];
+        EL.status('status', 'Wave ' + (w + 1) + ' of ' + plan.length + ' — ' + size + ' requests at once…');
+        var batch = [];
+        for (var i = 0; i < size; i++) batch.push(fire(size, rows.length + i));
+        await Promise.all(batch);
+        draw();
+        var failed = rows.filter(function (r) { return r.wave === size && r.status !== 200; });
+        if (failed.length) {
+          EL.status('status', 'Wall found at ' + size + ' concurrent requests: ' + failed.length + ' of ' + size +
+            ' failed (' + failed.map(function (f) { return f.status; }).join(', ') + '). That is the number to put in the semaphore.', 'warn');
+          break;
+        }
+      }
+      if (!stop) EL.status('status', 'Finished. ' + rows.length + ' requests, ' +
+        rows.filter(function (r) { return r.status !== 200; }).length + ' failures, estimated ' +
+        EL.money(rows.filter(function (r) { return r.status === 200; }).length * EL.estimate($('text').value.length, $('model').value)) + '.', 'ok');
+    } finally { $('btnRun').disabled = false; draw(); }
+  };
+
+  async function fire(wave, idx) {
+    var started = performance.now() - t0;
+    var row = { i: idx + 1, wave: wave, start: Math.round(started), ms: null, status: null, detail: '' };
+    rows.push(row);
+    try {
+      var r = await EL.raw('/text-to-speech/' + encodeURIComponent($('voice').value) + '?output_format=mp3_22050_32', {
+        method: 'POST',
+        json: { text: $('text').value, model_id: $('model').value, voice_settings: { stability: 0.5, similarity_boost: 0.75, speed: 1 } }
+      });
+      await r.res.arrayBuffer();
+      row.ms = r.ms; row.status = 200;
+    } catch (e) {
+      row.ms = e.ms || Math.round(performance.now() - t0 - started);
+      row.status = e.status || 'network';
+      row.detail = (e.detail || e.message || '').slice(0, 160);
+    }
+    draw();
+  }
+
+  function draw() {
+    var total = Math.max.apply(null, rows.map(function (r) { return r.start + (r.ms || 0); }).concat([1]));
+    var slowest = Math.max.apply(null, rows.map(function (r) { return r.ms || 0; }).concat([1]));
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    rows.forEach(function (r) {
+      var bad = r.status !== 200;
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + r.i + '</td><td>' + r.wave + '</td>' +
+        '<td class="small"' + (bad ? ' style="color:#b91c1c;font-weight:600"' : '') + '>' + (r.status == null ? 'in flight' : (bad ? '✗ ' : '✓ ') + r.status) + '</td>' +
+        '<td>' + (r.ms == null ? '—' : EL.bar(r.ms, slowest, bad, ' ms')) + '</td>' +
+        '<td>' + (r.ms == null ? '' : EL.span(r.start, r.ms, total, bad, r.start + '–' + (r.start + r.ms) + ' ms')) + '</td>' +
+        '<td class="small dim">' + EL.esc(r.detail) + '</td>';
+      tb.appendChild(tr);
+    });
+    var okRows = rows.filter(function (r) { return r.status === 200; });
+    var lat = okRows.map(function (r) { return r.ms; }).sort(function (a, b) { return a - b; });
+    var maxOk = 0;
+    [].concat(rows).forEach(function (r) {
+      if (r.status === 200 && !rows.some(function (x) { return x.wave === r.wave && x.status !== 200; })) maxOk = Math.max(maxOk, r.wave);
+    });
+    $('tiles').innerHTML =
+      tile(rows.length, 'requests fired') +
+      tile(rows.filter(function (r) { return r.status === 429; }).length, '429s — the concurrency wall') +
+      tile(maxOk || '—', 'highest wave with no failure') +
+      tile(lat.length ? lat[Math.floor(lat.length / 2)] + ' ms' : '—', 'median latency of the ones that worked') +
+      tile(lat.length ? lat[lat.length - 1] + ' ms' : '—', 'slowest success');
+  }
+  function tile(v, label) { return '<div class="tile"><b>' + v + '</b><span>' + label + '</span></div>'; }
+
+  $('btnMd').onclick = function () {
+    EL.copy(EL.toMarkdown(['#', 'Wave size', 'Status', 'Start ms', 'Latency ms', 'Detail'],
+      rows.map(function (r) { return [r.i, r.wave, r.status, r.start, r.ms == null ? '—' : r.ms, r.detail]; }),
+      'Concurrency probe — model ' + $('model').value + ', ' + $('text').value.length + ' characters per request'), 'status');
+  };
+})();
+</script>
+
+<h2 id="what-this-tests">What this tests</h2>
+<p>A <code>429</code> mid-render is the most likely first failure on a small plan <a class="chip st-u" href="/ledger/#claim-concurrency-unknown" title="Code we wrote and have never executed.">written, not run</a>, and it is a bad failure: it arrives after you have paid for the requests that succeeded, halfway through a render, with a partly-built video. The number that prevents it — the semaphore width — is a plan-specific fact that nobody has measured for this account.</p>
+<p>The ramp mode fires waves of 1, 2, 4, 8… and stops at the first wave with a failure. The wave before that is your answer.</p>
+<h2 id="how-to-read-the-result">How to read the result</h2>
+<ul><li><strong>The timeline column</strong> places each request by when it started and sizes it by how long it took. In a healthy wave the bars start together and end together; when they start together and finish in a staircase, requests are being queued somewhere between you and the model.</li><li><strong>A 429 is not a bug</strong>, it is the platform's own bound doing its job — the same class of event as <a href="/patterns/">the 402 on the sibling provider</a>, which is the one piece of evidence on this site that a bound is enforceable in practice <a class="chip st-v" href="/ledger/#claim-openrouter-402" title="Verified by execution on this date, by us.">verified 3 Sep 2026</a>.</li><li><strong>Distinguish 429 from 5xx and from a network error.</strong> The vendor's error table maps them: 401 key, 402 quota or plan, 422 validation, 429 concurrency or rate, 5xx theirs <a class="chip st-d" href="/ledger/#claim-error-table" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. A <code>network</code> row in this table usually means CORS or a host CSP, not the API <a class="chip st-v" href="/ledger/#claim-csp-blocks" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>.</li></ul>
+<h2 id="what-to-do-with-the-number">What to do with the number</h2>
+<p>Put it in the semaphore. In the pipeline this came from, that is <code>limits.maxConcurrent</code> in the vault's terms file — which is also exactly the field <a href="/pattern-three/">the pattern-three host</a> would enforce on behalf of an app that cannot be trusted to enforce it itself <a class="chip st-s" href="/ledger/#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a>. Until somebody runs this, that field holds a guess.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site v1.0.0 &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

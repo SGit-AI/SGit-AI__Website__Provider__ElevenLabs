@@ -1,0 +1,131 @@
+<div class="lab" id="lab-align">
+  <section>
+    <h2>1 · Forced alignment — subtitles for audio you already have</h2>
+    <p class="small">Send a file you already rendered and the exact words it speaks; get back per-word timing over
+      <em>your</em> text. Priced as speech to text, so a two-minute reel is a fraction of a cent. The transcript must be
+      <b>plain text</b> — not JSON — and it must be what the audio actually says, in the order it says it.</p>
+    <div class="grid2">
+      <div><label for="afile">Audio or video file</label><input type="file" id="afile" accept="audio/*,video/*">
+        <label for="ascript">The script, as plain text — one line per scene, intro first</label>
+        <textarea id="ascript" style="min-height:120px" placeholder="Paste exactly what the audio says."></textarea></div>
+      <div><label>&nbsp;</label><button id="btnAlign">Align</button>
+        <div class="status" id="alignStatus">Nothing sent.</div>
+        <div class="row" style="margin-top:.6rem"><button class="secondary" id="btnSrt">Download .srt</button>
+          <button class="secondary" id="btnWords">Download words.json</button></div>
+        <div class="kv" id="alignInfo" style="margin-top:.6rem"></div></div>
+    </div>
+    <div class="tablewrap" style="max-height:260px;overflow:auto"><table id="wtab"><thead><tr><th>#</th><th>word</th><th>start</th><th>end</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>2 · Scribe as a QA gate — does the video say what the script says?</h2>
+    <p class="small">Transcribe the finished file and diff it against the script, both sides normalised: lower-cased,
+      punctuation stripped. This catches the two failures this pipeline has actually shipped — a number spoken wrongly,
+      and an outro claiming "no API cost" over a slide printing $0.1554.</p>
+    <div class="grid2">
+      <div><label for="sfile">The finished file</label><input type="file" id="sfile" accept="audio/*,video/*">
+        <label class="inline"><input type="checkbox" id="diarize"> diarize (who spoke)</label>
+        <button id="btnStt" style="margin-top:.6rem">Transcribe and diff</button>
+        <div class="status" id="sttStatus"></div></div>
+      <div><label for="expected">What it should say</label><textarea id="expected" style="min-height:120px" placeholder="The script. Leave empty to just transcribe."></textarea></div>
+    </div>
+    <div class="tiles tiles-sm" id="tiles"></div>
+    <label for="transcript">Transcript</label>
+    <textarea id="transcript" class="mono" style="min-height:100px"></textarea>
+    <div class="tablewrap" id="diffwrap" style="max-height:260px;overflow:auto"><table id="difftab"><thead><tr><th>#</th><th>Expected</th><th>Heard</th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button class="secondary" id="btnMd">Copy the gate result as markdown</button></div>
+  </section>
+
+  <section><h2>3 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var words = [], diffs = [], stats = null;
+
+  $('btnAlign').onclick = async function () {
+    var f = $('afile').files[0], text = $('ascript').value.trim();
+    if (!f || !text) return EL.status('alignStatus', 'A file and its script, both.', 'warn');
+    var fd = new FormData(); fd.append('file', f); fd.append('text', text);
+    EL.status('alignStatus', 'Uploading ' + (f.size / 1e6).toFixed(1) + ' MB…');
+    try {
+      var r = await EL.postForm('/forced-alignment', fd);
+      var j = await r.res.json();
+      words = (j.words || []).map(function (w) { return { w: w.text || w.word || '', s: w.start, e: w.end }; });
+      if (!words.length && j.characters) words = EL.groupWords({
+        characters: j.characters.map(function (c) { return c.text; }),
+        character_start_times_seconds: j.characters.map(function (c) { return c.start; }),
+        character_end_times_seconds: j.characters.map(function (c) { return c.end; })
+      });
+      var tb = $('wtab').querySelector('tbody'); tb.innerHTML = '';
+      words.forEach(function (w, i) {
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + (i + 1) + '</td><td>' + EL.esc(w.w) + '</td><td>' + (+w.s).toFixed(3) + '</td><td>' + (+w.e).toFixed(3) + '</td>';
+        tb.appendChild(tr);
+      });
+      var dur = words.length ? words[words.length - 1].e : 0;
+      $('alignInfo').innerHTML = '<b>words</b><span>' + words.length + '</span><b>ends at</b><span>' + dur.toFixed(2) +
+        ' s</span><b>priced as</b><span>' + EL.money((dur / 3600) * 0.22) + ' at $0.22 per hour</span>';
+      EL.status('alignStatus', words.length + ' words aligned in ' + r.ms + ' ms.', 'ok');
+    } catch (e) { EL.status('alignStatus', e.message, 'err'); }
+  };
+  $('btnSrt').onclick = function () { if (words.length) EL.download('aligned.srt', EL.srt(EL.buildCues(words))); };
+  $('btnWords').onclick = function () { if (words.length) EL.download('aligned.words.json', JSON.stringify(words, null, 1), 'application/json'); };
+
+  var norm = function (s) {
+    return s.toLowerCase().replace(/[’']/g, '').replace(/[^a-z0-9]+/g, ' ').trim().split(' ').filter(Boolean);
+  };
+
+  $('btnStt').onclick = async function () {
+    var f = $('sfile').files[0];
+    if (!f) return EL.status('sttStatus', 'Pick a file.', 'warn');
+    var fd = new FormData();
+    fd.append('file', f); fd.append('model_id', 'scribe_v1'); fd.append('timestamps_granularity', 'word');
+    if ($('diarize').checked) fd.append('diarize', 'true');
+    EL.status('sttStatus', 'Transcribing…');
+    try {
+      var r = await EL.postForm('/speech-to-text', fd);
+      var j = await r.res.json();
+      $('transcript').value = j.text || '';
+      EL.status('sttStatus', 'Transcribed in ' + r.ms + ' ms.', 'ok');
+      gate();
+    } catch (e) { EL.status('sttStatus', e.message, 'err'); }
+  };
+  $('expected').oninput = gate; $('transcript').oninput = gate;
+
+  function gate() {
+    var a = norm($('expected').value), b = norm($('transcript').value);
+    if (!a.length || !b.length) { $('tiles').innerHTML = ''; return; }
+    diffs = []; var i = 0, j = 0;
+    while (i < a.length || j < b.length) {
+      if (a[i] === b[j]) { i++; j++; continue; }
+      var skipA = b.indexOf(a[i], j), skipB = a.indexOf(b[j], i);
+      if (a[i] === undefined) { diffs.push({ n: i, exp: '—', got: b[j] }); j++; }
+      else if (b[j] === undefined) { diffs.push({ n: i, exp: a[i], got: '—' }); i++; }
+      else if (skipA >= 0 && (skipB < 0 || skipA - j <= skipB - i)) { diffs.push({ n: i, exp: '—', got: b.slice(j, skipA).join(' ') }); j = skipA; }
+      else if (skipB >= 0) { diffs.push({ n: i, exp: a.slice(i, skipB).join(' '), got: '—' }); i = skipB; }
+      else { diffs.push({ n: i, exp: a[i], got: b[j] }); i++; j++; }
+      if (diffs.length > 200) break;
+    }
+    var tb = $('difftab').querySelector('tbody'); tb.innerHTML = '';
+    diffs.forEach(function (d) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + d.n + '</td><td>' + EL.esc(d.exp) + '</td><td style="color:#b91c1c">' + EL.esc(d.got) + '</td>';
+      tb.appendChild(tr);
+    });
+    stats = { expected: a.length, heard: b.length, mismatches: diffs.length };
+    $('tiles').innerHTML =
+      '<div class="tile"><b>' + a.length + '</b><span>words expected</span></div>' +
+      '<div class="tile"><b>' + b.length + '</b><span>words heard</span></div>' +
+      '<div class="tile' + (diffs.length ? ' hot' : ' cool') + '"><b>' + diffs.length + '</b><span>mismatches — ' +
+        (diffs.length ? 'read them before you publish' : 'the gate passes') + '</span></div>';
+  }
+
+  $('btnMd').onclick = function () {
+    if (!stats) return;
+    EL.copy(EL.toMarkdown(['#', 'Expected', 'Heard'], diffs.map(function (d) { return [d.n, d.exp, d.got]; }),
+      'Scribe QA gate — ' + stats.expected + ' expected words, ' + stats.heard + ' heard, ' + stats.mismatches + ' mismatches'), 'sttStatus');
+  };
+})();
+</script>

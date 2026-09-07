@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sound effects and music &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="The sound-generation and music endpoints, with a per-second cost meter — and the house rule they were evaluated against: a two-second sting under the title slide, and nothing else.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/experiments/sound/">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/lab.js"></script>
+</head>
+<body data-lab="1">
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><span class="stage-pill">v1</span><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Sound effects and music</p>
+<h1>Sound effects and music</h1>
+<p class="lead">Two endpoints that are easy to overuse. They are here with a cost meter and a house rule attached, because the interesting question is not <em>can it</em> — it obviously can — but <em>should it, under narration dense with numbers</em>.</p>
+
+<aside class="toc"><b>On this page</b><a class="lv2" href="#the-numbers">The numbers</a><a class="lv2" href="#the-rule-these-were-evaluated-against">The rule these were evaluated against</a><a class="lv2" href="#where-this-fits-the-site-s-argument">Where this fits the site&#x27;s argument</a></aside>
+<div class="patternbox">
+  <div class="ttl">Which pattern this is — read before you paste anything</div>
+  <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
+  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
+  is empty until you fill it.</p>
+  <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
+  except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
+  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  and it does not exist yet.</p>
+</div>
+<div id="keybar" class="keybar"></div>
+
+<div class="lab" id="lab-sound">
+  <section>
+    <h2>1 · Sound effects</h2>
+    <p class="small">A prompt, a duration and how literally to take you. Billed per minute, so the meter below is in
+      seconds — a two-second sting is a fraction of a cent, and a two-second sting under a title slide is the only use
+      of this endpoint that survived our own review.</p>
+    <div class="grid3">
+      <div><label for="sfxPrompt">Prompt</label><input type="text" id="sfxPrompt" value="a short soft synth sting, clean, no reverb tail"></div>
+      <div><label>Duration <b id="vDur">2.0</b> s <span class="dim">— leave at 0 for automatic</span></label>
+        <input type="range" id="dur" min="0" max="22" step="0.5" value="2"></div>
+      <div><label>Prompt influence <b id="vInf">0.30</b> <span class="dim">— high is literal</span></label>
+        <input type="range" id="inf" min="0" max="1" step="0.05" value="0.3"></div>
+    </div>
+    <div class="row"><label class="inline"><input type="checkbox" id="loop"> seamless loop (ambience)</label>
+      <span class="est" id="sfxCost"></span><button id="btnSfx">Generate</button></div>
+    <div class="status" id="sfxStatus"></div>
+    <audio id="sfxPlayer" controls></audio>
+    <div class="row"><button class="secondary" id="btnSfxDl">Download</button></div>
+  </section>
+
+  <section>
+    <h2>2 · Music</h2>
+    <p class="small">Natural language in, a track out, three seconds to five minutes. Cleared for broad commercial use on
+      paid plans — <b>check the current terms yourself before publishing anything under a brand</b>; this page is not
+      legal advice and the terms are the vendor's to change.</p>
+    <div class="grid2">
+      <div><label for="mPrompt">Prompt</label>
+        <textarea id="mPrompt" style="min-height:70px">A restrained instrumental bed under a technical explainer: sparse piano, low strings, no percussion, nothing that competes with a voice.</textarea></div>
+      <div><label>Length <b id="vLen">30</b> s</label><input type="range" id="len" min="3" max="300" step="1" value="30">
+        <span class="est" id="mCost"></span>
+        <button id="btnMusic" style="margin-top:.5rem">Generate</button></div>
+    </div>
+    <div class="status" id="mStatus"></div>
+    <audio id="mPlayer" controls></audio>
+    <div class="row"><button class="secondary" id="btnMDl">Download</button></div>
+  </section>
+
+  <section>
+    <h2>3 · The house rule this lab exists to test</h2>
+    <div class="note"><p><b>A two-second sting under the title slide, and nothing else.</b> A bed under narration hurts
+      intelligibility, and reels dense with numbers can least afford it. Mix a sting at &minus;18 dB under the voice and
+      fade it before the first word. If you disagree, this lab is where you produce the counter-example — generate both,
+      listen on a phone speaker, and write down which one you would rather watch.</p></div>
+  </section>
+
+  <section><h2>4 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var sfxBlob = null, mBlob = null;
+
+  function upd() {
+    $('vDur').textContent = (+$('dur').value).toFixed(1);
+    $('vInf').textContent = (+$('inf').value).toFixed(2);
+    $('vLen').textContent = $('len').value;
+    var d = +$('dur').value || 4;
+    $('sfxCost').textContent = 'about ' + EL.money((d / 60) * 0.12) + ' at $0.12 per minute';
+    $('mCost').textContent = 'about ' + EL.money((+$('len').value / 60) * 0.15) + ' at $0.15 per minute';
+  }
+  ['dur', 'inf', 'len'].forEach(function (id) { $(id).oninput = upd; });
+  upd();
+
+  $('btnSfx').onclick = async function () {
+    var body = { text: $('sfxPrompt').value.trim(), prompt_influence: +$('inf').value };
+    if (+$('dur').value > 0) body.duration_seconds = +$('dur').value;
+    if ($('loop').checked) body.loop = true;
+    EL.status('sfxStatus', 'Generating…');
+    try {
+      var r = await EL.post('/sound-generation', body);
+      sfxBlob = await r.res.blob();
+      $('sfxPlayer').src = URL.createObjectURL(sfxBlob); $('sfxPlayer').play().catch(function () {});
+      EL.status('sfxStatus', (sfxBlob.size / 1024).toFixed(0) + ' KB in ' + r.ms + ' ms.', 'ok');
+    } catch (e) { EL.status('sfxStatus', e.message, 'err'); }
+  };
+  $('btnSfxDl').onclick = function () { if (sfxBlob) EL.download('sting.mp3', sfxBlob); };
+
+  $('btnMusic').onclick = async function () {
+    EL.status('mStatus', 'Generating — music takes longer than speech…');
+    try {
+      var r = await EL.post('/music', { prompt: $('mPrompt').value.trim(), music_length_ms: (+$('len').value) * 1000 });
+      mBlob = await r.res.blob();
+      $('mPlayer').src = URL.createObjectURL(mBlob); $('mPlayer').play().catch(function () {});
+      EL.status('mStatus', (mBlob.size / 1024).toFixed(0) + ' KB in ' + r.ms + ' ms.', 'ok');
+    } catch (e) { EL.status('mStatus', e.message, 'err'); }
+  };
+  $('btnMDl').onclick = function () { if (mBlob) EL.download('bed.mp3', mBlob); };
+})();
+</script>
+
+<h2 id="the-numbers">The numbers</h2>
+<p><strong>Sound effects</strong> take a prompt, a duration from 0.1 to 30 seconds (omit it for automatic), a prompt-influence control where high means literal, and an optional seamless loop for ambience. <strong>$0.12 per minute</strong> — so a two-second sting is about <strong>$0.004</strong> <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</p>
+<p><strong>Music</strong> takes a natural-language prompt and a length from 3 seconds to 5 minutes. <strong>$0.15 per minute</strong> — a 30-second bed is about <strong>$0.075</strong>, which is the entire ElevenLabs spend behind this site's verified claims <a class="chip st-m" href="/ledger/#claim-bench-cost" title="Measured by our own pipeline on a named workload and date.">measured 5 Sep 2026</a>. The vendor states that music from paid plans is cleared for broad commercial use; <strong>read the current terms yourself before publishing under a brand</strong>, because that is a licence question and it is theirs to change.</p>
+<h2 id="the-rule-these-were-evaluated-against">The rule these were evaluated against</h2>
+<p>A <strong>two-second sting under the title slide, and nothing else.</strong> A bed under narration hurts intelligibility, and every reel in the source estate is dense with numbers that a viewer has one chance to hear. If a sting is used, mix it about 18 dB under the voice and fade it before the first word — the render already knows when the first word starts, because <a href="/experiments/captions/">the alignment says so</a>.</p>
+<p>That is a rule, not a finding. It was written from experience with a different medium and has never been A/B tested here <a class="chip st-u" href="/ledger/#claim-labs-unrun" title="Code we wrote and have never executed.">written, not run</a>. This lab is where somebody disproves it: generate a bed, mix it under a real narration line, listen on a phone speaker at half volume, and write down which version you would rather watch.</p>
+<h2 id="where-this-fits-the-site-s-argument">Where this fits the site's argument</h2>
+<p>Nowhere, and that is worth saying. These endpoints spend the same account quota as speech and carry the same credential story: a key scoped for narration does not need them, and a key that can reach them can spend the account's whole quota generating five-minute tracks <a class="chip st-d" href="/ledger/#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. If you scope a key for a render pipeline, scope these out — and use <a href="/experiments/key-scope/">the key-scope probe</a> to check that you actually did.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site v1.0.0 &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

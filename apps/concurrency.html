@@ -1,0 +1,147 @@
+<div class="lab" id="lab-conc">
+  <section>
+    <h2>1 · The probe</h2>
+    <p class="small">Fires real generations in parallel and records where the wall is. This is the only lab here that can
+      cost more than pennies if you set the numbers high — the estimate below is the whole spend, before you press anything.</p>
+    <div class="grid3">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select>
+        <button class="secondary" id="btnVoices" style="margin-top:.4rem">Load voices</button></div>
+      <div><label for="model">Model</label><select id="model"></select>
+        <label for="text">Text — keep it tiny; this measures the queue, not the model</label>
+        <input type="text" id="text" value="Encrypted before it left the machine."></div>
+      <div><label for="mode">Mode</label><select id="mode">
+          <option value="ramp">ramp — waves at 1, 2, 4, 8… until something fails</option>
+          <option value="flat">flat — one wave, N requests at once</option>
+        </select>
+        <label for="n">Requests per wave (flat) / ceiling (ramp)</label>
+        <input type="number" id="n" value="8" min="1" max="32"></div>
+    </div>
+    <div class="row" style="margin-top:.7rem">
+      <span class="est">Worst case <b id="reqs">0</b> requests × <b id="chars">0</b> chars = estimated <b id="cost">$0.000</b></span>
+      <label class="inline"><input type="checkbox" id="ok"> I have read the estimate</label>
+      <button id="btnRun">Run the probe</button>
+      <button class="secondary" id="btnStop">Stop</button>
+    </div>
+    <div class="status" id="status">Nothing fired yet.</div>
+  </section>
+
+  <section>
+    <h2>2 · What happened</h2>
+    <div class="tiles tiles-sm" id="tiles"></div>
+    <div class="tablewrap" style="max-height:420px;overflow:auto">
+      <table id="tbl"><thead><tr><th>#</th><th>Wave</th><th>Status</th><th>Latency</th><th style="width:38%">Timeline</th><th>Detail</th></tr></thead><tbody></tbody></table>
+    </div>
+    <p class="small dim">One hue for every request: the bar's <em>length</em> is the measurement and its <em>position</em>
+      is when it ran. Red means the request failed, and the status column always says so in words — the colour is never
+      the only signal.</p>
+    <div class="row"><button class="secondary" id="btnMd">Copy the run as markdown</button></div>
+  </section>
+
+  <section><h2>3 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var rows = [], t0 = 0, stop = false;
+
+  EL.fillModels($('model'));
+  $('model').value = 'eleven_flash_v2_5';
+  function est() {
+    var n = +$('n').value || 1, chars = $('text').value.length;
+    var total = $('mode').value === 'ramp' ? waves(n).reduce(function (a, w) { return a + w; }, 0) : n;
+    $('reqs').textContent = total; $('chars').textContent = chars;
+    $('cost').textContent = EL.money(EL.estimate(chars, $('model').value) * total);
+  }
+  function waves(ceiling) { var out = [], c = 1; while (c <= ceiling) { out.push(c); c *= 2; } return out; }
+  ['n', 'text', 'model', 'mode'].forEach(function (id) { $(id).oninput = est; $(id).onchange = est; });
+  est();
+
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('status', v.length + ' voices.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+  $('btnStop').onclick = function () { stop = true; EL.status('status', 'Stopping after the current wave.', 'warn'); };
+
+  $('btnRun').onclick = async function () {
+    if (!$('ok').checked) return EL.status('status', 'Tick the box: this one spends money in parallel.', 'warn');
+    var voice = $('voice').value; if (!voice) return EL.status('status', 'Pick a voice.', 'warn');
+    rows = []; stop = false; t0 = performance.now(); draw();
+    $('btnRun').disabled = true;
+    var plan = $('mode').value === 'ramp' ? waves(+$('n').value || 1) : [+$('n').value || 1];
+    try {
+      for (var w = 0; w < plan.length && !stop; w++) {
+        var size = plan[w];
+        EL.status('status', 'Wave ' + (w + 1) + ' of ' + plan.length + ' — ' + size + ' requests at once…');
+        var batch = [];
+        for (var i = 0; i < size; i++) batch.push(fire(size, rows.length + i));
+        await Promise.all(batch);
+        draw();
+        var failed = rows.filter(function (r) { return r.wave === size && r.status !== 200; });
+        if (failed.length) {
+          EL.status('status', 'Wall found at ' + size + ' concurrent requests: ' + failed.length + ' of ' + size +
+            ' failed (' + failed.map(function (f) { return f.status; }).join(', ') + '). That is the number to put in the semaphore.', 'warn');
+          break;
+        }
+      }
+      if (!stop) EL.status('status', 'Finished. ' + rows.length + ' requests, ' +
+        rows.filter(function (r) { return r.status !== 200; }).length + ' failures, estimated ' +
+        EL.money(rows.filter(function (r) { return r.status === 200; }).length * EL.estimate($('text').value.length, $('model').value)) + '.', 'ok');
+    } finally { $('btnRun').disabled = false; draw(); }
+  };
+
+  async function fire(wave, idx) {
+    var started = performance.now() - t0;
+    var row = { i: idx + 1, wave: wave, start: Math.round(started), ms: null, status: null, detail: '' };
+    rows.push(row);
+    try {
+      var r = await EL.raw('/text-to-speech/' + encodeURIComponent($('voice').value) + '?output_format=mp3_22050_32', {
+        method: 'POST',
+        json: { text: $('text').value, model_id: $('model').value, voice_settings: { stability: 0.5, similarity_boost: 0.75, speed: 1 } }
+      });
+      await r.res.arrayBuffer();
+      row.ms = r.ms; row.status = 200;
+    } catch (e) {
+      row.ms = e.ms || Math.round(performance.now() - t0 - started);
+      row.status = e.status || 'network';
+      row.detail = (e.detail || e.message || '').slice(0, 160);
+    }
+    draw();
+  }
+
+  function draw() {
+    var total = Math.max.apply(null, rows.map(function (r) { return r.start + (r.ms || 0); }).concat([1]));
+    var slowest = Math.max.apply(null, rows.map(function (r) { return r.ms || 0; }).concat([1]));
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    rows.forEach(function (r) {
+      var bad = r.status !== 200;
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + r.i + '</td><td>' + r.wave + '</td>' +
+        '<td class="small"' + (bad ? ' style="color:#b91c1c;font-weight:600"' : '') + '>' + (r.status == null ? 'in flight' : (bad ? '✗ ' : '✓ ') + r.status) + '</td>' +
+        '<td>' + (r.ms == null ? '—' : EL.bar(r.ms, slowest, bad, ' ms')) + '</td>' +
+        '<td>' + (r.ms == null ? '' : EL.span(r.start, r.ms, total, bad, r.start + '–' + (r.start + r.ms) + ' ms')) + '</td>' +
+        '<td class="small dim">' + EL.esc(r.detail) + '</td>';
+      tb.appendChild(tr);
+    });
+    var okRows = rows.filter(function (r) { return r.status === 200; });
+    var lat = okRows.map(function (r) { return r.ms; }).sort(function (a, b) { return a - b; });
+    var maxOk = 0;
+    [].concat(rows).forEach(function (r) {
+      if (r.status === 200 && !rows.some(function (x) { return x.wave === r.wave && x.status !== 200; })) maxOk = Math.max(maxOk, r.wave);
+    });
+    $('tiles').innerHTML =
+      tile(rows.length, 'requests fired') +
+      tile(rows.filter(function (r) { return r.status === 429; }).length, '429s — the concurrency wall') +
+      tile(maxOk || '—', 'highest wave with no failure') +
+      tile(lat.length ? lat[Math.floor(lat.length / 2)] + ' ms' : '—', 'median latency of the ones that worked') +
+      tile(lat.length ? lat[lat.length - 1] + ' ms' : '—', 'slowest success');
+  }
+  function tile(v, label) { return '<div class="tile"><b>' + v + '</b><span>' + label + '</span></div>'; }
+
+  $('btnMd').onclick = function () {
+    EL.copy(EL.toMarkdown(['#', 'Wave size', 'Status', 'Start ms', 'Latency ms', 'Detail'],
+      rows.map(function (r) { return [r.i, r.wave, r.status, r.start, r.ms == null ? '—' : r.ms, r.detail]; }),
+      'Concurrency probe — model ' + $('model').value + ', ' + $('text').value.length + ' characters per request'), 'status');
+  };
+})();
+</script>

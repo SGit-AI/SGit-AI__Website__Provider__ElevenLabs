@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-root="../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,14 +14,14 @@
 <meta property="og:description" content="Client side is not one thing. It is four patterns that differ in where the credential lives and what bounds it — and one of them is the only one where the bounded thing cannot reach the bounding thing.">
 <meta name="twitter:card" content="summary">
 <link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<script src="/assets/site.js" defer></script>
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script src="../assets/site.js" defer></script>
 </head>
 <body>
-<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl here" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<nav class="site"><div class="row"><a class="brand" href="../index.html">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="../versions/index.html" title="Site release history">v0.1.1</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="../index.html">The report</a></div><div class="ni"><a class="nl" href="../experiments/index.html">Experiments</a></div><div class="ni"><a class="nl" href="../bench/index.html">Bench</a></div><div class="ni"><a class="nl here" href="../patterns/index.html">Patterns</a></div><div class="ni"><a class="nl" href="../comparison/index.html">Comparison</a></div><div class="ni"><a class="nl" href="../ledger/index.html">Ledger</a></div><div class="ni"><a class="nl" href="../disclosures/index.html">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
 <main class="doc">
-<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / The four client-side credential patterns</p>
+<p class="crumb"><a href="../index.html">elevenlabs.providers.sgit.ai</a> / The four client-side credential patterns</p>
 <h1>The four client-side credential patterns</h1>
 <p class="lead">"Client side" is not one thing. It is four patterns, and they differ in exactly two ways: <strong>where the credential lives</strong>, and <strong>what bounds it</strong>. Every provider page on this family of sites answers §3 by naming one of these — per product, because a vendor with several products has several answers.</p>
 <p class="prov">Prose from the video vault at commit <code>7d1916aca5f3</code>, 7 September 2026. From platforms/README.md, the spine every provider page links to. When the vault moves ahead, this page is behind &mdash; and says so rather than guessing.</p>
@@ -33,19 +33,19 @@
 <h2 id="why-pattern-3-is-different-in-kind">Why pattern 3 is different in kind</h2>
 <p>Patterns 0 to 2 all end with a credential in the hands of the code that spends it — for a moment in pattern 2, for good in pattern 0. Pattern 3 does not: the application asks a host for a <strong>result</strong>, and the host holds the credential, applies the terms, and returns only the output.</p>
 <p>In this estate the SG/Vault host already does this for one class of call: <code>sg.llm.chat()</code> runs in the host, at the real origin, with a key sealed in the vault at <code>.vault/llm/config.json</code>. The app frame never sees the key and cannot read <code>.vault/**</code> under any grant it can be given. The terms — allowed models, spend cap per session, per-app overrides — live in the vault with the content they govern, which means <strong>the terms travel with the data</strong>, and a vault shared read-only carries neither the key nor the ability to spend against it.</p>
-<p>Whether that generalises past a model call is the open question this family of sites exists to answer. For a voice API the answer is written down and not yet built: <a href="/pattern-three/"><code>sg.tts</code> would be the same shape</a> <a class="chip st-s" href="/ledger/#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a>.</p>
+<p>Whether that generalises past a model call is the open question this family of sites exists to answer. For a voice API the answer is written down and not yet built: <a href="../pattern-three/index.html"><code>sg.tts</code> would be the same shape</a> <a class="chip st-s" href="../ledger/index.html#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a>.</p>
 <h2 id="the-one-piece-of-evidence-that-any-of-this-is-enforceable">The one piece of evidence that any of this is enforceable</h2>
 <p>Arguments about blast radius are cheap. Here is a bound doing its job, observed, with a date:</p>
-<div class="fails"><div class="fail ok"><p class="who">3 September 2026 · the sibling provider</p><h3>A 402 that was the point, not the outage</h3><p>At <b>$4.79 used against a $5.00 limit</b> on a provisioned key, every audio request was refused: <code>402 — this request requires at least $0.50 in balance for audio output</code>, with <code>limit_source: openrouter_key_limit</code>. Two re-renders could not run until the limit was raised in the dashboard. <a class="chip st-v" href="/ledger/#claim-openrouter-402" title="Verified by execution on this date, by us.">verified 3 Sep 2026</a></p><p>That is <b>pattern 1 working exactly as designed.</b> The blast radius was the number we chose in advance; the platform refused before spending past it; raising the limit was a deliberate act by a human with a dashboard — a reinstatement, in the insurance vocabulary. It cost an afternoon, because we had not budgeted for the headroom rule. It could have cost the account.</p></div></div>
+<div class="fails"><div class="fail ok"><p class="who">3 September 2026 · the sibling provider</p><h3>A 402 that was the point, not the outage</h3><p>At <b>$4.79 used against a $5.00 limit</b> on a provisioned key, every audio request was refused: <code>402 — this request requires at least $0.50 in balance for audio output</code>, with <code>limit_source: openrouter_key_limit</code>. Two re-renders could not run until the limit was raised in the dashboard. <a class="chip st-v" href="../ledger/index.html#claim-openrouter-402" title="Verified by execution on this date, by us.">verified 3 Sep 2026</a></p><p>That is <b>pattern 1 working exactly as designed.</b> The blast radius was the number we chose in advance; the platform refused before spending past it; raising the limit was a deliberate act by a human with a dashboard — a reinstatement, in the insurance vocabulary. It cost an afternoon, because we had not budgeted for the headroom rule. It could have cost the account.</p></div></div>
 <p>Note what makes it evidence rather than anecdote: the bound was <strong>chosen before</strong> the spend, <strong>enforced by the platform</strong> rather than by our code, and <strong>visible in the refusal</strong> — the error names the limit source. A ceiling that only appears in a monthly invoice is not this.</p>
 <h2 id="where-the-two-providers-sit">Where the two providers sit</h2>
-<div class="tablewrap"><table><thead><tr><th>Platform</th><th>Pattern in use</th><th>Evidence</th></tr></thead><tbody><tr><td>OpenRouter</td><td><strong>1</strong> — a provisioned key with a limit ($5, later $10) for the render pipeline; <strong>3</strong> for the vault's own AI chat through <code>sg.llm.*</code></td><td>The 402 above <a class="chip st-v" href="/ledger/#claim-openrouter-402" title="Verified by execution on this date, by us.">verified 3 Sep 2026</a>; the cost table on <a href="/providers/openrouter/">the stub page</a></td></tr><tr><td>ElevenLabs</td><td><strong>0 with a ceiling</strong> — the key's owner testing their own key in their own browser; <strong>2</strong> would need a server we do not run; <strong>3</strong> is specified and not shipped</td><td><a href="/">The report</a>, §3 and §5 <a class="chip st-d" href="/ledger/#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a></td></tr></tbody></table></div>
-<p><strong>ElevenLabs cannot do pattern 1 at all.</strong> A key can be <em>scoped</em> to endpoints; it cannot be <em>bounded</em> by spend. There is no per-key limit and no reset window shorter than the billing cycle <a class="chip st-d" href="/ledger/#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. So "put a bounded key in the page" — the honest answer for the sibling provider — has no implementation here, and a key in a page is pattern 0 with the account's quota as its only ceiling. That single asymmetry is why <a href="/comparison/">the comparison table</a> is worth generating.</p>
+<div class="tablewrap"><table><thead><tr><th>Platform</th><th>Pattern in use</th><th>Evidence</th></tr></thead><tbody><tr><td>OpenRouter</td><td><strong>1</strong> — a provisioned key with a limit ($5, later $10) for the render pipeline; <strong>3</strong> for the vault's own AI chat through <code>sg.llm.*</code></td><td>The 402 above <a class="chip st-v" href="../ledger/index.html#claim-openrouter-402" title="Verified by execution on this date, by us.">verified 3 Sep 2026</a>; the cost table on <a href="../providers/openrouter/index.html">the stub page</a></td></tr><tr><td>ElevenLabs</td><td><strong>0 with a ceiling</strong> — the key's owner testing their own key in their own browser; <strong>2</strong> would need a server we do not run; <strong>3</strong> is specified and not shipped</td><td><a href="../index.html">The report</a>, §3 and §5 <a class="chip st-d" href="../ledger/index.html#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a></td></tr></tbody></table></div>
+<p><strong>ElevenLabs cannot do pattern 1 at all.</strong> A key can be <em>scoped</em> to endpoints; it cannot be <em>bounded</em> by spend. There is no per-key limit and no reset window shorter than the billing cycle <a class="chip st-d" href="../ledger/index.html#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. So "put a bounded key in the page" — the honest answer for the sibling provider — has no implementation here, and a key in a page is pattern 0 with the account's quota as its only ceiling. That single asymmetry is why <a href="../comparison/index.html">the comparison table</a> is worth generating.</p>
 <h2 id="what-this-means-for-the-labs-on-this-site">What this means for the labs on this site</h2>
-<p>Every <a href="/experiments/">experiment here</a> asks you to paste your own key into your own browser. That is <strong>pattern 0 with a ceiling, deliberately, in the narrow case where it is defensible</strong>: the key's owner, testing their own key, on their own device, with no key shipped in the page and nothing sent anywhere but the vendor <a class="chip st-v" href="/ledger/#claim-keys-local-only" title="Verified by execution on this date, by us.">verified 7 Sep 2026</a>. It is not a pattern to publish, and the box saying so sits at the top of every lab rather than in a footnote.</p>
-<p>The version of those labs that would be publishable is <a href="/pattern-three/">pattern three</a>, where the page has no key box at all. It does not exist yet <a class="chip st-s" href="/ledger/#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a>.</p>
-<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
-<a href="/disclosures/">Disclosures &rarr;</a></p>
+<p>Every <a href="../experiments/index.html">experiment here</a> asks you to paste your own key into your own browser. That is <strong>pattern 0 with a ceiling, deliberately, in the narrow case where it is defensible</strong>: the key's owner, testing their own key, on their own device, with no key shipped in the page and nothing sent anywhere but the vendor <a class="chip st-v" href="../ledger/index.html#claim-keys-local-only" title="Verified by execution on this date, by us.">verified 7 Sep 2026</a>. It is not a pattern to publish, and the box saying so sits at the top of every lab rather than in a footnote.</p>
+<p>The version of those labs that would be publishable is <a href="../pattern-three/index.html">pattern three</a>, where the page has no key box at all. It does not exist yet <a class="chip st-s" href="../ledger/index.html#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a>.</p>
+<p class="pagenav"><a href="../ledger/index.html">Every claim on this site, with its state &rarr;</a>
+<a href="../disclosures/index.html">Disclosures &rarr;</a></p>
 </main>
 <footer class="site"><div class="cols">
   <div>
@@ -54,31 +54,31 @@
     <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
        Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
        <code>7d1916aca5f3</code>, 7 September 2026.</p>
-    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+    <p class="verline">site <a href="../versions/index.html">v0.1.1</a> &middot; <a href="../ledger/index.html">the ledger</a> &middot; <a href="../disclosures/index.html">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
   </div>
   <div>
     <h4>The report</h4>
-    <a href="/">ElevenLabs, nine sections</a>
-    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
-    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
-    <a href="/examples/">Example files</a>
-    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+    <a href="../index.html">ElevenLabs, nine sections</a>
+    <a href="../index.html#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="../index.html#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="../examples/index.html">Example files</a>
+    <a href="../providers/openrouter/index.html">OpenRouter (structural stub)</a>
   </div>
   <div>
     <h4>Experiments</h4>
-    <a href="/experiments/">All experiments</a>
-    <a href="/bench/">The test bench</a>
-    <a href="/experiments/captions/">Captions studio</a>
-    <a href="/experiments/concurrency/">Concurrency probe</a>
-    <a href="/experiments/cost/">Cost model (no key)</a>
+    <a href="../experiments/index.html">All experiments</a>
+    <a href="../bench/index.html">The test bench</a>
+    <a href="../experiments/captions/index.html">Captions studio</a>
+    <a href="../experiments/concurrency/index.html">Concurrency probe</a>
+    <a href="../experiments/cost/index.html">Cost model (no key)</a>
   </div>
   <div>
     <h4>The argument</h4>
-    <a href="/patterns/">The four patterns</a>
-    <a href="/comparison/">Comparison matrix</a>
-    <a href="/pattern-three/">Pattern three: sg.tts</a>
-    <a href="/ledger/">Claim ledger</a>
-    <a href="/disclosures/">Disclosures</a>
+    <a href="../patterns/index.html">The four patterns</a>
+    <a href="../comparison/index.html">Comparison matrix</a>
+    <a href="../pattern-three/index.html">Pattern three: sg.tts</a>
+    <a href="../ledger/index.html">Claim ledger</a>
+    <a href="../disclosures/index.html">Disclosures</a>
   </div>
 </div>
 <div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site

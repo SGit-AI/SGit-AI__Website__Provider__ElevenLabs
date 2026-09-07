@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-root="../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,14 +14,14 @@
 <meta property="og:description" content="The test bench: connect with your own key, list voices and models, generate with character-level timestamps, watch the words light up, build an SRT. The one page on this site that has actually been run.">
 <meta name="twitter:card" content="summary">
 <link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<script src="/assets/lab.js"></script>
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script src="../assets/lab.js"></script>
 </head>
 <body data-lab="1">
-<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl here" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<nav class="site"><div class="row"><a class="brand" href="../index.html">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="../versions/index.html" title="Site release history">v0.1.1</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="../index.html">The report</a></div><div class="ni"><a class="nl" href="../experiments/index.html">Experiments</a></div><div class="ni"><a class="nl here" href="../bench/index.html">Bench</a></div><div class="ni"><a class="nl" href="../patterns/index.html">Patterns</a></div><div class="ni"><a class="nl" href="../comparison/index.html">Comparison</a></div><div class="ni"><a class="nl" href="../ledger/index.html">Ledger</a></div><div class="ni"><a class="nl" href="../disclosures/index.html">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
 <main class="doc">
-<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / The bench — text to speech, with timestamps</p>
+<p class="crumb"><a href="../index.html">elevenlabs.providers.sgit.ai</a> / The bench — text to speech, with timestamps</p>
 <h1>The bench — text to speech, with timestamps</h1>
 <p class="lead">The original test bench, and the only page here that has been <strong>run against the live API</strong> — on 5 September 2026, from a human's own browser. Every <span class="chip st-v" title="Verified by execution on this date, by us.">verified</span> chip on this site comes from a session with this page.</p>
 <p class="prov">Prose from the video vault at commit <code>7d1916aca5f3</code>, 7 September 2026. Ported from elevenlabs/index.html, the self-contained vault app, onto this site&#x27;s shared lab runtime. When the vault moves ahead, this page is behind &mdash; and says so rather than guessing.</p>
@@ -29,12 +29,12 @@
 <div class="patternbox">
   <div class="ttl">Which pattern this is — read before you paste anything</div>
   <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
-  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  <a href="../patterns/index.html">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
   their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
   is empty until you fill it.</p>
   <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
   except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
-  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  when you are done. The version of this page with no key box at all is <a href="../pattern-three/index.html">pattern three</a>,
   and it does not exist yet.</p>
 </div>
 <div id="keybar" class="keybar"></div>
@@ -107,7 +107,7 @@
     <textarea id="srt" class="mono" style="min-height:120px" placeholder="Cues appear here: word-grouped from the character alignment, broken at 84 characters, a 0.6 s gap, or 6 seconds."></textarea>
     <details><summary class="small dim">Word table</summary>
       <div style="max-height:240px;overflow:auto"><table id="wtab"><thead><tr><th>#</th><th>word</th><th>start</th><th>end</th></tr></thead><tbody></tbody></table></div></details>
-    <p class="small dim">The grouping rule is ours, not the vendor's, and the <a href="/experiments/captions/">captions studio</a> lets you tune it.</p>
+    <p class="small dim">The grouping rule is ours, not the vendor's, and the <a href="../experiments/captions/index.html">captions studio</a> lets you tune it.</p>
   </section>
 
   <section>
@@ -226,17 +226,17 @@
 </script>
 
 <h2 id="what-this-page-proved-and-what-it-did-not">What this page proved, and what it did not</h2>
-<p>On 5 September 2026, from the project lead's browser inside a vault app frame: the subscription, voices and models endpoints answered, and three <code>with-timestamps</code> generations of a 187-character sample came back with audio and a per-character alignment <a class="chip st-v" href="/ledger/#claim-timestamps-roundtrip" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>, in 5.0 to 5.8 seconds each <a class="chip st-v" href="/ledger/#claim-latency-5s" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>. CORS was never the problem <a class="chip st-v" href="/ledger/#claim-cors-browser" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>; the host's own content-security policy was <a class="chip st-v" href="/ledger/#claim-csp-blocks" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>.</p>
-<p>It did <strong>not</strong> prove that the cue rule produces readable subtitles <a class="chip st-u" href="/ledger/#claim-cue-rule" title="Code we wrote and have never executed.">written, not run</a>, that any alias in the lexicon works <a class="chip st-u" href="/ledger/#claim-lexicon-hypothesis" title="Code we wrote and have never executed.">written, not run</a>, or which names the model gets wrong <a class="chip st-u" href="/ledger/#claim-names-test" title="Code we wrote and have never executed.">written, not run</a> — the button in section 5 exists precisely because nobody has pressed it. Three samples are three samples, not a latency distribution.</p>
+<p>On 5 September 2026, from the project lead's browser inside a vault app frame: the subscription, voices and models endpoints answered, and three <code>with-timestamps</code> generations of a 187-character sample came back with audio and a per-character alignment <a class="chip st-v" href="../ledger/index.html#claim-timestamps-roundtrip" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>, in 5.0 to 5.8 seconds each <a class="chip st-v" href="../ledger/index.html#claim-latency-5s" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>. CORS was never the problem <a class="chip st-v" href="../ledger/index.html#claim-cors-browser" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>; the host's own content-security policy was <a class="chip st-v" href="../ledger/index.html#claim-csp-blocks" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>.</p>
+<p>It did <strong>not</strong> prove that the cue rule produces readable subtitles <a class="chip st-u" href="../ledger/index.html#claim-cue-rule" title="Code we wrote and have never executed.">written, not run</a>, that any alias in the lexicon works <a class="chip st-u" href="../ledger/index.html#claim-lexicon-hypothesis" title="Code we wrote and have never executed.">written, not run</a>, or which names the model gets wrong <a class="chip st-u" href="../ledger/index.html#claim-names-test" title="Code we wrote and have never executed.">written, not run</a> — the button in section 5 exists precisely because nobody has pressed it. Three samples are three samples, not a latency distribution.</p>
 <h2 id="the-same-page-under-pattern-three">The same page, under pattern three</h2>
 <p>This is the reason to publish a bench rather than a video of one: the argument fits in one screen.</p>
-<div class="beforeafter"><div class="ba now"><h4>What you are using now</h4><p><b>Pattern 0 with a ceiling.</b> Your key is in this page's JavaScript and in this browser's <code>localStorage</code>. It calls <code>api.elevenlabs.io</code> directly. Nothing bounds it but your plan's monthly quota <a class="chip st-d" href="/ledger/#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</p><p>Defensible because it is <em>your</em> key, <em>your</em> browser, and no key ships in the page. Not defensible as a thing to deploy for other people.</p></div><div class="ba then"><h4>What it would become</h4><p><b>Pattern 3.</b> No key box, no key in storage, nothing in the network tab. <code>sg.tts.speak()</code> asks the vault host; the host holds the sealed key, applies <code>maxCostPerSession</code>, and returns audio and alignment. <a class="chip st-s" href="/ledger/#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a></p><p>Same page, same buttons, same output. The credential simply is not here. <a href="/pattern-three/">The specification →</a></p></div></div>
+<div class="beforeafter"><div class="ba now"><h4>What you are using now</h4><p><b>Pattern 0 with a ceiling.</b> Your key is in this page's JavaScript and in this browser's <code>localStorage</code>. It calls <code>api.elevenlabs.io</code> directly. Nothing bounds it but your plan's monthly quota <a class="chip st-d" href="../ledger/index.html#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</p><p>Defensible because it is <em>your</em> key, <em>your</em> browser, and no key ships in the page. Not defensible as a thing to deploy for other people.</p></div><div class="ba then"><h4>What it would become</h4><p><b>Pattern 3.</b> No key box, no key in storage, nothing in the network tab. <code>sg.tts.speak()</code> asks the vault host; the host holds the sealed key, applies <code>maxCostPerSession</code>, and returns audio and alignment. <a class="chip st-s" href="../ledger/index.html#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a></p><p>Same page, same buttons, same output. The credential simply is not here. <a href="../pattern-three/index.html">The specification →</a></p></div></div>
 <h2 id="what-it-will-cost-you-to-run">What it will cost you to run</h2>
-<p>At list price, the sample in the text box is 187 characters — about <strong>$0.019</strong> on <code>eleven_v3</code>, or <strong>$0.009</strong> on flash <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. The whole session that produced this site's verified claims was about 750 characters, <strong>$0.075</strong> <a class="chip st-m" href="/ledger/#claim-bench-cost" title="Measured by our own pipeline on a named workload and date.">measured 5 Sep 2026</a>. This is a lab you can run for the price of a rounding error, which is exactly why the open items in <a href="/ledger/#open-items">the ledger</a> are embarrassing rather than expensive.</p>
-<p>The command-line equivalents of what this page does are <a href="/examples/">downloadable as files</a> — <code>00-smoke.sh</code>, <code>tts-timestamps.mjs</code> and the rest — badged unrun, with the pipeline invocation beside them <a class="chip st-u" href="/ledger/#claim-examples-unrun" title="Code we wrote and have never executed.">written, not run</a>.</p>
-<p>If the request fails with a network error rather than an HTTP status, it is CORS or a host CSP and not your key <a class="chip st-v" href="/ledger/#claim-csp-blocks" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>: open the console, check for a <code>connect-src</code> violation, and see <a href="/#9-what-went-wrong">§9 of the report</a>.</p>
-<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
-<a href="/disclosures/">Disclosures &rarr;</a></p>
+<p>At list price, the sample in the text box is 187 characters — about <strong>$0.019</strong> on <code>eleven_v3</code>, or <strong>$0.009</strong> on flash <a class="chip st-d" href="../ledger/index.html#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. The whole session that produced this site's verified claims was about 750 characters, <strong>$0.075</strong> <a class="chip st-m" href="../ledger/index.html#claim-bench-cost" title="Measured by our own pipeline on a named workload and date.">measured 5 Sep 2026</a>. This is a lab you can run for the price of a rounding error, which is exactly why the open items in <a href="../ledger/index.html#open-items">the ledger</a> are embarrassing rather than expensive.</p>
+<p>The command-line equivalents of what this page does are <a href="../examples/index.html">downloadable as files</a> — <code>00-smoke.sh</code>, <code>tts-timestamps.mjs</code> and the rest — badged unrun, with the pipeline invocation beside them <a class="chip st-u" href="../ledger/index.html#claim-examples-unrun" title="Code we wrote and have never executed.">written, not run</a>.</p>
+<p>If the request fails with a network error rather than an HTTP status, it is CORS or a host CSP and not your key <a class="chip st-v" href="../ledger/index.html#claim-csp-blocks" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>: open the console, check for a <code>connect-src</code> violation, and see <a href="../index.html#9-what-went-wrong">§9 of the report</a>.</p>
+<p class="pagenav"><a href="../ledger/index.html">Every claim on this site, with its state &rarr;</a>
+<a href="../disclosures/index.html">Disclosures &rarr;</a></p>
 </main>
 <footer class="site"><div class="cols">
   <div>
@@ -245,31 +245,31 @@
     <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
        Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
        <code>7d1916aca5f3</code>, 7 September 2026.</p>
-    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+    <p class="verline">site <a href="../versions/index.html">v0.1.1</a> &middot; <a href="../ledger/index.html">the ledger</a> &middot; <a href="../disclosures/index.html">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
   </div>
   <div>
     <h4>The report</h4>
-    <a href="/">ElevenLabs, nine sections</a>
-    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
-    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
-    <a href="/examples/">Example files</a>
-    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+    <a href="../index.html">ElevenLabs, nine sections</a>
+    <a href="../index.html#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="../index.html#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="../examples/index.html">Example files</a>
+    <a href="../providers/openrouter/index.html">OpenRouter (structural stub)</a>
   </div>
   <div>
     <h4>Experiments</h4>
-    <a href="/experiments/">All experiments</a>
-    <a href="/bench/">The test bench</a>
-    <a href="/experiments/captions/">Captions studio</a>
-    <a href="/experiments/concurrency/">Concurrency probe</a>
-    <a href="/experiments/cost/">Cost model (no key)</a>
+    <a href="../experiments/index.html">All experiments</a>
+    <a href="../bench/index.html">The test bench</a>
+    <a href="../experiments/captions/index.html">Captions studio</a>
+    <a href="../experiments/concurrency/index.html">Concurrency probe</a>
+    <a href="../experiments/cost/index.html">Cost model (no key)</a>
   </div>
   <div>
     <h4>The argument</h4>
-    <a href="/patterns/">The four patterns</a>
-    <a href="/comparison/">Comparison matrix</a>
-    <a href="/pattern-three/">Pattern three: sg.tts</a>
-    <a href="/ledger/">Claim ledger</a>
-    <a href="/disclosures/">Disclosures</a>
+    <a href="../patterns/index.html">The four patterns</a>
+    <a href="../comparison/index.html">Comparison matrix</a>
+    <a href="../pattern-three/index.html">Pattern three: sg.tts</a>
+    <a href="../ledger/index.html">Claim ledger</a>
+    <a href="../disclosures/index.html">Disclosures</a>
   </div>
 </div>
 <div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site

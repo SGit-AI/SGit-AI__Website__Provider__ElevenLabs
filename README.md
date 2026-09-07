@@ -103,6 +103,9 @@ is treated as a release branch too — when `dev` is created, drop `main` from t
 - **No third-party anything.** No CDN, no web fonts, no analytics, no cookies. The only host any page
   talks to is `api.elevenlabs.io`, in a request the reader starts, and the check fails on any other origin
   appearing in the built site.
+- **The site works wherever it is served** — the custom domain, a GitHub Pages project path, a local
+  directory, a vault app frame. Every internal URL is relative to its page (`<html data-root>` carries the
+  root for anything JavaScript needs), and a root-absolute one fails the build.
 - **`docs/` matches the sources.** A stale build fails.
 - **The nine sections of the report are present and in order**; every claim is cited; the non-affiliation
   line is in every footer; the word "partner" appears nowhere; `sg.tts` stays in the future tense.

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-root="../../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,20 +14,20 @@
 <meta property="og:description" content="Paste a script or a reel.json and get characters, requests, per-model cost and plan fit, with every constant visible. Runs entirely in your browser; makes no network call at all.">
 <meta name="twitter:card" content="summary">
 <link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<script src="/assets/lab.js"></script>
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<script src="../../assets/lab.js"></script>
 </head>
 <body data-lab="1">
-<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<nav class="site"><div class="row"><a class="brand" href="../../index.html">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="../../versions/index.html" title="Site release history">v0.1.1</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="../../index.html">The report</a></div><div class="ni"><a class="nl here" href="../../experiments/index.html">Experiments</a></div><div class="ni"><a class="nl" href="../../bench/index.html">Bench</a></div><div class="ni"><a class="nl" href="../../patterns/index.html">Patterns</a></div><div class="ni"><a class="nl" href="../../comparison/index.html">Comparison</a></div><div class="ni"><a class="nl" href="../../ledger/index.html">Ledger</a></div><div class="ni"><a class="nl" href="../../disclosures/index.html">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
 <main class="doc">
-<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Cost model — no key, no network</p>
+<p class="crumb"><a href="../../index.html">elevenlabs.providers.sgit.ai</a> / <a href="../../experiments/index.html">experiments</a> / Cost model — no key, no network</p>
 <h1>Cost model — no key, no network</h1>
 <p class="lead">Arithmetic you can check, on text you paste, with no key and no request to anybody. Cost figures go stale faster than anything else on this site — this page makes the staleness visible instead of hiding it in a table.</p>
 
 <aside class="toc"><b>On this page</b><a class="lv2" href="#the-arithmetic-stated">The arithmetic, stated</a><a class="lv2" href="#against-what-we-actually-paid">Against what we actually paid</a><a class="lv2" href="#plan-fit">Plan fit</a><a class="lv2" href="#when-these-numbers-go-wrong">When these numbers go wrong</a></aside>
 <div class="note"><p><b>No key bar on this page, because there is nothing to send.</b> Everything below is computed in
-your browser from the text in the box and the list prices hard-coded in <a href="/assets/lab.js">lab.js</a>. It is the
+your browser from the text in the box and the list prices hard-coded in <a href="../../assets/lab.js">lab.js</a>. It is the
 only lab here that cannot cost you anything.</p></div>
 <div class="lab" id="lab-cost">
   <div class="note"><p><b>This lab needs no key and makes no network call at all.</b> Everything below is arithmetic in
@@ -49,7 +49,7 @@ Fifty-three controls, a hundred and forty-four requirements, two thousand seven 
     <div class="tiles" id="tiles"></div>
     <div class="tablewrap"><table id="tbl"><thead><tr><th>Model</th><th>Rate / 1k chars</th><th>Characters</th><th>Requests</th><th>Cost</th><th>Per-request limit</th></tr></thead><tbody></tbody></table></div>
     <p class="small dim">Rates are the vendor's September 2026 list prices as read on 5 September 2026, hard-coded in
-      <a href="/assets/lab.js">lab.js</a> where you can check them. They move. Nothing here calls the vendor to confirm them.</p>
+      <a href="../../assets/lab.js">lab.js</a> where you can check them. They move. Nothing here calls the vendor to confirm them.</p>
   </section>
 
   <section>
@@ -158,18 +158,18 @@ Fifty-three controls, a hundred and forty-four requirements, two thousand seven 
 </script>
 
 <h2 id="the-arithmetic-stated">The arithmetic, stated</h2>
-<p><strong>Cost = characters ÷ 1,000 × the model's rate.</strong> Rates, read 5 September 2026: <code>eleven_v3</code> and <code>eleven_multilingual_v2</code> <strong>$0.10 per 1,000 characters</strong>; <code>eleven_flash_v2_5</code> and <code>eleven_turbo_v2_5</code> <strong>$0.05</strong> <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. Context text passed as <code>previous_text</code> or <code>next_text</code> is not billed as generated characters, which is why <a href="/experiments/text-handling/">stitching</a> is free.</p>
+<p><strong>Cost = characters ÷ 1,000 × the model's rate.</strong> Rates, read 5 September 2026: <code>eleven_v3</code> and <code>eleven_multilingual_v2</code> <strong>$0.10 per 1,000 characters</strong>; <code>eleven_flash_v2_5</code> and <code>eleven_turbo_v2_5</code> <strong>$0.05</strong> <a class="chip st-d" href="../../ledger/index.html#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. Context text passed as <code>previous_text</code> or <code>next_text</code> is not billed as generated characters, which is why <a href="../../experiments/text-handling/index.html">stitching</a> is free.</p>
 <p>Two things this page counts that a rate card does not:</p>
-<ul><li><strong>Requests, not just characters.</strong> A scene-by-scene render fires one request per scene, and the request count is what meets the concurrency limit — the failure mode that costs a render, rather than a rounding error on the bill <a class="chip st-u" href="/ledger/#claim-concurrency-unknown" title="Code we wrote and have never executed.">written, not run</a>.</li><li><strong>Your longest scene against the model's per-request limit.</strong> <code>eleven_v3</code> takes 5,000 characters, <code>multilingual_v2</code> 10,000, flash and turbo 40,000 <a class="chip st-d" href="/ledger/#claim-char-limits" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. Our longest scene is about 420 characters, so limits are not a constraint for a scene-by-scene render — they bite only if somebody concatenates a whole reel into one request, which also destroys the per-scene timing the pipeline needs.</li></ul>
+<ul><li><strong>Requests, not just characters.</strong> A scene-by-scene render fires one request per scene, and the request count is what meets the concurrency limit — the failure mode that costs a render, rather than a rounding error on the bill <a class="chip st-u" href="../../ledger/index.html#claim-concurrency-unknown" title="Code we wrote and have never executed.">written, not run</a>.</li><li><strong>Your longest scene against the model's per-request limit.</strong> <code>eleven_v3</code> takes 5,000 characters, <code>multilingual_v2</code> 10,000, flash and turbo 40,000 <a class="chip st-d" href="../../ledger/index.html#claim-char-limits" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. Our longest scene is about 420 characters, so limits are not a constraint for a scene-by-scene render — they bite only if somebody concatenates a whole reel into one request, which also destroys the per-scene timing the pipeline needs.</li></ul>
 <h2 id="against-what-we-actually-paid">Against what we actually paid</h2>
-<p>Section 3 puts this page's arithmetic beside real invoices from a different provider on named dates <a class="chip st-m" href="/ledger/#claim-openrouter-cost-aiuc" title="Measured by our own pipeline on a named workload and date.">measured 3 Sep 2026</a>. Only the left-hand column is evidence; the two right-hand columns are this page doing multiplication <a class="chip st-p" href="/ledger/#claim-projected-reel-costs" title="Arithmetic, not an invoice. The workings are shown.">projected</a>.</p>
+<p>Section 3 puts this page's arithmetic beside real invoices from a different provider on named dates <a class="chip st-m" href="../../ledger/index.html#claim-openrouter-cost-aiuc" title="Measured by our own pipeline on a named workload and date.">measured 3 Sep 2026</a>. Only the left-hand column is evidence; the two right-hand columns are this page doing multiplication <a class="chip st-p" href="../../ledger/index.html#claim-projected-reel-costs" title="Arithmetic, not an invoice. The workings are shown.">projected</a>.</p>
 <p>The conclusion that survives the comparison: <strong>v3 costs about what the incumbent cost, flash costs half</strong>, and both are a rounding error against the value of the timestamps. The reason to switch is not price.</p>
 <h2 id="plan-fit">Plan fit</h2>
-<p>At about 4,000 characters per video, a Creator plan's 220,000 characters is roughly 50 videos a month <a class="chip st-p" href="/ledger/#claim-creator-covers-50" title="Arithmetic, not an invoice. The workings are shown.">projected</a> — arithmetic, not experience; we have never run a month of it. Section 4 does the same division on your own numbers. What it cannot tell you is whether the plan's <strong>concurrency</strong> allowance survives your render, which is the other half of choosing a tier and is <a href="/experiments/concurrency/">a different lab</a>.</p>
+<p>At about 4,000 characters per video, a Creator plan's 220,000 characters is roughly 50 videos a month <a class="chip st-p" href="../../ledger/index.html#claim-creator-covers-50" title="Arithmetic, not an invoice. The workings are shown.">projected</a> — arithmetic, not experience; we have never run a month of it. Section 4 does the same division on your own numbers. What it cannot tell you is whether the plan's <strong>concurrency</strong> allowance survives your render, which is the other half of choosing a tier and is <a href="../../experiments/concurrency/index.html">a different lab</a>.</p>
 <h2 id="when-these-numbers-go-wrong">When these numbers go wrong</h2>
-<p>The day the vendor changes a price. Everything here carries the date it was read, and the <a href="/ledger/">ledger</a> marks the whole class of pricing claims as vendor-documentation rather than measurement <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. If you find a rate that has moved, that is a correction worth sending: it invalidates a row on this site rather than a paragraph.</p>
-<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
-<a href="/disclosures/">Disclosures &rarr;</a></p>
+<p>The day the vendor changes a price. Everything here carries the date it was read, and the <a href="../../ledger/index.html">ledger</a> marks the whole class of pricing claims as vendor-documentation rather than measurement <a class="chip st-d" href="../../ledger/index.html#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. If you find a rate that has moved, that is a correction worth sending: it invalidates a row on this site rather than a paragraph.</p>
+<p class="pagenav"><a href="../../ledger/index.html">Every claim on this site, with its state &rarr;</a>
+<a href="../../disclosures/index.html">Disclosures &rarr;</a></p>
 </main>
 <footer class="site"><div class="cols">
   <div>
@@ -178,31 +178,31 @@ Fifty-three controls, a hundred and forty-four requirements, two thousand seven 
     <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
        Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
        <code>7d1916aca5f3</code>, 7 September 2026.</p>
-    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+    <p class="verline">site <a href="../../versions/index.html">v0.1.1</a> &middot; <a href="../../ledger/index.html">the ledger</a> &middot; <a href="../../disclosures/index.html">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
   </div>
   <div>
     <h4>The report</h4>
-    <a href="/">ElevenLabs, nine sections</a>
-    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
-    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
-    <a href="/examples/">Example files</a>
-    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+    <a href="../../index.html">ElevenLabs, nine sections</a>
+    <a href="../../index.html#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="../../index.html#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="../../examples/index.html">Example files</a>
+    <a href="../../providers/openrouter/index.html">OpenRouter (structural stub)</a>
   </div>
   <div>
     <h4>Experiments</h4>
-    <a href="/experiments/">All experiments</a>
-    <a href="/bench/">The test bench</a>
-    <a href="/experiments/captions/">Captions studio</a>
-    <a href="/experiments/concurrency/">Concurrency probe</a>
-    <a href="/experiments/cost/">Cost model (no key)</a>
+    <a href="../../experiments/index.html">All experiments</a>
+    <a href="../../bench/index.html">The test bench</a>
+    <a href="../../experiments/captions/index.html">Captions studio</a>
+    <a href="../../experiments/concurrency/index.html">Concurrency probe</a>
+    <a href="../../experiments/cost/index.html">Cost model (no key)</a>
   </div>
   <div>
     <h4>The argument</h4>
-    <a href="/patterns/">The four patterns</a>
-    <a href="/comparison/">Comparison matrix</a>
-    <a href="/pattern-three/">Pattern three: sg.tts</a>
-    <a href="/ledger/">Claim ledger</a>
-    <a href="/disclosures/">Disclosures</a>
+    <a href="../../patterns/index.html">The four patterns</a>
+    <a href="../../comparison/index.html">Comparison matrix</a>
+    <a href="../../pattern-three/index.html">Pattern three: sg.tts</a>
+    <a href="../../ledger/index.html">Claim ledger</a>
+    <a href="../../disclosures/index.html">Disclosures</a>
   </div>
 </div>
 <div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site

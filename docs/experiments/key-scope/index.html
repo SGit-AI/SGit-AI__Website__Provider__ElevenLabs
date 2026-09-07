@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-root="../../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,14 +14,14 @@
 <meta property="og:description" content="Read-only probes of every endpoint class your key can reach, plus the subscription object — and the field that does not exist anywhere in it: a per-key spend limit.">
 <meta name="twitter:card" content="summary">
 <link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<script src="/assets/lab.js"></script>
+<link rel="stylesheet" href="../../assets/site.css">
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<script src="../../assets/lab.js"></script>
 </head>
 <body data-lab="1">
-<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<nav class="site"><div class="row"><a class="brand" href="../../index.html">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="../../versions/index.html" title="Site release history">v0.1.1</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="../../index.html">The report</a></div><div class="ni"><a class="nl here" href="../../experiments/index.html">Experiments</a></div><div class="ni"><a class="nl" href="../../bench/index.html">Bench</a></div><div class="ni"><a class="nl" href="../../patterns/index.html">Patterns</a></div><div class="ni"><a class="nl" href="../../comparison/index.html">Comparison</a></div><div class="ni"><a class="nl" href="../../ledger/index.html">Ledger</a></div><div class="ni"><a class="nl" href="../../disclosures/index.html">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
 <main class="doc">
-<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Key scope and quota probe</p>
+<p class="crumb"><a href="../../index.html">elevenlabs.providers.sgit.ai</a> / <a href="../../experiments/index.html">experiments</a> / Key scope and quota probe</p>
 <h1>Key scope and quota probe</h1>
 <p class="lead">Eight <code>GET</code> requests, no generation, no spend. What comes back tells you what your key may <strong>do</strong>. What does not come back — anywhere in the API — is any way to cap what it may <strong>cost</strong>. That absence is the whole argument of this site, made empirically rather than asserted.</p>
 
@@ -29,12 +29,12 @@
 <div class="patternbox">
   <div class="ttl">Which pattern this is — read before you paste anything</div>
   <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
-  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  <a href="../../patterns/index.html">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
   their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
   is empty until you fill it.</p>
   <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
   except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
-  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  when you are done. The version of this page with no key box at all is <a href="../../pattern-three/index.html">pattern three</a>,
   and it does not exist yet.</p>
 </div>
 <div id="keybar" class="keybar"></div>
@@ -139,15 +139,15 @@
 
 <h2 id="scoped-is-not-bounded">Scoped is not bounded</h2>
 <p>A key can be restricted in the dashboard to the endpoints it needs. A key for a render pipeline needs text-to-speech and voices-read; it does not need dubbing, voice creation, or history — and history is worth thinking about, because it holds the <strong>text</strong> of everything the account has ever generated.</p>
-<p>Scoping limits <em>what a leaked key can do</em>. It does nothing at all to limit <em>how much of the account's quota it can burn</em> <a class="chip st-d" href="/ledger/#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. There is no per-key spend limit, no daily window, and nothing that resets faster than the billing cycle <a class="chip st-d" href="/ledger/#claim-plan-quotas" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</p>
-<p>That is the difference between this vendor and the sibling one, and it is not a matter of degree. On the sibling provider a key carries a number you chose, and when the spend reaches it the platform refuses — we have the 402 to prove it <a class="chip st-v" href="/ledger/#claim-openrouter-402" title="Verified by execution on this date, by us.">verified 3 Sep 2026</a>. Here, the only refusal comes when the account's month runs out.</p>
+<p>Scoping limits <em>what a leaked key can do</em>. It does nothing at all to limit <em>how much of the account's quota it can burn</em> <a class="chip st-d" href="../../ledger/index.html#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. There is no per-key spend limit, no daily window, and nothing that resets faster than the billing cycle <a class="chip st-d" href="../../ledger/index.html#claim-plan-quotas" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</p>
+<p>That is the difference between this vendor and the sibling one, and it is not a matter of degree. On the sibling provider a key carries a number you chose, and when the spend reaches it the platform refuses — we have the 402 to prove it <a class="chip st-v" href="../../ledger/index.html#claim-openrouter-402" title="Verified by execution on this date, by us.">verified 3 Sep 2026</a>. Here, the only refusal comes when the account's month runs out.</p>
 <h2 id="how-to-read-the-probe">How to read the probe</h2>
-<ul><li><strong>200</strong> — the key reaches this class of endpoint. If you did not intend it to, tighten the key in the dashboard and re-run.</li><li><strong>403</strong> — scoped out, or not on this plan. On a narrowly-scoped key, most rows <em>should</em> be 403; a table of 200s means a key that can do everything, which is what a leak would then be able to do.</li><li><strong>401</strong> on everything — the key is wrong, revoked, or sent under the wrong header name; auth is <code>xi-api-key</code>, not <code>Authorization</code> <a class="chip st-d" href="/ledger/#claim-api-key-shape" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</li></ul>
+<ul><li><strong>200</strong> — the key reaches this class of endpoint. If you did not intend it to, tighten the key in the dashboard and re-run.</li><li><strong>403</strong> — scoped out, or not on this plan. On a narrowly-scoped key, most rows <em>should</em> be 403; a table of 200s means a key that can do everything, which is what a leak would then be able to do.</li><li><strong>401</strong> on everything — the key is wrong, revoked, or sent under the wrong header name; auth is <code>xi-api-key</code>, not <code>Authorization</code> <a class="chip st-d" href="../../ledger/index.html#claim-api-key-shape" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</li></ul>
 <h2 id="the-tile-that-says-none">The tile that says "none"</h2>
-<p>The fourth tile in section 3 has no data behind it, because there is no field to read. Every other number on that row comes from <code>GET /v1/user/subscription</code>: characters used, characters allowed, the reset date — all <strong>account-level</strong> <a class="chip st-d" href="/ledger/#claim-plan-quotas" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. The API has no concept of a per-key budget, so a lab cannot show you one.</p>
-<p>That is the empirical form of the claim the <a href="/#5-the-bounding-primitive">report</a> makes in prose, and it is why <a href="/patterns/">pattern 1</a> is marked unavailable in <a href="/comparison/">the comparison</a> rather than merely discouraged.</p>
-<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
-<a href="/disclosures/">Disclosures &rarr;</a></p>
+<p>The fourth tile in section 3 has no data behind it, because there is no field to read. Every other number on that row comes from <code>GET /v1/user/subscription</code>: characters used, characters allowed, the reset date — all <strong>account-level</strong> <a class="chip st-d" href="../../ledger/index.html#claim-plan-quotas" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. The API has no concept of a per-key budget, so a lab cannot show you one.</p>
+<p>That is the empirical form of the claim the <a href="../../index.html#5-the-bounding-primitive">report</a> makes in prose, and it is why <a href="../../patterns/index.html">pattern 1</a> is marked unavailable in <a href="../../comparison/index.html">the comparison</a> rather than merely discouraged.</p>
+<p class="pagenav"><a href="../../ledger/index.html">Every claim on this site, with its state &rarr;</a>
+<a href="../../disclosures/index.html">Disclosures &rarr;</a></p>
 </main>
 <footer class="site"><div class="cols">
   <div>
@@ -156,31 +156,31 @@
     <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
        Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
        <code>7d1916aca5f3</code>, 7 September 2026.</p>
-    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+    <p class="verline">site <a href="../../versions/index.html">v0.1.1</a> &middot; <a href="../../ledger/index.html">the ledger</a> &middot; <a href="../../disclosures/index.html">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
   </div>
   <div>
     <h4>The report</h4>
-    <a href="/">ElevenLabs, nine sections</a>
-    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
-    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
-    <a href="/examples/">Example files</a>
-    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+    <a href="../../index.html">ElevenLabs, nine sections</a>
+    <a href="../../index.html#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="../../index.html#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="../../examples/index.html">Example files</a>
+    <a href="../../providers/openrouter/index.html">OpenRouter (structural stub)</a>
   </div>
   <div>
     <h4>Experiments</h4>
-    <a href="/experiments/">All experiments</a>
-    <a href="/bench/">The test bench</a>
-    <a href="/experiments/captions/">Captions studio</a>
-    <a href="/experiments/concurrency/">Concurrency probe</a>
-    <a href="/experiments/cost/">Cost model (no key)</a>
+    <a href="../../experiments/index.html">All experiments</a>
+    <a href="../../bench/index.html">The test bench</a>
+    <a href="../../experiments/captions/index.html">Captions studio</a>
+    <a href="../../experiments/concurrency/index.html">Concurrency probe</a>
+    <a href="../../experiments/cost/index.html">Cost model (no key)</a>
   </div>
   <div>
     <h4>The argument</h4>
-    <a href="/patterns/">The four patterns</a>
-    <a href="/comparison/">Comparison matrix</a>
-    <a href="/pattern-three/">Pattern three: sg.tts</a>
-    <a href="/ledger/">Claim ledger</a>
-    <a href="/disclosures/">Disclosures</a>
+    <a href="../../patterns/index.html">The four patterns</a>
+    <a href="../../comparison/index.html">Comparison matrix</a>
+    <a href="../../pattern-three/index.html">Pattern three: sg.tts</a>
+    <a href="../../ledger/index.html">Claim ledger</a>
+    <a href="../../disclosures/index.html">Disclosures</a>
   </div>
 </div>
 <div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site

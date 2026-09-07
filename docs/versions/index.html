@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-root="../">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -14,20 +14,21 @@
 <meta property="og:description" content="Every release of this site, with what changed. The version is owned by admin/build/version.txt, must appear in the release commit&#x27;s subject, and CI verifies the two agree before it tags anything.">
 <meta name="twitter:card" content="summary">
 <link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
-<link rel="stylesheet" href="/assets/site.css">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<script src="/assets/site.js" defer></script>
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script src="../assets/site.js" defer></script>
 </head>
 <body>
-<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<nav class="site"><div class="row"><a class="brand" href="../index.html">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="../versions/index.html" title="Site release history">v0.1.1</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="../index.html">The report</a></div><div class="ni"><a class="nl" href="../experiments/index.html">Experiments</a></div><div class="ni"><a class="nl" href="../bench/index.html">Bench</a></div><div class="ni"><a class="nl" href="../patterns/index.html">Patterns</a></div><div class="ni"><a class="nl" href="../comparison/index.html">Comparison</a></div><div class="ni"><a class="nl" href="../ledger/index.html">Ledger</a></div><div class="ni"><a class="nl" href="../disclosures/index.html">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
 <main class="doc">
-<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / Release history</p>
+<p class="crumb"><a href="../index.html">elevenlabs.providers.sgit.ai</a> / Release history</p>
 <h1>Release history</h1>
 <p class="lead">Every release of this site, with what changed and when. The estate's convention: <strong>one file owns the version</strong>, the release commit's subject repeats it, and the pipeline refuses to tag anything if the two disagree.</p>
 
 
 <div class="tablewrap"><table class="vers"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead><tbody>
 <!-- releases -->
+    <tr><td class="vnum">v0.1.1</td><td>2026-09-07</td><td>make every internal URL relative to its page — the site was serving under a GitHub Pages project path, where root-absolute URLs 404 the stylesheet, the lab runtime and the favicon</td></tr>
     <tr><td class="vnum">v0.1.0</td><td>2026-09-07</td><td>First release. The nine-section report with §8 and §9 given the visual weight; the four credential patterns and the generated provider × pattern matrix; the claim ledger, six verification states, joined to the pages that cite them at build time; the sg.tts specification, future tense throughout; the ported test bench and twelve browser labs, keys in localStorage and one host; the example scripts and the PLS lexicon as downloadable files; disclosures; the CI pipeline (validate → tag → deploy) with a secret scan, a reproducible-build check, the acceptance assertions and the lab runtime's own browser tests.</td></tr>
 </tbody></table></div>
 <h2 id="how-a-release-is-made-here">How a release is made here</h2>
@@ -42,9 +43,9 @@ git commit -am &quot;site v0.1.1: what changed in this release&quot;</pre>
 <p><strong>3 · Every push to the release branch is a minor.</strong> The new tag must be the next <code>vR.M.N+1</code>, or a deliberate <code>vR.M+1.0</code>. The first run backfills tags for any historical release it can read out of the commit subjects.</p>
 <h2 id="what-the-gate-checks-before-anything-is-tagged">What the gate checks before anything is tagged</h2>
 <p>The four house checks, plus what this particular site promises:</p>
-<div class="tablewrap"><table><thead><tr><th>Check</th><th>Why it exists here</th></tr></thead><tbody><tr><td><strong>The build is reproducible</strong> — <code>docs/</code> must match <code>content/</code></td><td>Markdown is the source of truth; a stale build would publish prose nobody wrote</td></tr><tr><td><strong>Version agreement</strong> — <code>version.txt</code> against every page badge, the table above, and <code>llms.txt</code></td><td>A blanket version bump that misses a page ships two versions of one site</td></tr><tr><td><strong>Internal links resolve</strong>, and every canonical URL is on the host in <code>CNAME</code></td><td>A moved page and a copy-pasted canonical are the two ways a static site quietly breaks</td></tr><tr><td><strong>Key-leak tripwire</strong> — API keys, vault keys, private keys, over the whole tree including <code>docs/</code></td><td>This repository is public; the vault its content came from was not. A leak here would be the site's own headline</td></tr><tr><td><strong>One host</strong> — no third-party resource, and no network origin in any script but <code>api.elevenlabs.io</code></td><td>It is the <a href="/experiments/">labs'</a> central claim, so it is a build failure rather than a promise</td></tr><tr><td><strong>The report's nine sections, in order; every claim cited; the non-affiliation line in every footer; <code>sg.tts</code> in the future tense</strong></td><td>The <a href="/ledger/">acceptance checklist</a>, enforced instead of remembered</td></tr><tr><td><strong>The lab runtime parses and passes its own tests</strong></td><td>Thirty-four assertions over the key store and the alignment arithmetic, in a real browser, with no network</td></tr></tbody></table></div>
-<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
-<a href="/disclosures/">Disclosures &rarr;</a></p>
+<div class="tablewrap"><table><thead><tr><th>Check</th><th>Why it exists here</th></tr></thead><tbody><tr><td><strong>The build is reproducible</strong> — <code>docs/</code> must match <code>content/</code></td><td>Markdown is the source of truth; a stale build would publish prose nobody wrote</td></tr><tr><td><strong>Version agreement</strong> — <code>version.txt</code> against every page badge, the table above, and <code>llms.txt</code></td><td>A blanket version bump that misses a page ships two versions of one site</td></tr><tr><td><strong>Internal links resolve</strong>, and every canonical URL is on the host in <code>CNAME</code></td><td>A moved page and a copy-pasted canonical are the two ways a static site quietly breaks</td></tr><tr><td><strong>Key-leak tripwire</strong> — API keys, vault keys, private keys, over the whole tree including <code>docs/</code></td><td>This repository is public; the vault its content came from was not. A leak here would be the site's own headline</td></tr><tr><td><strong>One host</strong> — no third-party resource, and no network origin in any script but <code>api.elevenlabs.io</code></td><td>It is the <a href="../experiments/index.html">labs'</a> central claim, so it is a build failure rather than a promise</td></tr><tr><td><strong>The report's nine sections, in order; every claim cited; the non-affiliation line in every footer; <code>sg.tts</code> in the future tense</strong></td><td>The <a href="../ledger/index.html">acceptance checklist</a>, enforced instead of remembered</td></tr><tr><td><strong>The lab runtime parses and passes its own tests</strong></td><td>Thirty-four assertions over the key store and the alignment arithmetic, in a real browser, with no network</td></tr></tbody></table></div>
+<p class="pagenav"><a href="../ledger/index.html">Every claim on this site, with its state &rarr;</a>
+<a href="../disclosures/index.html">Disclosures &rarr;</a></p>
 </main>
 <footer class="site"><div class="cols">
   <div>
@@ -53,31 +54,31 @@ git commit -am &quot;site v0.1.1: what changed in this release&quot;</pre>
     <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
        Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
        <code>7d1916aca5f3</code>, 7 September 2026.</p>
-    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+    <p class="verline">site <a href="../versions/index.html">v0.1.1</a> &middot; <a href="../ledger/index.html">the ledger</a> &middot; <a href="../disclosures/index.html">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
   </div>
   <div>
     <h4>The report</h4>
-    <a href="/">ElevenLabs, nine sections</a>
-    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
-    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
-    <a href="/examples/">Example files</a>
-    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+    <a href="../index.html">ElevenLabs, nine sections</a>
+    <a href="../index.html#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="../index.html#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="../examples/index.html">Example files</a>
+    <a href="../providers/openrouter/index.html">OpenRouter (structural stub)</a>
   </div>
   <div>
     <h4>Experiments</h4>
-    <a href="/experiments/">All experiments</a>
-    <a href="/bench/">The test bench</a>
-    <a href="/experiments/captions/">Captions studio</a>
-    <a href="/experiments/concurrency/">Concurrency probe</a>
-    <a href="/experiments/cost/">Cost model (no key)</a>
+    <a href="../experiments/index.html">All experiments</a>
+    <a href="../bench/index.html">The test bench</a>
+    <a href="../experiments/captions/index.html">Captions studio</a>
+    <a href="../experiments/concurrency/index.html">Concurrency probe</a>
+    <a href="../experiments/cost/index.html">Cost model (no key)</a>
   </div>
   <div>
     <h4>The argument</h4>
-    <a href="/patterns/">The four patterns</a>
-    <a href="/comparison/">Comparison matrix</a>
-    <a href="/pattern-three/">Pattern three: sg.tts</a>
-    <a href="/ledger/">Claim ledger</a>
-    <a href="/disclosures/">Disclosures</a>
+    <a href="../patterns/index.html">The four patterns</a>
+    <a href="../comparison/index.html">Comparison matrix</a>
+    <a href="../pattern-three/index.html">Pattern three: sg.tts</a>
+    <a href="../ledger/index.html">Claim ledger</a>
+    <a href="../disclosures/index.html">Disclosures</a>
   </div>
 </div>
 <div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site

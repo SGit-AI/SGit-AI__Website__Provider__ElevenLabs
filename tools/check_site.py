@@ -14,6 +14,7 @@ to confirm. Run after `python3 build.py`; `admin/build/validate.sh` runs both.
     python3 tools/check_site.py
 """
 
+import os
 import re
 import sys
 from pathlib import Path
@@ -122,10 +123,23 @@ def check_links():
             if href.startswith(("http://", "https://", "mailto:", "//")):
                 continue
             target = (Path(href.lstrip("/")) if href.startswith("/") else base / href)
-            target = Path(*target.parts)  # normalise
+            target = Path(os.path.normpath(str(target)))
             candidates = {str(target), str(target / "index.html")}
             if not candidates & built:
                 fail(f"dead internal link in {p.relative_to(OUT) if p != OUT / 'index.html' else 'index.html'}: {href}")
+
+
+def check_relative_urls():
+    """The site must work wherever it is served: the custom domain, a GitHub Pages
+    project path, a local directory, a vault frame. A root-absolute internal URL
+    works in exactly one of those, and shipping one left the first deploy
+    unstyled — so it is a build failure now, not a review item."""
+    for p in pages():
+        for m in re.finditer(r'\b(?:href|src)="(/[^"]*)"', p.read_text()):
+            fail(f"{p.relative_to(OUT)}: root-absolute URL {m.group(1)} — must be relative to the page")
+    for js in OUT.rglob("*.js"):
+        for m in re.finditer(r"""fetch\(\s*['"](/[^'"]*)""", js.read_text()):
+            fail(f"{js.relative_to(OUT)}: fetch of a root-absolute URL {m.group(1)} — use EL.asset()")
 
 
 def check_nine_sections():
@@ -238,7 +252,7 @@ def main():
     if not OUT.exists():
         print("docs/ not built — run python3 build.py first", file=sys.stderr)
         sys.exit(2)
-    for fn in [check_version_agreement, check_links, check_canonical_host, check_vault_key_tripwire,
+    for fn in [check_version_agreement, check_links, check_relative_urls, check_canonical_host, check_vault_key_tripwire,
                check_non_affiliation, check_forbidden_words, check_sgtts_tense, check_no_third_party,
                check_js_origins, check_shortcodes, check_nine_sections,
                check_every_claim_cited, check_key_bar_and_pattern_box, check_cname, check_markdown_twins]:

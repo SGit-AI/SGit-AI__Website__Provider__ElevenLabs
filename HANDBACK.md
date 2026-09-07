@@ -40,6 +40,13 @@ repository and the ledger row changes state, with the date.
 - **DNS was not confirmed.** `docs/CNAME` is set to `elevenlabs.providers.sgit.ai`, following the brief.
   Note that this repository's own description says `elevenlabs.provider.sgit.ai` (singular). **Somebody who
   owns the zone must confirm which is right before this goes live**; it is a one-line change in `build.py`.
+- **The pipeline expects a `dev` branch, and this repository has none.** The estate's
+  convention is `dev` = release branch (validate → tag → deploy), `main` = deploy-only.
+  Until `dev` exists, `main` is treated as a release branch too; create `dev` and drop
+  `main` from the `tag-release` condition in `.github/workflows/deploy-pages.yml` to
+  match the siblings exactly. GitHub Pages also needs pointing at the workflow
+  (Settings → Pages → Source: GitHub Actions) — the pipeline builds and uploads
+  `docs/` rather than serving a branch directory.
 - **A third-party secret-scanning Action was not added.** `tools/secret-scan.sh` runs the required patterns
   over the whole tree, including the built site, and is a required CI check. A vendored Action would have
   been a third-party dependency in a repository whose whole argument is about what you take a dependency on,

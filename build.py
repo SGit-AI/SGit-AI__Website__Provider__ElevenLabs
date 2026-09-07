@@ -33,12 +33,19 @@ FILES = ROOT / "files"
 DATA = ROOT / "data"
 OUT = ROOT / "docs"
 
+# The estate convention: one file owns the version, `bin/bump.py` moves it, the
+# release commit's subject repeats it, and CI refuses to tag if the two disagree.
+VERSION = (ROOT / "admin" / "build" / "version.txt").read_text().strip()
+# The host is owned by docs/CNAME's source of truth, here, and every canonical URL
+# on the site is checked against it before a release.
+DOMAIN = "elevenlabs.providers.sgit.ai"
+
 SITE = {
-    "domain": "elevenlabs.providers.sgit.ai",
-    "base": "https://elevenlabs.providers.sgit.ai",
+    "domain": DOMAIN,
+    "base": f"https://{DOMAIN}",
     "title": "ElevenLabs, reported on",
     "vault_commit": "7d1916aca5f3",
-    "version": "v1.0.0",
+    "version": VERSION,
 }
 
 NAV = [
@@ -668,7 +675,9 @@ def nav_html(current):
     return (
         '<nav class="site"><div class="row">'
         '<a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a>'
-        '<span class="stage-pill">v1</span>'
+        '<a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site\'s pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a>'
+        '<span class="stage-pill">provider report</span>'
+        f'<a class="ver" href="/versions/" title="Site release history">{SITE["version"]}</a>'
         '<button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button>'
         '<div class="nav-items">' + "".join(items) + "</div>"
         '<a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a>'
@@ -684,7 +693,7 @@ def footer_html():
     <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
        Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
        <code>{SITE['vault_commit']}</code>, 7 September 2026.</p>
-    <p class="verline">site {SITE['version']} &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+    <p class="verline">site <a href="/versions/">{SITE['version']}</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
   </div>
   <div>
     <h4>The report</h4>
@@ -748,6 +757,12 @@ def page_html(page, ctx, body):
 <meta name="description" content="{html.escape(desc)}">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="{SITE['base']}{page['url']}">
+<meta property="og:type" content="{'website' if page['url'] == '/' else 'article'}">
+<meta property="og:site_name" content="{SITE['domain']}">
+<meta property="og:url" content="{SITE['base']}{page['url']}">
+<meta property="og:title" content="{html.escape(fm['title'])}">
+<meta property="og:description" content="{html.escape(desc)}">
+<meta name="twitter:card" content="summary">
 <link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
 <link rel="stylesheet" href="/assets/site.css">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
@@ -850,6 +865,7 @@ def build(out_dir):
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + urls + "</urlset>\n"
     )
     (out_dir / "llms.txt").write_text(llms_txt(rendered))
+    (out_dir / "llms-full.txt").write_text(llms_full(rendered))
     print(f"build: {len(rendered)} pages, {len(claims)} claims → {out_dir}")
     unused = [c["id"] for c in claims if c["id"] not in ctx_shared["claim_uses"]]
     if unused:
@@ -860,6 +876,7 @@ def build(out_dir):
 def llms_txt(rendered):
     lines = [
         f"# {SITE['domain']}",
+        f"> site {SITE['version']}",
         "",
         "> An independent report on the ElevenLabs API: what it cost on a named workload on a named date,",
         "> what broke, and which of four client-side credential patterns the product can actually support.",
@@ -874,6 +891,30 @@ def llms_txt(rendered):
     for url, (page, _ctx, _body) in sorted(rendered.items()):
         lines.append(f"- [{page['fm']['title']}]({SITE['base']}{url}): {page['fm'].get('description', '')}")
     return "\n".join(lines) + "\n"
+
+
+def llms_full(rendered):
+    """The whole site as one markdown document. The estate ships one of these
+    beside llms.txt so an agent can read the site without crawling it — and here it
+    costs nothing, because markdown is already the source of truth."""
+    parts = [
+        f"# {SITE['domain']} — the whole site as markdown",
+        f"site {SITE['version']} · source vault commit {SITE['vault_commit']} · "
+        "every claim's verification state is at /ledger/",
+        "",
+        "Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by "
+        "ElevenLabs. \"ElevenLabs\" identifies the API this site reports on; all trademarks "
+        "belong to their owners.",
+        "",
+    ]
+    for url, (page, _ctx, _body) in sorted(rendered.items()):
+        parts += [
+            "\n" + "=" * 78,
+            f"PAGE {url}  —  {page['fm']['title']}",
+            "=" * 78 + "\n",
+            page["src_md"].strip(),
+        ]
+    return "\n".join(parts) + "\n"
 
 
 def main():

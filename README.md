@@ -41,21 +41,26 @@ present tense.
 | `assets/` | `site.css`, `site.js`, `lab.js`, the favicon. Self-hosted, no build step, no dependencies |
 | `files/` | Downloadable artefacts: the example scripts and the PLS lexicon |
 | `build.py` | The whole build system — Markdown, front-matter, shortcodes, generated tables. No dependencies |
-| `tools/` | The secret scan, the acceptance checks, the JavaScript syntax check |
+| `tools/` | The secret scan, the acceptance checks, the JavaScript syntax check, the lab self-test |
+| `admin/build/` | `version.txt` owns the site version; `validate.sh` is the pre-release gate |
+| `bin/bump.py` | The one command that bumps a release, in both the places that own it |
 | `docs/` | The built site, committed. GitHub Pages serves this directory |
 
 ## Build
 
 ```bash
 python3 build.py               # → docs/
-python3 build.py --check       # CI: rebuild to a temp dir and diff against docs/
-python3 tools/check_site.py    # the acceptance checklist, as assertions
-tools/secret-scan.sh           # the required secret scan
-tools/check-js.sh              # syntax-check every inline lab script
+admin/build/validate.sh        # the pre-release gate, all of it, in order
 python3 -m http.server -d docs 8000
 ```
 
-Python 3.11+, no packages. Node is used only to syntax-check the labs' JavaScript.
+The gate, if you want the pieces separately: `python3 build.py --check` (docs/ matches
+content/), `python3 tools/check_site.py` (the assertions), `tools/secret-scan.sh`,
+`tools/check-js.sh`, `tools/test-labs.sh` (34 browser assertions over the lab runtime).
+Pass `--no-browser` to `validate.sh` to skip the last one locally; CI never skips it.
+
+Python 3.11+, no packages. Node syntax-checks the labs' JavaScript and a Chromium runs
+their tests.
 
 ## Adding a provider
 
@@ -66,6 +71,31 @@ matrix is generated from those blocks, so no table is edited and no template is 
 Long term, `/patterns/`, `/comparison/`, `/ledger/` and `/disclosures/` belong to the whole
 `*.providers.sgit.ai` family and move to `providers.sgit.ai`; the templates are built so that the move
 is a redirect rather than a rewrite.
+
+## Releases — validate → tag → deploy
+
+The estate's pipeline, in `.github/workflows/deploy-pages.yml`, in that order. A
+failure at any stage stops the release rather than shipping past it.
+
+```bash
+bin/bump.py "what changed in this release"       # --major for vR.M+1.0
+python3 build.py
+admin/build/validate.sh
+git commit -am "site v0.1.1: what changed in this release"
+```
+
+**One file owns the version** — `admin/build/version.txt`. The nav badge, the footer,
+`llms.txt` and [the release history](content/versions.md) are all rendered from it, and
+the gate fails if any of them disagree. **The commit subject is load-bearing**:
+`tag-release` reads `version.txt`, finds the commit in the history whose *subject*
+carries that version, and tags it — HEAD on a direct push, HEAD's parent when a pull
+request lands as a merge. A version reused rather than bumped is an error, not a
+silent overwrite. Every push to the release branch is a minor; the first run backfills
+tags for any historical release it can read out of the commit subjects.
+
+`dev` is the estate's release branch. This repository does not have one yet, so `main`
+is treated as a release branch too — when `dev` is created, drop `main` from the
+`tag-release` condition and this matches its siblings exactly.
 
 ## Rules this repository enforces in CI
 

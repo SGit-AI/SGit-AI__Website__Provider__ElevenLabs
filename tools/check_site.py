@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 """
-check_site.py — the acceptance checklist, as assertions over the built site.
+check_site.py — the pre-release gate: the acceptance checklist as assertions over
+the built site.
 
-Everything here is something a human would otherwise have to re-read the whole
-site to confirm. Run after `python3 build.py`; it is a required CI check.
+The first four are the house gate, inherited from the sibling sites in this estate
+unchanged in intent — version agreement, internal links, canonical host, key-leak
+tripwire. The rest are this site's own promises, which are worth no more than the
+checks that enforce them.
+
+Everything here is something a human would otherwise have to re-read the whole site
+to confirm. Run after `python3 build.py`; `admin/build/validate.sh` runs both.
 
     python3 tools/check_site.py
 """
@@ -162,6 +168,60 @@ def check_key_bar_and_pattern_box():
             fail(f"{p.relative_to(OUT)} ships a value in a password field")
 
 
+def check_version_agreement():
+    """House check 1. One file owns the version; everything else is rendered from
+    it. A blanket bump that misses a page ships two versions of one site."""
+    version = (ROOT / "admin" / "build" / "version.txt").read_text().strip()
+    if not re.fullmatch(r"v\d+\.\d+\.\d+", version):
+        fail(f"admin/build/version.txt does not carry a vX.Y.Z version: {version!r}")
+        return
+    for p in pages():
+        for badge in re.findall(r'class="ver"[^>]*>(v\d+\.\d+\.\d+)<', p.read_text()):
+            if badge != version:
+                fail(f"{p.relative_to(OUT)}: version badge {badge} != {version}")
+    for name in ("llms.txt", "llms-full.txt"):
+        if version not in (OUT / name).read_text():
+            fail(f"{name} does not mention {version}")
+    history = (OUT / "versions" / "index.html").read_text()
+    rows = re.findall(r'class="vnum">(v\d+\.\d+\.\d+)<', history)
+    if version not in rows:
+        fail(f"the release history has no row for {version}")
+    for v in rows:
+        if rows.count(v) > 1:
+            fail(f"the release history lists {v} more than once")
+            break
+
+
+def check_canonical_host():
+    """House check 3. Every canonical and og:url is on the host in CNAME, and every
+    page declares one — a copy-pasted canonical is how a static site quietly
+    de-indexes itself."""
+    host = (OUT / "CNAME").read_text().strip()
+    for p in pages():
+        text = p.read_text()
+        claimed = re.findall(r'<link[^>]+rel="canonical"[^>]+href="([^"]+)"', text)
+        claimed += re.findall(r'<meta[^>]+property="og:url"[^>]+content="([^"]+)"', text)
+        if not claimed:
+            fail(f"{p.relative_to(OUT)}: no canonical link")
+        for url in claimed:
+            if not url.startswith(f"https://{host}/") and url != f"https://{host}":
+                fail(f"{p.relative_to(OUT)}: canonical/og:url is not on {host} -> {url}")
+
+
+def check_vault_key_tripwire():
+    """House check 4, as a belt to tools/secret-scan.sh's braces: an sgit vault key
+    is <passphrase>:<uuid>, and it unlocks everything the vault holds."""
+    shape = re.compile(r"[A-Za-z0-9_-]{20,}:[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
+    for f in ROOT.rglob("*"):
+        if not f.is_file() or ".git/" in str(f) or f.suffix in {".png", ".jpg", ".webp", ".ico", ".woff2", ".zip", ".pdf"}:
+            continue
+        try:
+            if shape.search(f.read_text()):
+                fail(f"{f.relative_to(ROOT)}: contains a vault-key-shaped string")
+        except (UnicodeDecodeError, OSError):
+            continue
+
+
 def check_cname():
     cname = (OUT / "CNAME").read_text().strip()
     if cname != DOMAIN:
@@ -178,8 +238,9 @@ def main():
     if not OUT.exists():
         print("docs/ not built — run python3 build.py first", file=sys.stderr)
         sys.exit(2)
-    for fn in [check_non_affiliation, check_forbidden_words, check_sgtts_tense, check_no_third_party,
-               check_js_origins, check_shortcodes, check_links, check_nine_sections,
+    for fn in [check_version_agreement, check_links, check_canonical_host, check_vault_key_tripwire,
+               check_non_affiliation, check_forbidden_words, check_sgtts_tense, check_no_third_party,
+               check_js_origins, check_shortcodes, check_nine_sections,
                check_every_claim_cited, check_key_bar_and_pattern_box, check_cname, check_markdown_twins]:
         fn()
     if failures:

@@ -33,15 +33,24 @@ pre.shell{color:var(--term-green)}
 
 /* ---------- nav ---------- */
 nav.site{position:sticky;top:0;z-index:50;background:rgba(250,249,245,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-nav.site .row{max-width:var(--wide);margin:0 auto;display:flex;align-items:center;gap:1.1rem;padding:.7rem 1.1rem;flex-wrap:wrap}
-nav.site .brand{font-weight:800;font-size:1rem;color:var(--fg);letter-spacing:-.02em;white-space:nowrap}
+nav.site .row{max-width:var(--wide);margin:0 auto;display:flex;align-items:center;gap:.7rem;padding:.7rem 1.1rem;flex-wrap:wrap}
+nav.site .brand{font-weight:800;font-size:.95rem;color:var(--fg);letter-spacing:-.02em;white-space:nowrap}
 nav.site .brand span{color:var(--accent);font-weight:600}
-nav.site a.nl{color:var(--dim);font-size:.85rem}
+nav.site a.nl{color:var(--dim);font-size:.82rem;padding:0 .1rem}
 nav.site a.nl.here{color:var(--fg);font-weight:600}
 nav.site a.nl:hover{color:var(--fg);text-decoration:none}
 nav.site .gh{margin-left:auto;border:1px solid var(--line2);border-radius:6px;padding:.28rem .7rem;color:var(--fg);
   font-size:.78rem;white-space:nowrap;background:var(--panel)}
 nav.site .gh:hover{border-color:var(--accent);text-decoration:none}
+nav.site .parent{font-size:.72rem;color:var(--dim);border:1px solid var(--line);border-radius:99px;
+  padding:.14rem .6rem;white-space:nowrap;background:var(--panel)}
+nav.site .parent:hover{border-color:var(--accent);color:var(--fg);text-decoration:none}
+nav.site .parent b{color:var(--accent-dk);font-weight:700}
+a.ver{font-family:var(--mono);font-size:.68rem;color:var(--dim2);border:1px solid var(--line);border-radius:99px;
+  padding:.14rem .55rem;white-space:nowrap}
+a.ver:hover{color:var(--accent-dk);border-color:var(--accent);text-decoration:none}
+table.vers td.vnum{font-family:var(--mono);font-weight:700;color:var(--accent-dk);white-space:nowrap}
+table.vers td{font-size:.85rem}
 .stage-pill{font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-dk);
   border:1px solid rgba(15,118,110,.35);background:rgba(15,118,110,.07);border-radius:99px;padding:.15rem .55rem}
 .nav-items{display:contents}

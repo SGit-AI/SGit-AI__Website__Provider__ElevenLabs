@@ -1,0 +1,97 @@
+<div class="lab" id="lab-scope">
+  <section>
+    <h2>1 · Probe — reads only, no generation, no spend</h2>
+    <p class="small">Every request this lab makes is a <code>GET</code>. Nothing here generates audio and nothing here
+      costs a character. What comes back tells you what your key may <em>do</em> — and, more usefully, what nothing in
+      the API will tell you: how much it may <em>spend</em>.</p>
+    <div class="row"><button id="btnProbe">Probe this key</button>
+      <button class="secondary" id="btnMd">Copy as markdown</button>
+      <span class="est" id="info"></span></div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section>
+    <h2>2 · What the key reaches</h2>
+    <div class="tablewrap"><table id="tbl"><thead><tr><th>Endpoint</th><th>What it would grant</th><th>Status</th><th>Reading</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>3 · The quota — the only bound there is</h2>
+    <div class="tiles tiles-sm" id="tiles"></div>
+    <div class="kv" id="sub"></div>
+    <div class="note" style="margin-top:.9rem"><p><b>Look for what is missing.</b> The subscription object reports characters
+      used, characters allowed and the reset date — for <em>the account</em>. There is no per-key spend field in it, because
+      there is no per-key spend limit to report. Scoping a key restricts which of the rows above it can reach; it does not
+      cap what it can cost. That is the difference between <em>scoped</em> and <em>bounded</em>, and it is the reason
+      pattern 1 has no implementation here.</p></div>
+  </section>
+
+  <section><h2>4 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var PROBES = [
+    { path: '/user/subscription', grants: 'read the account’s plan and quota', need: 'always available' },
+    { path: '/user', grants: 'read the account identity', need: 'user read' },
+    { path: '/voices', grants: 'list voices — needed by every generation lab', need: 'voices read' },
+    { path: '/models', grants: 'list models the account may use', need: 'models read' },
+    { path: '/pronunciation-dictionaries?page_size=1', grants: 'read and attach lexicons', need: 'dictionaries read' },
+    { path: '/history?page_size=1', grants: 'read past generations — including their text', need: 'history read' },
+    { path: '/dubbing?page_size=1', grants: 'dubbing jobs — a key for narration does not need this', need: 'dubbing read' },
+    { path: '/shared-voices?page_size=1', grants: 'the public voice library', need: 'voices read' }
+  ];
+  var results = [];
+
+  $('btnProbe').onclick = async function () {
+    results = []; $('tbl').querySelector('tbody').innerHTML = '';
+    EL.status('status', 'Probing…');
+    for (var i = 0; i < PROBES.length; i++) {
+      var p = PROBES[i], out = { p: p };
+      try { await EL.get(p.path); out.status = 200; out.reading = 'reachable with this key'; }
+      catch (e) {
+        out.status = e.status || 'network';
+        out.reading = e.status === 401 ? 'key rejected — check the header name is xi-api-key'
+          : e.status === 403 ? 'scoped out, or not on this plan — good, if you did that deliberately'
+          : e.status === 404 ? 'no such endpoint on this account'
+          : e.status === 429 ? 'rate limited — try again in a moment'
+          : 'failed: ' + (e.detail || e.message || '').slice(0, 80);
+      }
+      results.push(out); draw();
+    }
+    try {
+      var sub = await EL.get('/user/subscription');
+      var used = sub.character_count, limit = sub.character_limit;
+      $('sub').innerHTML = Object.keys(sub).filter(function (k) { return typeof sub[k] !== 'object'; })
+        .map(function (k) { return '<b>' + EL.esc(k) + '</b><span>' + EL.esc(String(sub[k])) + '</span>'; }).join('');
+      $('tiles').innerHTML =
+        '<div class="tile"><b>' + (sub.tier || '?') + '</b><span>plan tier</span></div>' +
+        '<div class="tile"><b>' + (limit ? Math.round((used / limit) * 100) + '%' : '?') + '</b><span>of this cycle’s characters used</span><em>' +
+          (used != null ? used.toLocaleString() : '?') + ' of ' + (limit != null ? limit.toLocaleString() : '?') + '</em></div>' +
+        '<div class="tile"><b>' + (limit != null ? EL.money((limit - used) / 1000 * 0.10) : '?') + '</b><span>value left this cycle at the v3 rate</span></div>' +
+        '<div class="tile hot"><b>none</b><span>per-key spend limit — the field does not exist</span></div>';
+      EL.status('status', 'Probed ' + results.length + ' endpoints. No audio was generated; no characters were spent.', 'ok');
+    } catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  function draw() {
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    results.forEach(function (r) {
+      var ok = r.status === 200;
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><code>' + EL.esc(r.p.path.split('?')[0]) + '</code></td><td class="small">' + EL.esc(r.p.grants) + '</td>' +
+        '<td class="small"' + (ok ? '' : ' style="color:#b45309;font-weight:600"') + '>' + (ok ? '✓ 200' : '✗ ' + r.status) + '</td>' +
+        '<td class="small dim">' + EL.esc(r.reading) + '</td>';
+      tb.appendChild(tr);
+    });
+    $('info').textContent = results.filter(function (r) { return r.status === 200; }).length + ' of ' + results.length + ' reachable';
+  }
+
+  $('btnMd').onclick = function () {
+    EL.copy(EL.toMarkdown(['Endpoint', 'Grants', 'Status', 'Reading'],
+      results.map(function (r) { return ['`' + r.p.path.split('?')[0] + '`', r.p.grants, r.status, r.reading]; }),
+      'Key scope probe'), 'status');
+  };
+})();
+</script>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pattern three, for a voice API — the sg.tts specification &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="What a browser app would look like if the vault host held the ElevenLabs key and enforced the terms: no key box, a spend cap the app cannot reach, and terms that travel with the content. Specified, not shipped.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/pattern-three/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="elevenlabs.providers.sgit.ai">
+<meta property="og:url" content="https://elevenlabs.providers.sgit.ai/pattern-three/">
+<meta property="og:title" content="Pattern three, for a voice API — the sg.tts specification">
+<meta property="og:description" content="What a browser app would look like if the vault host held the ElevenLabs key and enforced the terms: no key box, a spend cap the app cannot reach, and terms that travel with the content. Specified, not shipped.">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / Pattern three, for a voice API — the sg.tts specification</p>
+<h1>Pattern three, for a voice API — the sg.tts specification</h1>
+<p class="lead">This is the site's argument made concrete: <strong>a browser application using a paid speech API without ever holding the key.</strong> Everything on this page is a specification. <code>sg.tts</code> does not exist; nothing here describes software you can run today.</p>
+<p class="prov">Prose from the video vault at commit <code>7d1916aca5f3</code>, 7 September 2026. From elevenlabs/docs/10-pattern-three-sg-tts.md, which is a specification and is treated as one. When the vault moves ahead, this page is behind &mdash; and says so rather than guessing.</p>
+<aside class="toc"><b>On this page</b><a class="lv2" href="#what-would-exist-already-if-the-verb-landed-tomorrow">What would exist already, if the verb landed tomorrow</a><a class="lv2" href="#the-verb-as-specified">The verb, as specified</a><a class="lv2" href="#why-this-is-the-only-pattern-where-the-bound-holds">Why this is the only pattern where the bound holds</a><a class="lv2" href="#what-it-would-change-for-this-estate">What it would change for this estate</a><a class="lv2" href="#what-would-still-be-true">What would still be true</a></aside>
+<div class="warnbox"><p><b>Future tense, throughout.</b> <a class="chip st-s" href="/ledger/#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a> <code>sg.tts.speak()</code> is a verb the SG/Vault host <em>would</em> gain. It is not implemented, not scheduled here, and not something to plan a product around. The one piece that is real is the terms file — <code>.vault/elevenlabs/config.json</code> — which exists in the source vault today, in the same shape and under the same seal as the host's model-router config.</p></div>
+<h2 id="what-would-exist-already-if-the-verb-landed-tomorrow">What would exist already, if the verb landed tomorrow</h2>
+<p>Two of the three pieces are in place, which is the only reason this specification is worth publishing rather than filing.</p>
+<div class="tablewrap"><table><thead><tr><th>Piece</th><th>State</th><th>What it is</th></tr></thead><tbody><tr><td>The terms file</td><td>real</td><td><code>.vault/elevenlabs/config.json</code> — owner-sealed key, endpoint, defaults (model, voice, speed, output format) and <code>limits</code> (<code>maxCostPerSession</code>, <code>maxCharsPerRequest</code>, <code>maxConcurrent</code>). Sealed with AES-256-GCM under a key derived from the vault's <strong>write</strong> key, so a read-key holder cannot open it</td></tr><tr><td>The permission floor</td><td>real</td><td><code>.vault/**</code> is denied to every app frame under every grant a frame can be given. An app cannot read the terms file, let alone the key inside it</td></tr><tr><td>The host verb</td><td><span class="chip st-s" title="A specification. It does not exist yet.">specified, not shipped</span></td><td><code>sg.tts.*</code>, beside the <code>sg.llm.*</code> that already does exactly this shape of thing for a model router</td></tr></tbody></table></div>
+<h2 id="the-verb-as-specified">The verb, as specified</h2>
+<pre class="lang-js">// app side — would require &quot;permissions&quot;: { &quot;tts&quot;: { &quot;speak&quot;: true } } in app.json;
+// denied by default, as every host capability is.
+const r = await sg.tts.speak({ text, voice?, model?, speed?, timestamps?: true });
+// → { audio: Blob, durationSecs, alignment?: { characters, character_start_times_seconds,
+//     character_end_times_seconds }, cost: { chars, usd, estimated: true } }
+
+await sg.tts.available();   // { ok, reason?: &#x27;ENOKEY&#x27; | &#x27;EPERM&#x27; | &#x27;EBUDGET&#x27; | &#x27;EREADONLY&#x27; }
+await sg.tts.voices();      // filtered by the policy&#x27;s voice allow-list
+await sg.tts.usage();       // this session&#x27;s characters and estimated cost</pre>
+<p>What the host would do, in order:</p>
+<ol><li><strong>Open the terms file.</strong> Owner-sealed, so only a session holding the vault's write key can open it; a read-only opener would get <code>ENOKEY</code>, exactly as the model-router verb does today.</li><li><strong>Enforce the limits.</strong> Refuse over <code>maxCharsPerRequest</code>; keep a per-session character counter and refuse past <code>maxCostPerSession</code> at the model's list rate; hold a semaphore at <code>maxConcurrent</code> — which is also the mitigation for <a href="/experiments/concurrency/">the concurrency question</a> that is still open <a class="chip st-u" href="/ledger/#claim-concurrency-unknown" title="Code we wrote and have never executed.">written, not run</a>.</li><li><strong>Ask, the first time.</strong> The first <code>speak()</code> in a session would raise the host's own prompt — <em>"this app wants to generate speech with the vault's key — estimated $0.02"</em> — outside the frame, where the app cannot suppress or fake it.</li><li><strong>Make the call at the host's origin</strong> with the <code>xi-api-key</code> header, and strip the key from every error surfaced back to the frame.</li><li><strong>Return audio and alignment</strong>, and nothing else. The frame gets a <code>Blob</code> and an array of numbers.</li></ol>
+<h2 id="why-this-is-the-only-pattern-where-the-bound-holds">Why this is the only pattern where the bound holds</h2>
+<div class="beforeafter"><div class="ba now"><h4>The bench today — pattern 0 with a ceiling</h4><p>A key box at the top of the page. Your full account key, in the page's own JavaScript, calling the vendor directly. Bounded by the plan's monthly quota and nothing else <a class="chip st-d" href="/ledger/#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</p><p>The code that spends the money <b>holds the credential that authorises it</b>. Every safety property is a property of your restraint.</p><pre class="lang-js">const { items } = JSON.parse(
+  localStorage.getItem('el.keys.v1'));
+fetch('https://api.elevenlabs.io/v1/…', {
+  headers: { 'xi-api-key': items[0].key }
+});</pre></div><div class="ba then"><h4>The same page under pattern 3 — specified</h4><p>No key box. No key in the page, in storage, or in the network tab. The app asks; the host spends, meters and refuses.</p><p>The bounded thing <b>cannot reach the bounding thing</b>: the terms live below the permission floor, in the vault, with the content they govern. <a class="chip st-s" href="/ledger/#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a></p><pre class="lang-js">const { audio, alignment, cost } =
+  await sg.tts.speak({ text, timestamps: true });
+// no key, anywhere in this frame</pre></div></div>
+<p>The difference is not cosmetic. In the left-hand version, a cross-site scripting bug in the page is an account compromise. In the right-hand version, it is a request the host will meter and cap — the attacker gets speech, up to <code>maxCostPerSession</code>, and never gets the key.</p>
+<h2 id="what-it-would-change-for-this-estate">What it would change for this estate</h2>
+<ul><li>The <a href="/bench/">bench</a> and every lab here would drop the key box, and the pattern box at the top of each would change from <em>0 with a ceiling</em> to <em>3</em>.</li><li><code>app.json</code> would no longer need <code>"permissions": {"network": true}</code> for these pages — which is the grant that <a href="/#9-what-went-wrong">bit us on day one</a> <a class="chip st-v" href="/ledger/#claim-csp-blocks" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a> and which is a real widening for any vault whose app holds private content.</li><li>ElevenLabs would move, in <a href="/comparison/">the comparison</a>, from <em>needs a server</em> to <em>pattern 3, no server</em> — because for a vault app <strong>the host is the server</strong> that pattern 2 keeps asking for. That is the generalisation the family of sites exists to test.</li></ul>
+<h2 id="what-would-still-be-true">What would still be true</h2>
+<p>The host is not magic. Under pattern 3 the terms are only as good as the numbers in them, the estimate is an estimate at list price rather than an invoice, and a compromised <em>host</em> is a compromised key — the trust moves, it does not vanish. What changes is <strong>who chose the blast radius and where the choice is recorded</strong>: a number in a file that travels with the content, rather than a promise about how carefully an application will behave.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

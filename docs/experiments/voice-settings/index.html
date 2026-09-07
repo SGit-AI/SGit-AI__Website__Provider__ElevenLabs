@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voice-settings sweep &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="Sweep one voice setting at a time — stability, similarity boost, style, speed — with everything else held constant and the seed fixed, then write down what you heard.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/experiments/voice-settings/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="elevenlabs.providers.sgit.ai">
+<meta property="og:url" content="https://elevenlabs.providers.sgit.ai/experiments/voice-settings/">
+<meta property="og:title" content="Voice-settings sweep">
+<meta property="og:description" content="Sweep one voice setting at a time — stability, similarity boost, style, speed — with everything else held constant and the seed fixed, then write down what you heard.">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/lab.js"></script>
+</head>
+<body data-lab="1">
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Voice-settings sweep</p>
+<h1>Voice-settings sweep</h1>
+<p class="lead">Four sliders, and the vendor's guidance on them is qualitative. This lab sweeps <strong>one at a time</strong>, holds everything else constant, fixes the seed, and makes you write down what you heard — which is the only part of this that is not arithmetic.</p>
+
+<aside class="toc"><b>On this page</b><a class="lv2" href="#what-this-tests">What this tests</a><a class="lv2" href="#method">Method</a><a class="lv2" href="#what-it-costs">What it costs</a></aside>
+<div class="patternbox">
+  <div class="ttl">Which pattern this is — read before you paste anything</div>
+  <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
+  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
+  is empty until you fill it.</p>
+  <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
+  except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
+  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  and it does not exist yet.</p>
+</div>
+<div id="keybar" class="keybar"></div>
+
+<div class="lab" id="lab-settings">
+  <section>
+    <h2>1 · The line, and the knob to sweep</h2>
+    <label for="text">The line. Short: this lab generates it once per value.</label>
+    <textarea id="text" style="min-height:80px">And here is the argument. A control is not a row in a list — it is what its edges say it is.</textarea>
+    <div class="samplechips" id="samples"></div>
+    <div class="grid3">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select></div>
+      <div><label for="model">Model</label><select id="model"></select></div>
+      <div><label for="param">Sweep</label><select id="param">
+        <option value="stability">stability — 0 to 1</option>
+        <option value="similarity">similarity_boost — 0 to 1</option>
+        <option value="style">style — 0 to 1, costs latency</option>
+        <option value="speed">speed — 0.7 to 1.2, the vendor's range</option>
+      </select></div>
+    </div>
+    <label for="values">Values, comma separated</label>
+    <input type="text" id="values" class="mono" value="0, 0.35, 0.5, 0.75, 1">
+    <div class="row" style="margin-top:.6rem">
+      <button class="secondary" id="btnVoices">Load voices</button>
+      <span class="est"><b id="chars">0</b> chars × <b id="n">0</b> values = estimated <b id="cost">$0.000</b></span>
+      <button id="btnRun">Sweep</button>
+    </div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section>
+    <h2>2 · The sweep</h2>
+    <p class="small dim">Held constant: everything not being swept. That is the whole method — one knob at a time, same
+      seed where you set one, same text, same voice. Listen twice before you write anything down.</p>
+    <div class="row"><label class="inline" style="margin:0"><input type="checkbox" id="useSeed" checked>
+      fix the seed at</label><input type="text" id="seed" class="mono" value="42" style="max-width:8rem"></div>
+    <div class="tablewrap"><table id="tbl"><thead><tr><th>Value</th><th>Latency</th><th>Spoken length</th><th>Bytes</th>
+      <th>Listen</th><th>Your note</th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button class="secondary" id="btnMd">Copy as markdown</button>
+      <span class="est" id="summary"></span></div>
+  </section>
+
+  <section><h2>3 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var results = [];
+
+  EL.fillModels($('model'));
+  EL.sampleChips($('samples'), $('text'), est);
+  function vals() {
+    return $('values').value.split(',').map(function (x) { return parseFloat(x.trim()); }).filter(function (x) { return !isNaN(x); });
+  }
+  function est() {
+    var n = $('text').value.length, k = vals().length;
+    $('chars').textContent = n; $('n').textContent = k;
+    $('cost').textContent = EL.money(EL.estimate(n, $('model').value) * k);
+  }
+  ['text', 'values', 'model'].forEach(function (id) { $(id).oninput = est; $(id).onchange = est; });
+  $('param').onchange = function () {
+    $('values').value = $('param').value === 'speed' ? '0.7, 0.85, 1, 1.1, 1.2' : '0, 0.35, 0.5, 0.75, 1';
+    est();
+  };
+  est();
+
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('status', v.length + ' voices.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  $('btnRun').onclick = async function () {
+    var voice = $('voice').value; if (!voice) return EL.status('status', 'Pick a voice first.', 'warn');
+    var text = $('text').value.trim(), param = $('param').value, list = vals();
+    if (!text || !list.length) return;
+    if (param === 'speed' && list.some(function (v) { return v < 0.7 || v > 1.2; }))
+      EL.status('status', 'Values outside 0.7–1.2 will come back 422 — that is the vendor validating, not this page.', 'warn');
+    results = []; $('tbl').querySelector('tbody').innerHTML = '';
+    $('btnRun').disabled = true;
+    try {
+      for (var i = 0; i < list.length; i++) {
+        var o = { text: text, voice: voice, model: $('model').value, timestamps: true };
+        o[param] = list[i];
+        if ($('useSeed').checked && $('seed').value) o.seed = $('seed').value;
+        EL.status('status', param + ' = ' + list[i] + ' …');
+        try { var r = await EL.speak(o); results.push({ v: list[i], r: r }); }
+        catch (e) { results.push({ v: list[i], err: e.message }); }
+        draw();
+      }
+      EL.status('status', 'Swept ' + results.length + ' values of ' + param + '. Estimated ' +
+        EL.money(results.reduce(function (a, x) { return a + (x.r ? x.r.cost : 0); }, 0)) + '.', 'ok');
+    } finally { $('btnRun').disabled = false; }
+  };
+
+  function draw() {
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    var slowest = Math.max.apply(null, results.map(function (x) { return x.r ? x.r.ms : 0; })) || 1;
+    results.forEach(function (x, i) {
+      var tr = document.createElement('tr');
+      if (x.err) {
+        tr.innerHTML = '<td><code>' + x.v + '</code></td><td colspan="5" class="small" style="color:#b91c1c">' + EL.esc(x.err) + '</td>';
+      } else {
+        var spoken = x.r.words.length ? x.r.words[x.r.words.length - 1].e : null;
+        tr.innerHTML = '<td><code>' + x.v + '</code></td>' +
+          '<td>' + EL.bar(x.r.ms, slowest, false, ' ms') + '</td>' +
+          '<td class="small">' + (spoken != null ? spoken.toFixed(2) + ' s' : '—') + '</td>' +
+          '<td class="small">' + (x.r.bytes / 1024).toFixed(0) + ' KB</td>' +
+          '<td><button class="secondary" data-play="' + i + '">play</button></td>' +
+          '<td><input type="text" data-note="' + i + '" placeholder="what you heard"></td>';
+      }
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('[data-play]').forEach(function (el) {
+      el.onclick = function () { var a = new Audio(results[+el.getAttribute('data-play')].r.url); a.play(); };
+    });
+    tb.querySelectorAll('[data-note]').forEach(function (el) {
+      el.oninput = function () { results[+el.getAttribute('data-note')].note = el.value; };
+    });
+    var lens = results.filter(function (x) { return x.r && x.r.words.length; });
+    if (lens.length > 1) {
+      var a = lens[0].r.words[lens[0].r.words.length - 1].e, b = lens[lens.length - 1].r.words[lens[lens.length - 1].r.words.length - 1].e;
+      $('summary').textContent = 'Spoken length across the sweep: ' + a.toFixed(2) + ' s → ' + b.toFixed(2) + ' s (' +
+        (((b - a) / a) * 100).toFixed(1) + '%).';
+    }
+  }
+
+  $('btnMd').onclick = function () {
+    EL.copy(EL.toMarkdown(
+      [$('param').value, 'Latency ms', 'Spoken s', 'KB', 'Heard'],
+      results.map(function (x) {
+        if (x.err) return [x.v, 'error', '—', '—', x.err];
+        var spoken = x.r.words.length ? x.r.words[x.r.words.length - 1].e.toFixed(2) : '—';
+        return [x.v, x.r.ms, spoken, (x.r.bytes / 1024).toFixed(0), x.note || ''];
+      }),
+      'Voice-settings sweep — ' + $('param').value + ', model ' + $('model').value + ', voice ' + $('voice').value
+    ), 'status');
+  };
+})();
+</script>
+
+<h2 id="what-this-tests">What this tests</h2>
+<ul><li><strong><code>speed</code></strong> is the setting that sent us here in the first place. Its documented range is <strong>0.7–1.2</strong>, default 1.0, with quality costs at the extremes <a class="chip st-d" href="/ledger/#claim-speed-range" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. The incumbent provider has no equivalent, and the absence cost a portrait cut a third of its script instead of 15% of its pace <a class="chip st-m" href="/ledger/#claim-openrouter-no-speed" title="Measured by our own pipeline on a named workload and date.">measured 2 Sep 2026</a>. The measurable question: <strong>how much time does 1.15× actually save on your script</strong>, and at what point does it stop sounding like a person? The "spoken length across the sweep" line answers the first half; your ears answer the second.</li><li><strong><code>stability</code></strong> trades expressiveness against consistency. On <code>eleven_v3</code> the vendor frames it as three modes — creative, natural, robust — rather than a continuum <a class="chip st-u" href="/ledger/#claim-labs-unrun" title="Code we wrote and have never executed.">written, not run</a>. For narration of somebody else's compliance standard, hallucination is not a risk worth taking, so the interesting range is the top half.</li><li><strong><code>style</code></strong> costs latency and is worth 0 for most narration. This lab is where you confirm that rather than assume it.</li><li><strong><code>similarity_boost</code></strong> matters most for cloned voices; on a library voice the effect is usually small, which is itself worth measuring once.</li></ul>
+<h2 id="method">Method</h2>
+<p>One knob, five values, everything else pinned, seed fixed at 42 so the read is as repeatable as the vendor allows — the seed is documented as best-effort, which the <a href="/experiments/text-handling/">text-handling lab</a> tests directly.</p>
+<p>Latency is reported but is <strong>not</strong> the point here: a sweep is sequential, so the numbers include whatever your connection was doing at the time. The two columns that matter are <strong>spoken length</strong> — a real, comparable measurement — and <strong>your note</strong>, which is the only column that captures quality.</p>
+<h2 id="what-it-costs">What it costs</h2>
+<p>Five values of a 90-character line is about <strong>$0.045</strong> on v3, half that on flash <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. A full sweep of all four settings is under a quarter of a dollar, which is less than the cost of arguing about it.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

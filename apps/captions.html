@@ -1,0 +1,120 @@
+<div class="lab" id="lab-captions">
+  <section>
+    <h2>1 · Where the timing comes from</h2>
+    <div class="row">
+      <button id="btnGen">Generate a sample and use its alignment</button>
+      <button class="secondary" id="btnPaste">Use pasted JSON instead</button>
+      <span class="est" id="src">No timing loaded.</span>
+    </div>
+    <div class="grid3" style="margin-top:.6rem">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select>
+        <button class="secondary" id="btnVoices" style="margin-top:.4rem">Load voices</button></div>
+      <div><label for="model">Model</label><select id="model"></select></div>
+      <div><label for="text">Text</label><textarea id="text" style="min-height:90px">This is the vault, opened read-only in the SG/Vault browser. The presenter app, the deck, the screenshots and the sources: four megabytes, encrypted before they left the author's machine.</textarea></div>
+    </div>
+    <details style="margin-top:.6rem"><summary class="small dim">Paste an <code>alignment</code> object or a <code>words.json</code> array — this lab works with no key at all</summary>
+      <textarea id="json" class="mono" style="min-height:90px" placeholder='{"characters":["T","h","e"],"character_start_times_seconds":[0,0.03,0.07],"character_end_times_seconds":[0.03,0.07,0.11]}   —or—   [{"w":"The","s":0,"e":0.11}]'></textarea></details>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section>
+    <h2>2 · The cue rule — ours, not the vendor's</h2>
+    <div class="grid3">
+      <div><label>Break over <b id="vChars">84</b> characters <span class="dim">(two lines of 42)</span></label>
+        <input type="range" id="maxChars" min="30" max="140" step="2" value="84"></div>
+      <div><label>Break on a gap over <b id="vGap">0.60</b> s</label>
+        <input type="range" id="gap" min="0.1" max="2" step="0.05" value="0.6"></div>
+      <div><label>Break after <b id="vSecs">6.0</b> s</label>
+        <input type="range" id="maxSecs" min="1" max="12" step="0.5" value="6"></div>
+    </div>
+    <div class="row"><label class="inline" style="margin:0">Wrap each line at <input type="number" id="wrap" value="42" min="20" max="80" style="max-width:5rem"> characters</label>
+      <span class="est" id="cueInfo"></span></div>
+  </section>
+
+  <section>
+    <h2>3 · Cues</h2>
+    <div class="tablewrap" style="max-height:320px;overflow:auto"><table id="cues"><thead><tr><th>#</th><th>in</th><th>out</th><th>dur</th><th>chars</th><th>text</th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button class="secondary" id="btnSrt">Download .srt</button>
+      <button class="secondary" id="btnVtt">Download .vtt</button>
+      <button class="secondary" id="btnWords">Download words.json</button>
+      <button class="secondary" id="btnCopy">Copy SRT</button></div>
+  </section>
+
+  <section>
+    <h2>4 · Karaoke — the reason to want per-word timing at all</h2>
+    <audio id="player" controls></audio>
+    <div class="words" id="words"></div>
+    <p class="small dim">Every word here is positioned by the API's own character timings, not by guessing at speech rate.
+      In the pipeline this came from, the caption band already shows the narration text — this is what it would cost to
+      highlight the word being spoken: nothing, because the timing arrives with the audio.</p>
+  </section>
+
+  <section><h2>5 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var words = [], audioUrl = null;
+
+  EL.fillModels($('model'));
+  ['maxChars', 'gap', 'maxSecs', 'wrap'].forEach(function (id) { $(id).oninput = render; });
+
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('status', v.length + ' voices.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  $('btnGen').onclick = async function () {
+    var voice = $('voice').value; if (!voice) return EL.status('status', 'Load voices and pick one.', 'warn');
+    try {
+      EL.status('status', 'Generating…');
+      var r = await EL.speak({ text: $('text').value.trim(), voice: voice, model: $('model').value, timestamps: true });
+      words = r.words; audioUrl = r.url; $('player').src = r.url;
+      $('src').textContent = 'Timing from a live generation · ' + r.ms + ' ms · ' + EL.money(r.cost);
+      EL.status('status', r.words.length + ' timed words.', 'ok');
+      render();
+    } catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  $('btnPaste').onclick = function () {
+    try {
+      var j = JSON.parse($('json').value);
+      words = Array.isArray(j) ? j : EL.groupWords(j.alignment || j);
+      if (!words.length) throw new Error('no words found in that JSON');
+      audioUrl = null; $('player').removeAttribute('src');
+      $('src').textContent = 'Timing from pasted JSON · ' + words.length + ' words · no key used, nothing sent anywhere';
+      EL.status('status', words.length + ' words parsed locally.', 'ok');
+      render();
+    } catch (e) { EL.status('status', 'Could not read that JSON: ' + e.message, 'err'); }
+  };
+
+  function render() {
+    $('vChars').textContent = $('maxChars').value;
+    $('vGap').textContent = (+$('gap').value).toFixed(2);
+    $('vSecs').textContent = (+$('maxSecs').value).toFixed(1);
+    if (!words.length) return;
+    var cues = EL.buildCues(words, { maxChars: +$('maxChars').value, gap: +$('gap').value, maxSecs: +$('maxSecs').value });
+    var tb = $('cues').querySelector('tbody'); tb.innerHTML = '';
+    cues.forEach(function (c, i) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + (i + 1) + '</td><td class="small">' + EL.tc(c.s, true) + '</td><td class="small">' + EL.tc(c.e, true) +
+        '</td><td class="small">' + (c.e - c.s).toFixed(2) + ' s</td><td class="small">' + c.t.length + '</td><td>' +
+        EL.esc(EL.wrap2(c.t, +$('wrap').value)).replace(/\n/g, '<br>') + '</td>';
+      tb.appendChild(tr);
+    });
+    var durs = cues.map(function (c) { return c.e - c.s; });
+    var over = cues.filter(function (c) { return c.t.length > +$('maxChars').value; }).length;
+    $('cueInfo').textContent = cues.length + ' cues · mean ' + (durs.reduce(function (a, b) { return a + b; }, 0) / cues.length).toFixed(2) +
+      ' s · longest ' + Math.max.apply(null, durs).toFixed(2) + ' s' + (over ? ' · ' + over + ' over the character limit (a single long word)' : '');
+    EL.renderWords($('words'), words);
+    if (audioUrl) EL.karaoke($('player'), $('words'), words);
+    window.__cues = cues;
+  }
+
+  $('btnSrt').onclick = function () { if (window.__cues) EL.download('captions.srt', EL.srt(window.__cues, +$('wrap').value)); };
+  $('btnVtt').onclick = function () { if (window.__cues) EL.download('captions.vtt', EL.vtt(window.__cues, +$('wrap').value)); };
+  $('btnWords').onclick = function () { if (words.length) EL.download('words.json', JSON.stringify(words, null, 1), 'application/json'); };
+  $('btnCopy').onclick = function () { if (window.__cues) EL.copy(EL.srt(window.__cues, +$('wrap').value), 'status'); };
+})();
+</script>

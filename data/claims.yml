@@ -1,0 +1,220 @@
+# The ledger. Every factual claim the site makes lives here once, with the state
+# it earned and the date it earned it. Pages cite a claim with {{claim:id}}, which
+# renders the chip and links back to /ledger/. The "where it is said" column is
+# joined at build time, so a claim cannot quietly appear on a page unbadged.
+#
+# States: verified · measured · docs · spec · unrun · projected  (see build.py STATES)
+
+- id: cors-browser
+  state: verified
+  date: 5 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "`api.elevenlabs.io` answers CORS for browser origins directly. `GET /user/subscription`, `/voices`, `/models` and `POST /text-to-speech/{id}/with-timestamps` all returned 200 from a `null`-origin srcdoc iframe. No proxy is needed for a browser-side lab."
+  source: "The project lead's browser, SG/Vault app frame"
+
+- id: timestamps-roundtrip
+  state: verified
+  date: 5 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "Three `with-timestamps` generations of a 187-character sample on voice `pNInz6obpgDQGcFmaJgB` (premade \"Adam\"), model `eleven_v3`, returned audio plus a per-character alignment."
+  source: "The bench, three samples"
+
+- id: latency-5s
+  state: verified
+  date: 5 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "Those three generations took **5.0–5.8 s each**, wall clock, from a residential connection. Three samples is not a latency distribution; it is three samples."
+  source: "The bench's own timer"
+
+- id: csp-blocks
+  state: verified
+  date: 5 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "Inside the SG/App host, every app frame is served `connect-src blob: data:`, so the bench's first `fetch` was refused before it left the frame. `\"permissions\": {\"network\": true}` in `app.json` omits that meta and the host's HUD then shows a standing \"direct network access\" chip."
+  source: "Console error, then the fix, on the same afternoon"
+
+- id: egress-blocked
+  state: verified
+  date: 4–5 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "`api.elevenlabs.io:443` is refused to the authoring container by the agent proxy (`connect_rejected`, organization policy) — from curl and from Node, on the regional hosts too. Nothing written in that container could be executed there."
+  source: "curl and node, both refused"
+
+- id: keys-local-only
+  state: verified
+  date: 7 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "A key typed into any lab on this site is kept in this browser's `localStorage` (or `sg.state` inside a vault app) and is sent to exactly one host, `api.elevenlabs.io`, in the `xi-api-key` header. There is no other network origin in the built site."
+  source: "Enforced by tools/check_site.py, a required CI check, over the built HTML and JS"
+
+- id: bench-cost
+  state: measured
+  date: 5 Sep 2026
+  group: Measured on our own workloads
+  claim: "The whole bench session cost about **750 characters ≈ $0.075** at list price on `eleven_v3` — four generations of a 187-character sample."
+  source: "Character count × list rate; the subscription counter is the audit"
+
+- id: openrouter-402
+  state: verified
+  date: 3 Sep 2026
+  group: Measured on our own workloads
+  claim: "At $4.79 used against a $5.00 provisioned limit, OpenRouter refused every audio request with `402 — this request requires at least $0.50 in balance for audio output, limit_source: openrouter_key_limit`. **The bound worked.** Raising the limit in the dashboard resumed the work."
+  source: "The render log of two blocked re-renders"
+
+- id: openrouter-cost-aiuc
+  state: measured
+  date: 3 Sep 2026
+  group: Measured on our own workloads
+  claim: "A 3:46 landscape reel — 599 words, 16 requests, `openai/gpt-audio` — cost **$0.2997**; its 2:09 portrait cut, 318 words in 10 requests, cost **$0.1708**. About $0.08 per minute of speech."
+  source: "Priced per generation id from the provider's own endpoint"
+
+- id: openrouter-no-speed
+  state: measured
+  date: 2 Sep 2026
+  group: Measured on our own workloads
+  claim: "`openai/gpt-audio` takes no pace parameter, so a portrait cut that had to fit under YouTube's three-minute Shorts rule lost a third of its script instead of 15% of its pace. ElevenLabs exposes `voice_settings.speed`; that is the reason this page exists at all."
+  source: "Two renders of the same script"
+
+- id: transcript-mismatches
+  state: measured
+  date: 3 Sep 2026
+  group: Measured on our own workloads
+  claim: "Across 61 OpenRouter generations, transcript mismatches: **0**. The provider returns a transcript of what it spoke and it matched the script every time."
+  source: "`transcriptMismatches` in the render log"
+
+- id: no-per-key-spend-limit
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "An ElevenLabs key can be **scoped** to endpoints in the dashboard. There is **no per-key spend limit** for the text-to-speech API: the only bound is the plan's monthly character quota, which belongs to the whole account. Scoping is not bounding."
+  source: "ElevenLabs dashboard and API reference, read 5 Sep 2026"
+
+- id: agents-only-signed-urls
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "\"Never expose your ElevenLabs API key client-side\", the 15-minute signed URL and the exact-hostname allowlist are **Agents** (conversational) features. The text-to-speech REST API has no signed-URL and no allowlist mechanism at all."
+  source: "elevenlabs.io/docs/eleven-agents/customization/authentication, read 5 Sep 2026"
+
+- id: tts-prices
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "List price, September 2026: `eleven_v3` and `eleven_multilingual_v2` **$0.10 per 1,000 characters**; `eleven_flash_v2_5` and `eleven_turbo_v2_5` **$0.05**. Speech-to-text and forced alignment $0.22 per hour of audio; sound effects $0.12/min; music $0.15/min; dubbing $0.33 (v1) / $2.20 (v2) per minute."
+  source: "elevenlabs.io/pricing/api, read 5 Sep 2026. Prices move; this one has a date on it"
+
+- id: plan-quotas
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "Monthly character quotas: Starter $6 — 10k · Creator $22 — 220k · Pro $99 — 990k, with pay-as-you-go above quota. `GET /v1/user/subscription` reports `character_count`, `character_limit` and the reset date."
+  source: "elevenlabs.io/pricing/api and the API reference, read 5 Sep 2026"
+
+- id: char-limits
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "Characters per request: `eleven_v3` 5,000 · `eleven_multilingual_v2` 10,000 · `eleven_flash_v2_5` and `eleven_turbo_v2_5` 40,000."
+  source: "elevenlabs.io/docs/overview/models, read 5 Sep 2026"
+
+- id: speed-range
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "`voice_settings.speed` accepts **0.7–1.2**, default 1.0; values at the extremes cost quality. A `speed` outside that range is a 422, not a clamp."
+  source: "Text-to-speech best practices, read 5 Sep 2026"
+
+- id: phoneme-models
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "Pronunciation dictionaries take two rule types: **alias** rules work on every model; **phoneme** rules (IPA or CMU Arpabet) are honoured only by `eleven_flash_v2` and `eleven_v3` — other models ignore them silently. Up to 3 dictionary locators per request."
+  source: "Pronunciation dictionary guide, read 5 Sep 2026"
+
+- id: alignment-stt-price
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "`POST /v1/forced-alignment` takes audio (up to 3 GB / 10 hours) plus the transcript as **plain text** (max 675,000 characters, not JSON-wrapped) and returns per-character and per-word timing, priced at the speech-to-text rate of $0.22 per hour of audio."
+  source: "Forced alignment capability page, read 5 Sep 2026"
+
+- id: dialogue-endpoint
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "`POST /v1/text-to-dialogue` (and `/with-timestamps`) takes `inputs: [{text, voice_id}, …]` and renders a multi-speaker exchange in one call with consistent pacing."
+  source: "API reference, read 5 Sep 2026"
+
+- id: api-key-shape
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "Auth is the header `xi-api-key: <key>` — not `Authorization`. Keys are `sk_` followed by 48 hex characters, which is why that shape is in this repository's secret scan."
+  source: "API reference, read 5 Sep 2026"
+
+- id: error-table
+  state: docs
+  date: 5 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "401 bad or missing key · 402 quota exhausted or feature not on this plan · 422 validation (unknown `model_id`, `speed` out of range, bad dictionary locator, text over the model's limit) · 429 concurrency or rate limit · 5xx theirs. The `detail` object in the body says which field."
+  source: "API reference, read 5 Sep 2026"
+
+- id: sg-tts-spec
+  state: spec
+  group: Specified, or written and never run
+  claim: "`sg.tts.speak()` **does not exist**. It is a written specification for a verb the SG/Vault host would gain, so that a vault app could generate speech without ever holding the key. The terms file `.vault/elevenlabs/config.json` is real; the host verb is not."
+  source: "elevenlabs/docs/10-pattern-three-sg-tts.md in the source vault"
+
+- id: shim-unrun
+  state: unrun
+  group: Specified, or written and never run
+  claim: "The render shim (`TTS=elevenlabs` in the video pipeline's `02-render.mjs`) is written and has **never been executed** — the container that wrote it could not reach the API."
+  source: "See the egress claim"
+
+- id: examples-unrun
+  state: unrun
+  group: Specified, or written and never run
+  claim: "Every file in `examples/` — `00-smoke.sh`, `voices.sh`, `tts.sh`, `tts-timestamps.mjs`, `align.sh`, `stt.sh` — is written from the vendor's reference and has never been run against the API by us."
+  source: "Same block"
+
+- id: labs-unrun
+  state: unrun
+  group: Specified, or written and never run
+  claim: "**Every lab on this site is unrun by us.** They were written against the vendor's published request and response shapes by a session with no access to the API and no key. The first person to press a button will know more about whether they work than the people who wrote them."
+  source: "Built 7 Sep 2026 with no API key present at any point"
+
+- id: names-test
+  state: unrun
+  group: Specified, or written and never run
+  claim: "The names-pronunciation test has **not been run**. The bench has had the button since 5 September and nobody has pressed it, so this site cannot say which names `eleven_v3` gets wrong."
+  source: "Nobody has pressed it"
+
+- id: lexicon-hypothesis
+  state: unrun
+  group: Specified, or written and never run
+  claim: "`pronunciations.pls` is a **hypothesis**. It has never been uploaded, and no alias in it has ever been heard. Publish it as a starting point, not as a lexicon that is known to work."
+  source: "Written from the PLS spec; never uploaded"
+
+- id: concurrency-unknown
+  state: unrun
+  group: Specified, or written and never run
+  claim: "The plan's concurrency limit is **unknown to us**. Our render fires 10–16 requests at once, and a 429 mid-render is the likely first failure on a small plan — but we have never provoked one."
+  source: "Never tested; the concurrency lab exists to test it"
+
+- id: cue-rule
+  state: unrun
+  group: Specified, or written and never run
+  claim: "The characters→words→cues grouping rule — break at 84 characters, or a gap over 0.6 s, or 6 s of running time; wrap at the last space before 42 — is ours, not the vendor's. It is arithmetic over the alignment array, and no cue it produced has yet been checked against a human reading of the finished video."
+  source: "Implemented in the bench, the captions lab and tts-timestamps.mjs"
+
+- id: projected-reel-costs
+  state: projected
+  group: Specified, or written and never run
+  claim: "Per-reel ElevenLabs costs for our existing scripts are **projected**: measured word counts × 6 characters per word × the list rate. $0.18–0.36 per landscape reel on v3, half of that on flash. No such render has been paid for."
+  source: "Arithmetic on measured word counts; the workings are on the page"
+
+- id: creator-covers-50
+  state: projected
+  group: Specified, or written and never run
+  claim: "At about 4,000 characters per video, a Creator plan's 220k monthly characters is roughly **50 videos a month**. Arithmetic, not experience — we have never run a month of it."
+  source: "220,000 ÷ 4,000, against measured script sizes"

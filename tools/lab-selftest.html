@@ -1,0 +1,88 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>lab.js self-test</title>
+<!-- Not part of the site: this file lives in tools/ and is never published.
+     It exercises the shared lab runtime without touching the network — the key
+     store, the alignment arithmetic and the SRT/VTT formatting. Run it with
+     tools/test-labs.sh. -->
+<script src="../assets/lab.js"></script>
+<pre id="out">running…</pre>
+<script>
+(function () {
+  var pass = 0, fail = 0, lines = [];
+  function is(name, got, want) {
+    var ok = JSON.stringify(got) === JSON.stringify(want);
+    ok ? pass++ : fail++;
+    lines.push((ok ? 'PASS ' : 'FAIL ') + name + (ok ? '' : '\n     got  ' + JSON.stringify(got) + '\n     want ' + JSON.stringify(want)));
+  }
+  function ok(name, cond) { is(name, !!cond, true); }
+
+  // --- the key store: several keys, named, switchable, in localStorage only
+  EL.keys.clear();
+  is('empty store', EL.keys.all(), []);
+  is('no key', EL.key(), '');
+  var a = EL.keys.add('scoped', 'sk_TEST_A');
+  var b = EL.keys.add('full', 'sk_TEST_B');
+  is('two keys held', EL.keys.all().length, 2);
+  is('the newest is active', EL.key(), 'sk_TEST_B');
+  EL.keys.use(a);
+  is('switching keys', EL.key(), 'sk_TEST_A');
+  ok('stored in localStorage under el.keys.v1', (localStorage.getItem('el.keys.v1') || '').indexOf('sk_TEST_A') > 0);
+  EL.keys.remove(a);
+  is('removing the active key falls back', EL.key(), 'sk_TEST_B');
+  EL.keys.remove(b);
+  is('store empties', EL.keys.all(), []);
+  is('localStorage is cleared with it', (localStorage.getItem('el.keys.v1') || '').indexOf('sk_TEST') , -1);
+  ok('hasKey is false with nothing stored', EL.hasKey() === false);
+
+  // --- characters -> words
+  var al = {
+    characters:                    ['T', 'h', 'e', ' ', 'v', 'a', 'u', 'l', 't', '.'],
+    character_start_times_seconds: [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+    character_end_times_seconds:   [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+  };
+  var w = EL.groupWords(al);
+  is('two words', w.length, 2);
+  is('first word', w[0].w, 'The');
+  is('word start is its first character start', w[0].s, 0);
+  is('word end is its last character end', +w[1].e.toFixed(2), 1);
+  is('punctuation stays attached', w[1].w, 'vault.');
+  is('empty alignment is not a crash', EL.groupWords(null), []);
+
+  // --- words -> cues
+  var words = [
+    { w: 'one', s: 0, e: 0.5 }, { w: 'two', s: 0.55, e: 1 },
+    { w: 'three', s: 3.0, e: 3.4 },                      // a 2 s gap: must break
+    { w: 'four', s: 3.45, e: 3.9 }
+  ];
+  is('a gap over the threshold breaks the cue', EL.buildCues(words, { gap: 0.6 }).length, 2);
+  is('a large gap threshold keeps one cue', EL.buildCues(words, { gap: 5, maxSecs: 99 }).length, 1);
+  is('the character limit breaks the cue', EL.buildCues(words, { gap: 5, maxSecs: 99, maxChars: 12 }).length, 2);
+  is('a tighter character limit breaks it again', EL.buildCues(words, { gap: 5, maxSecs: 99, maxChars: 8 }).length, 3);
+  is('the duration limit breaks the cue', EL.buildCues(words, { gap: 5, maxSecs: 2 }).length, 2);
+
+  // --- formatting
+  is('srt timecode', EL.tc(3661.5, true), '01:01:01,500');
+  is('vtt timecode', EL.tc(1.25), '00:00:01.250');
+  var srt = EL.srt(EL.buildCues(words, { gap: 0.6 }));
+  ok('srt is numbered from 1', srt.indexOf('1\n00:00:00,000 --> 00:00:01,000') === 0);
+  ok('vtt has its header', EL.vtt([{ s: 0, e: 1, t: 'x' }]).indexOf('WEBVTT') === 0);
+  is('wrap at the last space', EL.wrap2('aaa bbb ccc', 7), 'aaa bbb\nccc');
+  is('no wrap when it fits', EL.wrap2('short', 40), 'short');
+
+  // --- money
+  is('rate for v3', EL.estimate(1000, 'eleven_v3'), 0.1);
+  is('rate for flash', EL.estimate(2000, 'eleven_flash_v2_5'), 0.1);
+  is('unknown model falls back to the dearer rate', EL.estimate(1000, 'nope'), 0.1);
+  is('small money keeps four places', EL.money(0.075), '$0.0750');
+
+  // --- markdown export
+  var md = EL.toMarkdown(['a', 'b'], [[1, 'x|y']], 'T');
+  ok('markdown has a title', md.indexOf('### T') === 0);
+  ok('markdown escapes pipes', md.indexOf('x\\|y') > 0);
+  ok('markdown says the run is unverified', md.indexOf('unverified') > 0);
+
+  document.getElementById('out').textContent =
+    lines.join('\n') + '\n\n' + (fail ? 'RESULT FAIL ' : 'RESULT PASS ') + pass + ' passed, ' + fail + ' failed';
+})();
+</script>

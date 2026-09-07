@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Key scope and quota probe &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="Read-only probes of every endpoint class your key can reach, plus the subscription object — and the field that does not exist anywhere in it: a per-key spend limit.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/experiments/key-scope/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="elevenlabs.providers.sgit.ai">
+<meta property="og:url" content="https://elevenlabs.providers.sgit.ai/experiments/key-scope/">
+<meta property="og:title" content="Key scope and quota probe">
+<meta property="og:description" content="Read-only probes of every endpoint class your key can reach, plus the subscription object — and the field that does not exist anywhere in it: a per-key spend limit.">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/lab.js"></script>
+</head>
+<body data-lab="1">
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Key scope and quota probe</p>
+<h1>Key scope and quota probe</h1>
+<p class="lead">Eight <code>GET</code> requests, no generation, no spend. What comes back tells you what your key may <strong>do</strong>. What does not come back — anywhere in the API — is any way to cap what it may <strong>cost</strong>. That absence is the whole argument of this site, made empirically rather than asserted.</p>
+
+<aside class="toc"><b>On this page</b><a class="lv2" href="#scoped-is-not-bounded">Scoped is not bounded</a><a class="lv2" href="#how-to-read-the-probe">How to read the probe</a><a class="lv2" href="#the-tile-that-says-none">The tile that says &quot;none&quot;</a></aside>
+<div class="patternbox">
+  <div class="ttl">Which pattern this is — read before you paste anything</div>
+  <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
+  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
+  is empty until you fill it.</p>
+  <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
+  except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
+  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  and it does not exist yet.</p>
+</div>
+<div id="keybar" class="keybar"></div>
+
+<div class="lab" id="lab-scope">
+  <section>
+    <h2>1 · Probe — reads only, no generation, no spend</h2>
+    <p class="small">Every request this lab makes is a <code>GET</code>. Nothing here generates audio and nothing here
+      costs a character. What comes back tells you what your key may <em>do</em> — and, more usefully, what nothing in
+      the API will tell you: how much it may <em>spend</em>.</p>
+    <div class="row"><button id="btnProbe">Probe this key</button>
+      <button class="secondary" id="btnMd">Copy as markdown</button>
+      <span class="est" id="info"></span></div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section>
+    <h2>2 · What the key reaches</h2>
+    <div class="tablewrap"><table id="tbl"><thead><tr><th>Endpoint</th><th>What it would grant</th><th>Status</th><th>Reading</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>3 · The quota — the only bound there is</h2>
+    <div class="tiles tiles-sm" id="tiles"></div>
+    <div class="kv" id="sub"></div>
+    <div class="note" style="margin-top:.9rem"><p><b>Look for what is missing.</b> The subscription object reports characters
+      used, characters allowed and the reset date — for <em>the account</em>. There is no per-key spend field in it, because
+      there is no per-key spend limit to report. Scoping a key restricts which of the rows above it can reach; it does not
+      cap what it can cost. That is the difference between <em>scoped</em> and <em>bounded</em>, and it is the reason
+      pattern 1 has no implementation here.</p></div>
+  </section>
+
+  <section><h2>4 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var PROBES = [
+    { path: '/user/subscription', grants: 'read the account’s plan and quota', need: 'always available' },
+    { path: '/user', grants: 'read the account identity', need: 'user read' },
+    { path: '/voices', grants: 'list voices — needed by every generation lab', need: 'voices read' },
+    { path: '/models', grants: 'list models the account may use', need: 'models read' },
+    { path: '/pronunciation-dictionaries?page_size=1', grants: 'read and attach lexicons', need: 'dictionaries read' },
+    { path: '/history?page_size=1', grants: 'read past generations — including their text', need: 'history read' },
+    { path: '/dubbing?page_size=1', grants: 'dubbing jobs — a key for narration does not need this', need: 'dubbing read' },
+    { path: '/shared-voices?page_size=1', grants: 'the public voice library', need: 'voices read' }
+  ];
+  var results = [];
+
+  $('btnProbe').onclick = async function () {
+    results = []; $('tbl').querySelector('tbody').innerHTML = '';
+    EL.status('status', 'Probing…');
+    for (var i = 0; i < PROBES.length; i++) {
+      var p = PROBES[i], out = { p: p };
+      try { await EL.get(p.path); out.status = 200; out.reading = 'reachable with this key'; }
+      catch (e) {
+        out.status = e.status || 'network';
+        out.reading = e.status === 401 ? 'key rejected — check the header name is xi-api-key'
+          : e.status === 403 ? 'scoped out, or not on this plan — good, if you did that deliberately'
+          : e.status === 404 ? 'no such endpoint on this account'
+          : e.status === 429 ? 'rate limited — try again in a moment'
+          : 'failed: ' + (e.detail || e.message || '').slice(0, 80);
+      }
+      results.push(out); draw();
+    }
+    try {
+      var sub = await EL.get('/user/subscription');
+      var used = sub.character_count, limit = sub.character_limit;
+      $('sub').innerHTML = Object.keys(sub).filter(function (k) { return typeof sub[k] !== 'object'; })
+        .map(function (k) { return '<b>' + EL.esc(k) + '</b><span>' + EL.esc(String(sub[k])) + '</span>'; }).join('');
+      $('tiles').innerHTML =
+        '<div class="tile"><b>' + (sub.tier || '?') + '</b><span>plan tier</span></div>' +
+        '<div class="tile"><b>' + (limit ? Math.round((used / limit) * 100) + '%' : '?') + '</b><span>of this cycle’s characters used</span><em>' +
+          (used != null ? used.toLocaleString() : '?') + ' of ' + (limit != null ? limit.toLocaleString() : '?') + '</em></div>' +
+        '<div class="tile"><b>' + (limit != null ? EL.money((limit - used) / 1000 * 0.10) : '?') + '</b><span>value left this cycle at the v3 rate</span></div>' +
+        '<div class="tile hot"><b>none</b><span>per-key spend limit — the field does not exist</span></div>';
+      EL.status('status', 'Probed ' + results.length + ' endpoints. No audio was generated; no characters were spent.', 'ok');
+    } catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  function draw() {
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    results.forEach(function (r) {
+      var ok = r.status === 200;
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><code>' + EL.esc(r.p.path.split('?')[0]) + '</code></td><td class="small">' + EL.esc(r.p.grants) + '</td>' +
+        '<td class="small"' + (ok ? '' : ' style="color:#b45309;font-weight:600"') + '>' + (ok ? '✓ 200' : '✗ ' + r.status) + '</td>' +
+        '<td class="small dim">' + EL.esc(r.reading) + '</td>';
+      tb.appendChild(tr);
+    });
+    $('info').textContent = results.filter(function (r) { return r.status === 200; }).length + ' of ' + results.length + ' reachable';
+  }
+
+  $('btnMd').onclick = function () {
+    EL.copy(EL.toMarkdown(['Endpoint', 'Grants', 'Status', 'Reading'],
+      results.map(function (r) { return ['`' + r.p.path.split('?')[0] + '`', r.p.grants, r.status, r.reading]; }),
+      'Key scope probe'), 'status');
+  };
+})();
+</script>
+
+<h2 id="scoped-is-not-bounded">Scoped is not bounded</h2>
+<p>A key can be restricted in the dashboard to the endpoints it needs. A key for a render pipeline needs text-to-speech and voices-read; it does not need dubbing, voice creation, or history — and history is worth thinking about, because it holds the <strong>text</strong> of everything the account has ever generated.</p>
+<p>Scoping limits <em>what a leaked key can do</em>. It does nothing at all to limit <em>how much of the account's quota it can burn</em> <a class="chip st-d" href="/ledger/#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. There is no per-key spend limit, no daily window, and nothing that resets faster than the billing cycle <a class="chip st-d" href="/ledger/#claim-plan-quotas" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</p>
+<p>That is the difference between this vendor and the sibling one, and it is not a matter of degree. On the sibling provider a key carries a number you chose, and when the spend reaches it the platform refuses — we have the 402 to prove it <a class="chip st-v" href="/ledger/#claim-openrouter-402" title="Verified by execution on this date, by us.">verified 3 Sep 2026</a>. Here, the only refusal comes when the account's month runs out.</p>
+<h2 id="how-to-read-the-probe">How to read the probe</h2>
+<ul><li><strong>200</strong> — the key reaches this class of endpoint. If you did not intend it to, tighten the key in the dashboard and re-run.</li><li><strong>403</strong> — scoped out, or not on this plan. On a narrowly-scoped key, most rows <em>should</em> be 403; a table of 200s means a key that can do everything, which is what a leak would then be able to do.</li><li><strong>401</strong> on everything — the key is wrong, revoked, or sent under the wrong header name; auth is <code>xi-api-key</code>, not <code>Authorization</code> <a class="chip st-d" href="/ledger/#claim-api-key-shape" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</li></ul>
+<h2 id="the-tile-that-says-none">The tile that says "none"</h2>
+<p>The fourth tile in section 3 has no data behind it, because there is no field to read. Every other number on that row comes from <code>GET /v1/user/subscription</code>: characters used, characters allowed, the reset date — all <strong>account-level</strong> <a class="chip st-d" href="/ledger/#claim-plan-quotas" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. The API has no concept of a per-key budget, so a lab cannot show you one.</p>
+<p>That is the empirical form of the claim the <a href="/#5-the-bounding-primitive">report</a> makes in prose, and it is why <a href="/patterns/">pattern 1</a> is marked unavailable in <a href="/comparison/">the comparison</a> rather than merely discouraged.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Voice explorer &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="List every voice the key can reach, filter by accent, gender and use case, shortlist candidates, and hear any of them say your own line rather than the vendor&#x27;s demo sentence.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/experiments/voices/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="elevenlabs.providers.sgit.ai">
+<meta property="og:url" content="https://elevenlabs.providers.sgit.ai/experiments/voices/">
+<meta property="og:title" content="Voice explorer">
+<meta property="og:description" content="List every voice the key can reach, filter by accent, gender and use case, shortlist candidates, and hear any of them say your own line rather than the vendor&#x27;s demo sentence.">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/lab.js"></script>
+</head>
+<body data-lab="1">
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl here" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / <a href="/experiments/">experiments</a> / Voice explorer</p>
+<h1>Voice explorer</h1>
+<p class="lead">The vendor's library is large and the useful part of it is small. This lab lists what <strong>your</strong> key can reach, filters it down, and makes each candidate say <strong>your</strong> line — because a voice that sounds excellent reading a marketing sentence can still mangle a product name.</p>
+
+<aside class="toc"><b>On this page</b><a class="lv2" href="#what-this-tests">What this tests</a><a class="lv2" href="#method-and-its-one-deliberate-omission">Method, and its one deliberate omission</a><a class="lv2" href="#what-we-know-and-what-we-do-not">What we know, and what we do not</a><a class="lv2" href="#what-it-costs">What it costs</a></aside>
+<div class="patternbox">
+  <div class="ttl">Which pattern this is — read before you paste anything</div>
+  <p><b>Your own full key, in your own browser, bounded only by your plan's monthly quota.</b> That is
+  <a href="/patterns/">pattern 0 with a ceiling</a>: the narrow case where it is defensible — the key's owner, testing
+  their own key, on their own device — and <b>not a pattern to publish</b>. No key ships in this page: the field below
+  is empty until you fill it.</p>
+  <p>ElevenLabs offers no per-key spend limit for text to speech, so nothing here caps what a leaked key could cost you
+  except the account's own quota. Use a key <b>scoped in the dashboard to the endpoints this lab needs</b>, and forget it
+  when you are done. The version of this page with no key box at all is <a href="/pattern-three/">pattern three</a>,
+  and it does not exist yet.</p>
+</div>
+<div id="keybar" class="keybar"></div>
+
+<div class="lab" id="lab-voices">
+  <section>
+    <h2>1 · Load the library</h2>
+    <div class="row"><button id="btnLoad">Load voices</button>
+      <button class="secondary" id="btnMd">Copy the shortlist as markdown</button>
+      <span class="est" id="loadInfo"></span></div>
+    <div class="status" id="status">Nothing loaded. <code>GET /v1/voices</code> is a read: it costs nothing and generates no audio.</div>
+  </section>
+
+  <section>
+    <h2>2 · Filter</h2>
+    <div class="grid3">
+      <div><label for="q">Search name, description or use case</label><input type="text" id="q" placeholder="narration, calm, british…"></div>
+      <div><label for="fCat">Category</label><select id="fCat"><option value="">any</option></select></div>
+      <div><label for="fAcc">Accent</label><select id="fAcc"><option value="">any</option></select></div>
+    </div>
+    <div class="grid3">
+      <div><label for="fGen">Gender</label><select id="fGen"><option value="">any</option></select></div>
+      <div><label for="fUse">Use case</label><select id="fUse"><option value="">any</option></select></div>
+      <div><label class="inline" style="margin-top:1.6rem"><input type="checkbox" id="fShort"> shortlisted only</label></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 · The library <span class="dim" id="count"></span></h2>
+    <div style="max-height:520px;overflow:auto">
+      <table id="tbl"><thead><tr><th></th><th>Voice</th><th>Category</th><th>Labels</th><th>voice_id</th><th>Hear it</th></tr></thead><tbody></tbody></table>
+    </div>
+    <p class="small dim">The vendor returns a <code>preview_url</code> for most voices, hosted on their own CDN. This page
+      deliberately does not fetch it: the claim that these labs call exactly one host would stop being true. Copy the link
+      and open it yourself, or spend a cent hearing the voice say a line of <em>your</em> text — which is the more useful test anyway.</p>
+  </section>
+
+  <section>
+    <h2>4 · Hear one, on your own line</h2>
+    <label for="line">The line to speak — keep it short; you pay per character</label>
+    <textarea id="line" style="min-height:70px">This is the vault, opened read-only in the SG/Vault browser.</textarea>
+    <div class="row"><select id="model" style="max-width:22rem"></select>
+      <span class="est"><b id="chars">0</b> chars · <b id="cost">$0.000</b> per voice tried</span></div>
+    <div class="status" id="genStatus"></div>
+    <audio id="player" controls></audio>
+  </section>
+
+  <section><h2>5 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var SHORT = 'el.shortlist.v1';
+  var voices = [];
+  var shortlist = load();
+
+  function load() { try { return JSON.parse(localStorage.getItem(SHORT) || '{}'); } catch (e) { return {}; } }
+  function save() { try { localStorage.setItem(SHORT, JSON.stringify(shortlist)); } catch (e) {} }
+
+  EL.fillModels($('model'));
+  function est() { var n = $('line').value.length; $('chars').textContent = n; $('cost').textContent = EL.money(EL.estimate(n, $('model').value)); }
+  $('line').oninput = est; $('model').onchange = est; est();
+
+  $('btnLoad').onclick = async function () {
+    try {
+      EL.status('status', 'Loading…');
+      voices = await EL.loadVoices(null);
+      fillFilters(); draw();
+      EL.status('status', voices.length + ' voices on this account. Nothing was generated; nothing was charged.', 'ok');
+      $('loadInfo').textContent = voices.filter(function (v) { return v.category === 'premade'; }).length + ' premade · ' +
+        voices.filter(function (v) { return v.category !== 'premade'; }).length + ' your own';
+    } catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  function fillFilters() {
+    var sets = { fCat: {}, fAcc: {}, fGen: {}, fUse: {} };
+    voices.forEach(function (v) {
+      var l = v.labels || {};
+      if (v.category) sets.fCat[v.category] = 1;
+      if (l.accent) sets.fAcc[l.accent] = 1;
+      if (l.gender) sets.fGen[l.gender] = 1;
+      if (l.use_case) sets.fUse[l.use_case] = 1;
+    });
+    Object.keys(sets).forEach(function (id) {
+      $(id).innerHTML = '<option value="">any</option>' + Object.keys(sets[id]).sort().map(function (v) {
+        return '<option>' + EL.esc(v) + '</option>';
+      }).join('');
+      $(id).onchange = draw;
+    });
+  }
+  $('q').oninput = draw; $('fShort').onchange = draw;
+
+  function matches(v) {
+    var l = v.labels || {}, q = $('q').value.trim().toLowerCase();
+    if ($('fShort').checked && !shortlist[v.voice_id]) return false;
+    if ($('fCat').value && v.category !== $('fCat').value) return false;
+    if ($('fAcc').value && l.accent !== $('fAcc').value) return false;
+    if ($('fGen').value && l.gender !== $('fGen').value) return false;
+    if ($('fUse').value && l.use_case !== $('fUse').value) return false;
+    if (!q) return true;
+    return JSON.stringify([v.name, v.description || '', l]).toLowerCase().indexOf(q) >= 0;
+  }
+
+  function draw() {
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    var shown = voices.filter(matches);
+    shown.forEach(function (v) {
+      var l = v.labels || {};
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><input type="checkbox" data-star="' + EL.esc(v.voice_id) + '"' + (shortlist[v.voice_id] ? ' checked' : '') + ' title="shortlist"></td>' +
+        '<td><b>' + EL.esc(v.name) + '</b><br><span class="small dim">' + EL.esc((v.description || '').slice(0, 90)) + '</span></td>' +
+        '<td class="small">' + EL.esc(v.category || '') + '</td>' +
+        '<td class="small">' + [l.accent, l.gender, l.age, l.use_case].filter(Boolean).map(EL.esc).join(' · ') + '</td>' +
+        '<td class="small"><code>' + EL.esc(v.voice_id) + '</code></td>' +
+        '<td><button class="secondary" data-say="' + EL.esc(v.voice_id) + '">Speak my line</button>' +
+        (v.preview_url ? ' <button class="secondary" data-copy="' + EL.esc(v.preview_url) + '" title="copy the vendor-hosted preview URL">link</button>' : '') + '</td>';
+      tb.appendChild(tr);
+    });
+    $('count').textContent = '— ' + shown.length + ' shown, ' + Object.keys(shortlist).length + ' shortlisted';
+    tb.querySelectorAll('[data-star]').forEach(function (el) {
+      el.onchange = function () {
+        var id = el.getAttribute('data-star');
+        if (el.checked) shortlist[id] = (voices.filter(function (v) { return v.voice_id === id; })[0] || {}).name || id;
+        else delete shortlist[id];
+        save(); draw();
+      };
+    });
+    tb.querySelectorAll('[data-say]').forEach(function (el) { el.onclick = function () { say(el.getAttribute('data-say')); }; });
+    tb.querySelectorAll('[data-copy]').forEach(function (el) { el.onclick = function () { EL.copy(el.getAttribute('data-copy'), 'genStatus'); }; });
+  }
+
+  async function say(voice) {
+    var text = $('line').value.trim(); if (!text) return;
+    EL.status('genStatus', 'Generating on ' + voice + '…');
+    try {
+      var r = await EL.speak({ text: text, voice: voice, model: $('model').value, timestamps: false });
+      $('player').src = r.url; $('player').play().catch(function () {});
+      EL.status('genStatus', 'Spoke ' + r.chars + ' characters in ' + r.ms + ' ms · estimated ' + EL.money(r.cost), 'ok');
+    } catch (e) { EL.status('genStatus', e.message, 'err'); }
+  }
+
+  $('btnMd').onclick = function () {
+    var rows = Object.keys(shortlist).map(function (id) {
+      var v = voices.filter(function (x) { return x.voice_id === id; })[0] || {};
+      var l = v.labels || {};
+      return [v.name || shortlist[id], '`' + id + '`', v.category || '', [l.accent, l.gender, l.use_case].filter(Boolean).join(' · ')];
+    });
+    EL.copy(EL.toMarkdown(['Voice', 'voice_id', 'Category', 'Labels'], rows, 'Voice shortlist'), 'status');
+  };
+})();
+</script>
+
+<h2 id="what-this-tests">What this tests</h2>
+<p>Whether a voice is right for a workload is not answerable from a name and a preview clip. This lab answers three narrower questions that are:</p>
+<ol><li><strong>What does this key actually reach?</strong> <code>premade</code> library voices, your own clones, anything shared with the account — the list is per-account, so it is a fact about your key, not about the vendor.</li><li><strong>How does a candidate handle the words you actually use?</strong> The line in section 4 defaults to a real sentence from a real script. Swap it for the worst one you have: the one with a product name, an initialism and a version number in it.</li><li><strong>Which three are worth a real comparison?</strong> The shortlist is kept in this browser's <code>localStorage</code> and exports as markdown, so the decision can be recorded somewhere durable instead of in a browser tab.</li></ol>
+<h2 id="method-and-its-one-deliberate-omission">Method, and its one deliberate omission</h2>
+<p>The vendor returns a <code>preview_url</code> for most voices, on their own CDN. <strong>This lab does not fetch it.</strong> Every page on this site claims to call exactly one host <a class="chip st-v" href="/ledger/#claim-keys-local-only" title="Verified by execution on this date, by us.">verified 7 Sep 2026</a>, and quietly loading audio from a second one would make that claim false. The link is there to copy; the honest test is a generation of your own text, which costs about a cent and tells you more.</p>
+<p>Shortlisting writes nothing to the network. Listing voices is a read and costs nothing <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</p>
+<h2 id="what-we-know-and-what-we-do-not">What we know, and what we do not</h2>
+<p>We know the endpoint answers from a browser, because we watched it do so <a class="chip st-v" href="/ledger/#claim-cors-browser" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>. We know nothing at all about which voice suits this workload: the evaluation that produced this site used the premade "Adam" voice for every sample because it was the first one in the list, which is not a choice, it is an absence of one <a class="chip st-v" href="/ledger/#claim-timestamps-roundtrip" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>.</p>
+<p>For narration of technical explainers, the labels worth filtering on are <code>use_case: narration</code> or <code>informative_educational</code>, and a neutral accent. That is a starting hypothesis from the vendor's own metadata <a class="chip st-u" href="/ledger/#claim-labs-unrun" title="Code we wrote and have never executed.">written, not run</a>, not a finding.</p>
+<h2 id="what-it-costs">What it costs</h2>
+<p>Listing is free. Each "speak my line" is one generation of your text — around <strong>$0.006 for a 60-character line</strong> on flash, twice that on v3 <a class="chip st-d" href="/ledger/#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. Trying eight voices on one line costs less than a bus fare and settles an argument that otherwise runs for a week.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

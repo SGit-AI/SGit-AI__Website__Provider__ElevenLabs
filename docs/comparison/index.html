@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Comparison — provider × pattern &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="One row per provider and product, one column per credential pattern. Generated from the front-matter of each provider page, so a new provider is one Markdown file rather than a table edit.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/comparison/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="elevenlabs.providers.sgit.ai">
+<meta property="og:url" content="https://elevenlabs.providers.sgit.ai/comparison/">
+<meta property="og:title" content="Comparison — provider × pattern">
+<meta property="og:description" content="One row per provider and product, one column per credential pattern. Generated from the front-matter of each provider page, so a new provider is one Markdown file rather than a table edit.">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<script src="/assets/site.js" defer></script>
+</head>
+<body>
+<nav class="site"><div class="row"><a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site's pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="/versions/" title="Site release history">v0.1.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="/">The report</a></div><div class="ni"><a class="nl" href="/experiments/">Experiments</a></div><div class="ni"><a class="nl" href="/bench/">Bench</a></div><div class="ni"><a class="nl" href="/patterns/">Patterns</a></div><div class="ni"><a class="nl here" href="/comparison/">Comparison</a></div><div class="ni"><a class="nl" href="/ledger/">Ledger</a></div><div class="ni"><a class="nl" href="/disclosures/">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<main class="doc">
+<p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a> / Comparison — provider × pattern</p>
+<h1>Comparison — provider × pattern</h1>
+<p class="lead">One row per provider and product, one column per pattern. <strong>This table is generated</strong> at build time from the <code>patterns:</code> front-matter on each provider page — the hand-written version of it drifted the moment a second provider appeared.</p>
+<p class="prov">Prose from the video vault at commit <code>7d1916aca5f3</code>, 7 September 2026.  When the vault moves ahead, this page is behind &mdash; and says so rather than guessing.</p>
+
+<div class="tablewrap"><table class="cmp"><thead><tr><th>Provider</th><th>Product</th><th>0 &middot; key in the page</th><th>1 &middot; bounded key in the page</th><th>2 &middot; short-lived token</th><th>3 &middot; host holds the key</th><th>Needs a server for the safe pattern</th></tr></thead><tbody><tr><th scope="row"><a href="/">ElevenLabs</a></th><td>Text to speech (REST)</td><td title="available and never acceptable"><span class="v v-never">&#9888;</span><span class="vnote">CORS allows it; the account quota is the only bound</span></td><td title="unavailable"><span class="v v-no">&times;</span><span class="vnote">no per-key spend limit exists</span></td><td title="available"><span class="v v-yes">&check;</span><span class="vnote">only with a server we run</span></td><td title="specified here, not shipped"><span class="v v-spec">&#9686;</span><span class="vnote">sg.tts specified; terms file in the vault</span></td><td>Yes — ours, until sg.tts ships</td></tr><tr><th scope="row"><a href="/">ElevenLabs</a></th><td>Agents (conversational)</td><td title="available and never acceptable"><span class="v v-never">&#9888;</span><span class="vnote">the vendor forbids it explicitly</span></td><td title="unavailable"><span class="v v-no">&times;</span><span class="vnote">no bounded key to mint</span></td><td title="available"><span class="v v-yes">&check;</span><span class="vnote">vendor signed URL, 15 min; or a hostname allowlist — not both</span></td><td title="not applicable"><span class="v v-na">&mdash;</span><span class="vnote">not attempted</span></td><td>Yes — the vendor&#x27;s minter holds your key</td></tr><tr><th scope="row"><a href="/providers/openrouter/">OpenRouter</a></th><td>Chat and audio models</td><td title="available and never acceptable"><span class="v v-never">&#9888;</span><span class="vnote">possible; never acceptable</span></td><td title="available"><span class="v v-yes">&check;</span><span class="vnote">provisioned key with a limit and a reset</span></td><td title="available"><span class="v v-yes">&check;</span><span class="vnote">with a server, and not needed</span></td><td title="available"><span class="v v-yes">&check;</span><span class="vnote">shipped: sg.llm.* in the SG/Vault host</span></td><td>No</td></tr></tbody></table></div><p class="small dim legend"><span class="v v-yes">&check;</span> available &middot; <span class="v v-no">&times;</span> unavailable &middot; <span class="v v-never">&#9888;</span> available and never acceptable &middot; <span class="v v-spec">&#9686;</span> specified here, not shipped &middot; <span class="v v-na">&mdash;</span> not applicable</p><p class="small dim">Generated at build time from the <code>patterns:</code> front-matter of every provider page. Adding a provider is one Markdown file; this table follows.</p>
+<h2 id="read-down-the-columns">Read down the columns</h2>
+<p><strong>Column 0</strong> is the same everywhere: possible, and never acceptable. It is in the table because "the browser can call it" is what people usually mean by "client-side", and CORS permitting a call says nothing about whether the credential is bounded <a class="chip st-v" href="/ledger/#claim-cors-browser" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>.</p>
+<p><strong>Column 1 is where the two providers part company.</strong> OpenRouter can mint a key with a spend limit and a reset window, so a key in a page has a blast radius you chose. ElevenLabs cannot: scoping restricts <em>what</em> a key may call, never <em>how much</em> it may spend <a class="chip st-d" href="/ledger/#claim-no-per-key-spend-limit" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. There is no product configuration that makes column 1 available for ElevenLabs text to speech, which is why the row says ✗ rather than "not recommended".</p>
+<p><strong>Column 2 needs a server, and the question is whose.</strong> For ElevenLabs Agents the vendor runs the minter — you hand it your key and it issues a 15-minute signed URL <a class="chip st-d" href="/ledger/#claim-agents-only-signed-urls" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>. For ElevenLabs text to speech there is no such endpoint, so the minter would be ours to build, host, secure and pay for. "Available with a server" and "available" are not the same claim, and the last column of the table says which.</p>
+<p><strong>Column 3 is the one this estate can extend to any provider</strong> by adding a verb to the host bridge and a terms file to <code>.vault/</code>. It is shipped for the model router and <a href="/pattern-three/">specified for the voice API</a> <a class="chip st-s" href="/ledger/#claim-sg-tts-spec" title="A specification. It does not exist yet.">specified, not shipped</a>. It is the site's actual argument: <em>a browser application can use a paid API without ever holding the key, because the host holds it and enforces the terms.</em></p>
+<h2 id="how-to-add-a-provider">How to add a provider</h2>
+<p>Write one Markdown file in <code>content/providers/</code> with a <code>patterns:</code> block in its front-matter, and this table grows a row. No template surgery, no edit to this page:</p>
+<pre class="lang-yaml">patterns:
+  - provider: Some Vendor
+    product: The specific product, because a vendor is not one auth story
+    server: &quot;Yes — ours&quot;
+    p0:
+      verdict: never
+      note: &quot;why, in six words&quot;
+    p1:
+      verdict: yes
+      note: &quot;the bound, named&quot;
+    p2:
+      verdict: no
+      note: &quot;no vendor minter for this product&quot;
+    p3:
+      verdict: spec
+      note: &quot;&quot; </pre>
+<p><code>verdict</code> is one of <code>yes</code> · <code>no</code> · <code>never</code> · <code>spec</code> · <code>na</code>. The <a href="/providers/openrouter/">OpenRouter page</a> on this site exists as the proof: it is a stub of the sibling site's content, carrying nothing but front-matter and a short body, and it is where the second and third rows of the table above come from.</p>
+<p class="pagenav"><a href="/ledger/">Every claim on this site, with its state &rarr;</a>
+<a href="/disclosures/">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="verline">site <a href="/versions/">v0.1.0</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="/">ElevenLabs, nine sections</a>
+    <a href="/#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="/examples/">Example files</a>
+    <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="/experiments/">All experiments</a>
+    <a href="/bench/">The test bench</a>
+    <a href="/experiments/captions/">Captions studio</a>
+    <a href="/experiments/concurrency/">Concurrency probe</a>
+    <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="/patterns/">The four patterns</a>
+    <a href="/comparison/">Comparison matrix</a>
+    <a href="/pattern-three/">Pattern three: sg.tts</a>
+    <a href="/ledger/">Claim ledger</a>
+    <a href="/disclosures/">Disclosures</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

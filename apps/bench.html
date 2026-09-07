@@ -1,0 +1,185 @@
+<div class="lab" id="bench">
+  <section>
+    <h2>1 · Connect</h2>
+    <div class="row"><button id="btnConnect">Connect — subscription, voices, models</button>
+      <span class="est" id="connInfo"></span></div>
+    <div class="status" id="connStatus">Not connected. Nothing has been sent anywhere.</div>
+    <div class="kv" id="sub" style="margin-top:.6rem"></div>
+  </section>
+
+  <section>
+    <h2>2 · Voice and model</h2>
+    <div class="grid2">
+      <div>
+        <label for="model">Model</label>
+        <select id="model"></select>
+        <label for="voice">Voice <span class="dim" id="voiceCount"></span></label>
+        <select id="voice"><option value="">— connect to list voices —</option></select>
+        <label for="fmt">Output format</label>
+        <select id="fmt">
+          <option value="mp3_44100_128">mp3_44100_128 (default)</option>
+          <option value="mp3_44100_192">mp3_44100_192 (Creator and above)</option>
+          <option value="mp3_22050_32">mp3_22050_32 (small)</option>
+        </select>
+        <label for="seed">Seed — optional, for a repeatable read</label>
+        <input type="text" id="seed" class="mono" placeholder="e.g. 42" inputmode="numeric">
+      </div>
+      <div>
+        <label>Stability <span id="vStability">0.50</span></label>
+        <input type="range" id="stability" min="0" max="1" step="0.05" value="0.5">
+        <label>Similarity boost <span id="vSim">0.75</span></label>
+        <input type="range" id="similarity" min="0" max="1" step="0.05" value="0.75">
+        <label>Style <span id="vStyle">0.00</span> — costs latency; leave at 0 for narration</label>
+        <input type="range" id="style" min="0" max="1" step="0.05" value="0">
+        <label>Speed <span id="vSpeed">1.00</span> — the vendor's range is 0.7–1.2</label>
+        <input type="range" id="speed" min="0.7" max="1.2" step="0.05" value="1">
+        <label class="inline"><input type="checkbox" id="boost" checked> use_speaker_boost</label>
+        <label>Pronunciation dictionary — optional, <code>id</code> and <code>version</code></label>
+        <div class="row fill"><input type="text" class="mono" id="dictId" placeholder="dictionary id">
+          <input type="text" class="mono" id="dictVer" placeholder="version id"></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 · Text</h2>
+    <textarea id="text">This is the vault, opened read-only in the SG/Vault browser. The presenter app, the deck, the screenshots and the sources: four megabytes, encrypted before they left the author's machine.</textarea>
+    <div class="samplechips" id="samples"></div>
+    <details style="margin-top:.5rem"><summary class="small dim">v3 audio tags — click to insert at the cursor. <code>eleven_v3</code> only, and use them sparingly</summary>
+      <div class="samplechips" id="tags"></div></details>
+    <div class="row" style="margin-top:.8rem">
+      <span class="est"><b id="chars">0</b> characters · estimated <b id="cost">$0.000</b> at this model's list rate</span>
+      <label class="inline" style="margin:0"><input type="checkbox" id="withTs" checked> with timestamps</label>
+      <button id="btnGo">Generate</button>
+    </div>
+    <div class="status" id="genStatus"></div>
+    <audio id="player" controls></audio>
+    <div class="words" id="words"></div>
+  </section>
+
+  <section>
+    <h2>4 · Timing → SRT</h2>
+    <div class="row"><button class="secondary" id="btnSrt">Build SRT from the last generation</button>
+      <button class="secondary" id="btnCopySrt">Copy</button>
+      <button class="secondary" id="btnDlSrt">Download .srt</button>
+      <span class="est" id="tsInfo"></span></div>
+    <textarea id="srt" class="mono" style="min-height:120px" placeholder="Cues appear here: word-grouped from the character alignment, broken at 84 characters, a 0.6 s gap, or 6 seconds."></textarea>
+    <details><summary class="small dim">Word table</summary>
+      <div style="max-height:240px;overflow:auto"><table id="wtab"><thead><tr><th>#</th><th>word</th><th>start</th><th>end</th></tr></thead><tbody></tbody></table></div></details>
+    <p class="small dim">The grouping rule is ours, not the vendor's, and the <a href="/experiments/captions/">captions studio</a> lets you tune it.</p>
+  </section>
+
+  <section>
+    <h2>5 · The names test — one click, then listen</h2>
+    <p class="small">Generates the <b>names to test</b> sample with timestamps on the selected voice and builds a compact
+      report — every word with its timing, the request id, the model — so that what you <em>hear</em> can be written down
+      next to what was <em>sent</em>. This is the open item the whole site keeps pointing at: nobody has pressed this button yet.</p>
+    <div class="row"><button id="btnNames">Run the names test</button>
+      <button class="secondary" id="btnCopyReport">Copy report</button>
+      <span class="est" id="namesInfo"></span></div>
+    <textarea id="report" class="mono" style="min-height:130px" placeholder="report JSON appears here"></textarea>
+  </section>
+
+  <section><h2>6 · Log — every request this page has made</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var last = null;
+
+  EL.fillModels($('model'));
+  EL.sampleChips($('samples'), $('text'), est);
+  EL.TAGS.forEach(function (t) {
+    var s = document.createElement('span'); s.textContent = t;
+    s.onclick = function () { var ta = $('text'); ta.setRangeText(t + ' ', ta.selectionStart, ta.selectionEnd, 'end'); ta.focus(); est(); };
+    $('tags').appendChild(s);
+  });
+  [['stability', 'vStability'], ['similarity', 'vSim'], ['style', 'vStyle'], ['speed', 'vSpeed']].forEach(function (p) {
+    $(p[0]).oninput = function () { $(p[1]).textContent = Number($(p[0]).value).toFixed(2); };
+  });
+  function est() {
+    var n = $('text').value.length;
+    $('chars').textContent = n;
+    $('cost').textContent = EL.money(EL.estimate(n, $('model').value));
+    var limit = EL.LIMITS[$('model').value];
+    EL.status('genStatus', n > limit ? ('Over this model’s per-request limit of ' + limit + ' characters — it will 422.') : '', n > limit ? 'warn' : '');
+  }
+  $('text').oninput = est; $('model').onchange = est; est();
+
+  $('btnConnect').onclick = async function () {
+    try {
+      EL.status('connStatus', 'Connecting…');
+      var sub = await EL.get('/user/subscription');
+      $('sub').innerHTML =
+        '<b>tier</b><span>' + EL.esc(sub.tier || '?') + '</span>' +
+        '<b>characters</b><span>' + (sub.character_count != null ? sub.character_count : '?') + ' / ' + (sub.character_limit != null ? sub.character_limit : '?') + ' this cycle</span>' +
+        '<b>resets</b><span>' + (sub.next_character_count_reset_unix ? new Date(sub.next_character_count_reset_unix * 1000).toLocaleDateString() : '?') + '</span>' +
+        '<b>instant cloning</b><span>' + (sub.can_use_instant_voice_cloning != null ? sub.can_use_instant_voice_cloning : '?') + '</span>';
+      var voices = await EL.loadVoices($('voice'));
+      $('voiceCount').textContent = '(' + voices.length + ')';
+      var models = await EL.get('/models');
+      var have = {}; (models || []).forEach(function (m) { have[m.model_id] = 1; });
+      var missing = EL.MODELS.map(function (m) { return m[0]; }).filter(function (id) { return !have[id]; });
+      EL.status('connStatus', 'Connected. ' + voices.length + ' voices, ' + (models || []).length + ' models.' +
+        (missing.length ? ' Not on this account: ' + missing.join(', ') + '.' : ''), 'ok');
+    } catch (e) { EL.status('connStatus', e.message, 'err'); }
+  };
+
+  $('btnGo').onclick = async function () {
+    var voice = $('voice').value;
+    if (!voice) return EL.status('genStatus', 'Connect and pick a voice first.', 'warn');
+    var text = $('text').value.trim(); if (!text) return;
+    $('btnGo').disabled = true; EL.status('genStatus', 'Generating…');
+    try {
+      var r = await EL.speak({
+        text: text, voice: voice, model: $('model').value, format: $('fmt').value,
+        stability: $('stability').value, similarity: $('similarity').value, style: $('style').value,
+        speed: $('speed').value, boost: $('boost').checked, seed: $('seed').value,
+        dictId: $('dictId').value.trim(), dictVersion: $('dictVer').value.trim(),
+        timestamps: $('withTs').checked
+      });
+      last = r;
+      $('player').src = r.url; $('player').play().catch(function () {});
+      EL.renderWords($('words'), r.words); EL.karaoke($('player'), $('words'), r.words);
+      EL.status('genStatus', r.chars + ' characters → ' + (r.bytes / 1024).toFixed(0) + ' KB in ' + r.ms + ' ms · estimated ' +
+        EL.money(r.cost) + (r.words.length ? ' · ' + r.words.length + ' timed words' : ' · no timestamps requested'), 'ok');
+      $('tsInfo').textContent = r.words.length ? (r.words.length + ' words, ending at ' + r.words[r.words.length - 1].e.toFixed(2) + ' s') : '';
+    } catch (e) { EL.status('genStatus', e.message, 'err'); }
+    finally { $('btnGo').disabled = false; }
+  };
+
+  $('btnSrt').onclick = function () {
+    if (!last || !last.words.length) return EL.status('genStatus', 'Generate with timestamps first.', 'warn');
+    var cues = EL.buildCues(last.words);
+    $('srt').value = EL.srt(cues);
+    var tb = $('wtab').querySelector('tbody'); tb.innerHTML = '';
+    last.words.forEach(function (w, i) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + (i + 1) + '</td><td>' + EL.esc(w.w) + '</td><td>' + w.s.toFixed(3) + '</td><td>' + w.e.toFixed(3) + '</td>';
+      tb.appendChild(tr);
+    });
+    EL.status('genStatus', cues.length + ' cues from ' + last.words.length + ' words.', 'ok');
+  };
+  $('btnCopySrt').onclick = function () { EL.copy($('srt').value, 'genStatus'); };
+  $('btnDlSrt').onclick = function () { if ($('srt').value) EL.download('bench.srt', $('srt').value); };
+
+  $('btnNames').onclick = async function () {
+    $('text').value = EL.SAMPLES['names to test']; $('withTs').checked = true; est();
+    await $('btnGo').onclick();
+    if (!last || !last.words.length) return;
+    var rep = {
+      when: new Date().toISOString(), model: $('model').value,
+      voice: ($('voice').selectedOptions[0] || {}).textContent || $('voice').value, voice_id: $('voice').value,
+      speed: +$('speed').value, stability: +$('stability').value, text: EL.SAMPLES['names to test'],
+      request_id: last.requestId || null, latency_ms: last.ms,
+      words: last.words.map(function (w) { return [w.w, +w.s.toFixed(3), +w.e.toFixed(3)]; }),
+      total_s: +last.words[last.words.length - 1].e.toFixed(2),
+      heard_wrong: '<fill in: which names sounded wrong, and how they should sound>'
+    };
+    $('report').value = JSON.stringify(rep, null, 1);
+    $('namesInfo').textContent = rep.words.length + ' words · ' + rep.total_s + ' s · now listen, fill in heard_wrong, copy';
+  };
+  $('btnCopyReport').onclick = function () { EL.copy($('report').value, 'genStatus'); };
+})();
+</script>

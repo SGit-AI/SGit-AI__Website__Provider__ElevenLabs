@@ -1,0 +1,149 @@
+<div class="lab" id="lab-voices">
+  <section>
+    <h2>1 · Load the library</h2>
+    <div class="row"><button id="btnLoad">Load voices</button>
+      <button class="secondary" id="btnMd">Copy the shortlist as markdown</button>
+      <span class="est" id="loadInfo"></span></div>
+    <div class="status" id="status">Nothing loaded. <code>GET /v1/voices</code> is a read: it costs nothing and generates no audio.</div>
+  </section>
+
+  <section>
+    <h2>2 · Filter</h2>
+    <div class="grid3">
+      <div><label for="q">Search name, description or use case</label><input type="text" id="q" placeholder="narration, calm, british…"></div>
+      <div><label for="fCat">Category</label><select id="fCat"><option value="">any</option></select></div>
+      <div><label for="fAcc">Accent</label><select id="fAcc"><option value="">any</option></select></div>
+    </div>
+    <div class="grid3">
+      <div><label for="fGen">Gender</label><select id="fGen"><option value="">any</option></select></div>
+      <div><label for="fUse">Use case</label><select id="fUse"><option value="">any</option></select></div>
+      <div><label class="inline" style="margin-top:1.6rem"><input type="checkbox" id="fShort"> shortlisted only</label></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>3 · The library <span class="dim" id="count"></span></h2>
+    <div style="max-height:520px;overflow:auto">
+      <table id="tbl"><thead><tr><th></th><th>Voice</th><th>Category</th><th>Labels</th><th>voice_id</th><th>Hear it</th></tr></thead><tbody></tbody></table>
+    </div>
+    <p class="small dim">The vendor returns a <code>preview_url</code> for most voices, hosted on their own CDN. This page
+      deliberately does not fetch it: the claim that these labs call exactly one host would stop being true. Copy the link
+      and open it yourself, or spend a cent hearing the voice say a line of <em>your</em> text — which is the more useful test anyway.</p>
+  </section>
+
+  <section>
+    <h2>4 · Hear one, on your own line</h2>
+    <label for="line">The line to speak — keep it short; you pay per character</label>
+    <textarea id="line" style="min-height:70px">This is the vault, opened read-only in the SG/Vault browser.</textarea>
+    <div class="row"><select id="model" style="max-width:22rem"></select>
+      <span class="est"><b id="chars">0</b> chars · <b id="cost">$0.000</b> per voice tried</span></div>
+    <div class="status" id="genStatus"></div>
+    <audio id="player" controls></audio>
+  </section>
+
+  <section><h2>5 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var SHORT = 'el.shortlist.v1';
+  var voices = [];
+  var shortlist = load();
+
+  function load() { try { return JSON.parse(localStorage.getItem(SHORT) || '{}'); } catch (e) { return {}; } }
+  function save() { try { localStorage.setItem(SHORT, JSON.stringify(shortlist)); } catch (e) {} }
+
+  EL.fillModels($('model'));
+  function est() { var n = $('line').value.length; $('chars').textContent = n; $('cost').textContent = EL.money(EL.estimate(n, $('model').value)); }
+  $('line').oninput = est; $('model').onchange = est; est();
+
+  $('btnLoad').onclick = async function () {
+    try {
+      EL.status('status', 'Loading…');
+      voices = await EL.loadVoices(null);
+      fillFilters(); draw();
+      EL.status('status', voices.length + ' voices on this account. Nothing was generated; nothing was charged.', 'ok');
+      $('loadInfo').textContent = voices.filter(function (v) { return v.category === 'premade'; }).length + ' premade · ' +
+        voices.filter(function (v) { return v.category !== 'premade'; }).length + ' your own';
+    } catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  function fillFilters() {
+    var sets = { fCat: {}, fAcc: {}, fGen: {}, fUse: {} };
+    voices.forEach(function (v) {
+      var l = v.labels || {};
+      if (v.category) sets.fCat[v.category] = 1;
+      if (l.accent) sets.fAcc[l.accent] = 1;
+      if (l.gender) sets.fGen[l.gender] = 1;
+      if (l.use_case) sets.fUse[l.use_case] = 1;
+    });
+    Object.keys(sets).forEach(function (id) {
+      $(id).innerHTML = '<option value="">any</option>' + Object.keys(sets[id]).sort().map(function (v) {
+        return '<option>' + EL.esc(v) + '</option>';
+      }).join('');
+      $(id).onchange = draw;
+    });
+  }
+  $('q').oninput = draw; $('fShort').onchange = draw;
+
+  function matches(v) {
+    var l = v.labels || {}, q = $('q').value.trim().toLowerCase();
+    if ($('fShort').checked && !shortlist[v.voice_id]) return false;
+    if ($('fCat').value && v.category !== $('fCat').value) return false;
+    if ($('fAcc').value && l.accent !== $('fAcc').value) return false;
+    if ($('fGen').value && l.gender !== $('fGen').value) return false;
+    if ($('fUse').value && l.use_case !== $('fUse').value) return false;
+    if (!q) return true;
+    return JSON.stringify([v.name, v.description || '', l]).toLowerCase().indexOf(q) >= 0;
+  }
+
+  function draw() {
+    var tb = $('tbl').querySelector('tbody'); tb.innerHTML = '';
+    var shown = voices.filter(matches);
+    shown.forEach(function (v) {
+      var l = v.labels || {};
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><input type="checkbox" data-star="' + EL.esc(v.voice_id) + '"' + (shortlist[v.voice_id] ? ' checked' : '') + ' title="shortlist"></td>' +
+        '<td><b>' + EL.esc(v.name) + '</b><br><span class="small dim">' + EL.esc((v.description || '').slice(0, 90)) + '</span></td>' +
+        '<td class="small">' + EL.esc(v.category || '') + '</td>' +
+        '<td class="small">' + [l.accent, l.gender, l.age, l.use_case].filter(Boolean).map(EL.esc).join(' · ') + '</td>' +
+        '<td class="small"><code>' + EL.esc(v.voice_id) + '</code></td>' +
+        '<td><button class="secondary" data-say="' + EL.esc(v.voice_id) + '">Speak my line</button>' +
+        (v.preview_url ? ' <button class="secondary" data-copy="' + EL.esc(v.preview_url) + '" title="copy the vendor-hosted preview URL">link</button>' : '') + '</td>';
+      tb.appendChild(tr);
+    });
+    $('count').textContent = '— ' + shown.length + ' shown, ' + Object.keys(shortlist).length + ' shortlisted';
+    tb.querySelectorAll('[data-star]').forEach(function (el) {
+      el.onchange = function () {
+        var id = el.getAttribute('data-star');
+        if (el.checked) shortlist[id] = (voices.filter(function (v) { return v.voice_id === id; })[0] || {}).name || id;
+        else delete shortlist[id];
+        save(); draw();
+      };
+    });
+    tb.querySelectorAll('[data-say]').forEach(function (el) { el.onclick = function () { say(el.getAttribute('data-say')); }; });
+    tb.querySelectorAll('[data-copy]').forEach(function (el) { el.onclick = function () { EL.copy(el.getAttribute('data-copy'), 'genStatus'); }; });
+  }
+
+  async function say(voice) {
+    var text = $('line').value.trim(); if (!text) return;
+    EL.status('genStatus', 'Generating on ' + voice + '…');
+    try {
+      var r = await EL.speak({ text: text, voice: voice, model: $('model').value, timestamps: false });
+      $('player').src = r.url; $('player').play().catch(function () {});
+      EL.status('genStatus', 'Spoke ' + r.chars + ' characters in ' + r.ms + ' ms · estimated ' + EL.money(r.cost), 'ok');
+    } catch (e) { EL.status('genStatus', e.message, 'err'); }
+  }
+
+  $('btnMd').onclick = function () {
+    var rows = Object.keys(shortlist).map(function (id) {
+      var v = voices.filter(function (x) { return x.voice_id === id; })[0] || {};
+      var l = v.labels || {};
+      return [v.name || shortlist[id], '`' + id + '`', v.category || '', [l.accent, l.gender, l.use_case].filter(Boolean).join(' · ')];
+    });
+    EL.copy(EL.toMarkdown(['Voice', 'voice_id', 'Category', 'Labels'], rows, 'Voice shortlist'), 'status');
+  };
+})();
+</script>

@@ -1,0 +1,192 @@
+<div class="lab" id="lab-pron">
+  <section>
+    <h2>1 · The lexicon</h2>
+    <div class="row"><button class="secondary" id="btnLoadPls">Load the estate's pronunciations.pls</button>
+      <button class="secondary" id="btnAdd">Add a rule</button>
+      <button class="secondary" id="btnPls">Download as .pls</button>
+      <span class="est" id="lexInfo">No rules loaded.</span></div>
+    <div class="tablewrap" style="max-height:300px;overflow:auto"><table id="rules"><thead><tr><th>Grapheme</th><th>Type</th><th>Alias or phoneme</th><th></th></tr></thead><tbody></tbody></table></div>
+    <p class="small dim"><b>alias</b> rules are text substitution and work on every model. <b>phoneme</b> rules (IPA)
+      are honoured only by <code>eleven_flash_v2</code> and <code>eleven_v3</code> — every other model ignores them
+      <em>silently</em>, which is the failure this lab exists to make visible.</p>
+  </section>
+
+  <section>
+    <h2>2 · Upload it, and pin a version</h2>
+    <div class="row fill">
+      <input type="text" id="dictName" placeholder="dictionary name — e.g. sgit-estate" value="sgit-estate">
+      <button id="btnCreate">Create from rules</button>
+    </div>
+    <div class="row fill" style="margin-top:.5rem">
+      <input type="text" id="dictId" class="mono" placeholder="pronunciation_dictionary_id">
+      <input type="text" id="dictVer" class="mono" placeholder="version_id">
+      <button class="secondary" id="btnRemember">Remember on this device</button>
+    </div>
+    <div class="status" id="dictStatus">Creating a dictionary costs nothing; only generating speech does.</div>
+  </section>
+
+  <section>
+    <h2>3 · A/B — the same text, with and without the dictionary</h2>
+    <label for="text">Text. The default is the names sample: the one nobody has listened to yet.</label>
+    <textarea id="text" style="min-height:80px">sgit.ai, SG/Vault, SGraph, AIUC-1, SHA-256, llms.txt, OWASP, José Bota, VoiceDebrief, PT-BR, v0.1.29.</textarea>
+    <div class="samplechips" id="samples"></div>
+    <div class="grid3">
+      <div><label for="voice">Voice</label><select id="voice"><option value="">— load voices —</option></select>
+        <button class="secondary" id="btnVoices" style="margin-top:.4rem">Load voices</button></div>
+      <div><label for="model">Model</label><select id="model"></select></div>
+      <div><label>&nbsp;</label><button id="btnRun">Generate both</button>
+        <span class="est" id="cost" style="display:block;margin-top:.4rem"></span></div>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="grid2" style="margin-top:.8rem">
+      <div><h4 style="margin:.2rem 0">Without the dictionary</h4><audio id="playA" controls></audio><div class="words" id="wordsA"></div></div>
+      <div><h4 style="margin:.2rem 0">With it</h4><audio id="playB" controls></audio><div class="words" id="wordsB"></div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>4 · Write down what you heard</h2>
+    <p class="small">This is the open item the whole site keeps pointing at. Mark each name, then copy the report into the
+      repository or the vault — it is the difference between a hypothesis and a lexicon.</p>
+    <div class="tablewrap"><table id="heard"><thead><tr><th>Token</th><th>Without</th><th>With</th><th>Should sound like</th></tr></thead><tbody></tbody></table></div>
+    <div class="row"><button class="secondary" id="btnMd">Copy the report as markdown</button></div>
+  </section>
+
+  <section><h2>5 · Log</h2><div class="log" id="log"></div></section>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var rules = [], A = null, B = null;
+  var PIN = 'el.dict.v1';
+
+  EL.fillModels($('model'), ['eleven_v3', 'eleven_flash_v2_5', 'eleven_multilingual_v2', 'eleven_turbo_v2_5']);
+  EL.sampleChips($('samples'), $('text'), cost);
+  try {
+    var pin = JSON.parse(localStorage.getItem(PIN) || '{}');
+    if (pin.id) { $('dictId').value = pin.id; $('dictVer').value = pin.version || ''; }
+  } catch (e) {}
+
+  function cost() {
+    var n = $('text').value.length;
+    $('cost').textContent = n + ' chars × 2 generations = ' + EL.money(EL.estimate(n, $('model').value) * 2);
+  }
+  $('text').oninput = cost; $('model').onchange = cost; cost();
+
+  $('btnLoadPls').onclick = async function () {
+    try {
+      var xml = await (await fetch('/files/pronunciations.pls')).text();
+      var doc = new DOMParser().parseFromString(xml, 'application/xml');
+      rules = [].slice.call(doc.getElementsByTagName('lexeme')).map(function (lx) {
+        var g = lx.getElementsByTagName('grapheme')[0], a = lx.getElementsByTagName('alias')[0], p = lx.getElementsByTagName('phoneme')[0];
+        return { grapheme: g ? g.textContent : '', type: p ? 'phoneme' : 'alias', value: (p || a || {}).textContent || '' };
+      }).filter(function (r) { return r.grapheme; });
+      drawRules();
+      EL.status('dictStatus', rules.length + ' rules loaded from this site — a file, not a call to the vendor.', 'ok');
+    } catch (e) { EL.status('dictStatus', e.message, 'err'); }
+  };
+  $('btnAdd').onclick = function () { rules.push({ grapheme: '', type: 'alias', value: '' }); drawRules(); };
+
+  function drawRules() {
+    var tb = $('rules').querySelector('tbody'); tb.innerHTML = '';
+    rules.forEach(function (r, i) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><input type="text" class="mono" data-g="' + i + '" value="' + EL.esc(r.grapheme) + '"></td>' +
+        '<td><select data-t="' + i + '"><option' + (r.type === 'alias' ? ' selected' : '') + '>alias</option>' +
+        '<option' + (r.type === 'phoneme' ? ' selected' : '') + '>phoneme</option></select></td>' +
+        '<td><input type="text" class="mono" data-v="' + i + '" value="' + EL.esc(r.value) + '"></td>' +
+        '<td><button class="secondary" data-x="' + i + '">×</button></td>';
+      tb.appendChild(tr);
+    });
+    tb.querySelectorAll('[data-g]').forEach(function (el) { el.oninput = function () { rules[+el.dataset.g].grapheme = el.value; }; });
+    tb.querySelectorAll('[data-v]').forEach(function (el) { el.oninput = function () { rules[+el.dataset.v].value = el.value; }; });
+    tb.querySelectorAll('[data-t]').forEach(function (el) { el.onchange = function () { rules[+el.dataset.t].type = el.value; }; });
+    tb.querySelectorAll('[data-x]').forEach(function (el) { el.onclick = function () { rules.splice(+el.dataset.x, 1); drawRules(); }; });
+    $('lexInfo').textContent = rules.length + ' rules · ' + rules.filter(function (r) { return r.type === 'phoneme'; }).length + ' phoneme';
+    drawHeard();
+  }
+
+  $('btnPls').onclick = function () {
+    var body = rules.map(function (r) {
+      return '  <lexeme><grapheme>' + EL.esc(r.grapheme) + '</grapheme><' + r.type + '>' + EL.esc(r.value) + '</' + r.type + '></lexeme>';
+    }).join('\n');
+    EL.download('pronunciations.pls',
+      '<?xml version="1.0" encoding="UTF-8"?>\n<lexicon version="1.0" xmlns="http://www.w3.org/2005/01/pronunciation-lexicon" alphabet="ipa" xml:lang="en-GB">\n' +
+      body + '\n</lexicon>\n', 'application/xml');
+  };
+
+  $('btnCreate').onclick = async function () {
+    if (!rules.length) return EL.status('dictStatus', 'No rules to send.', 'warn');
+    try {
+      EL.status('dictStatus', 'Creating…');
+      var r = await EL.post('/pronunciation-dictionaries/add-from-rules', {
+        name: $('dictName').value.trim() || 'lexicon',
+        rules: rules.map(function (x) {
+          return x.type === 'phoneme'
+            ? { type: 'phoneme', string_to_replace: x.grapheme, phoneme: x.value, alphabet: 'ipa' }
+            : { type: 'alias', string_to_replace: x.grapheme, alias: x.value };
+        })
+      });
+      var j = await r.res.json();
+      $('dictId').value = j.id || j.pronunciation_dictionary_id || '';
+      $('dictVer').value = j.version_id || '';
+      EL.status('dictStatus', 'Created. Pin these two ids — a dictionary is versioned and a request names one version.', 'ok');
+    } catch (e) { EL.status('dictStatus', e.message, 'err'); }
+  };
+  $('btnRemember').onclick = function () {
+    try { localStorage.setItem(PIN, JSON.stringify({ id: $('dictId').value.trim(), version: $('dictVer').value.trim() })); } catch (e) {}
+    EL.status('dictStatus', 'Pinned on this device.', 'ok');
+  };
+  $('btnVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('voice')); EL.status('status', v.length + ' voices.', 'ok'); }
+    catch (e) { EL.status('status', e.message, 'err'); }
+  };
+
+  $('btnRun').onclick = async function () {
+    var voice = $('voice').value; if (!voice) return EL.status('status', 'Pick a voice.', 'warn');
+    var text = $('text').value.trim();
+    var base = { text: text, voice: voice, model: $('model').value, timestamps: true, seed: 42 };
+    $('btnRun').disabled = true;
+    try {
+      EL.status('status', 'Generating without the dictionary…');
+      A = await EL.speak(base);
+      $('playA').src = A.url; EL.renderWords($('wordsA'), A.words); EL.karaoke($('playA'), $('wordsA'), A.words);
+      if ($('dictId').value.trim() && $('dictVer').value.trim()) {
+        EL.status('status', 'Generating with the dictionary…');
+        B = await EL.speak(Object.assign({}, base, { dictId: $('dictId').value.trim(), dictVersion: $('dictVer').value.trim() }));
+        $('playB').src = B.url; EL.renderWords($('wordsB'), B.words); EL.karaoke($('playB'), $('wordsB'), B.words);
+        EL.status('status', 'Both done. Listen to each, then fill in section 4. Spent about ' + EL.money(A.cost + B.cost) + '.', 'ok');
+      } else {
+        EL.status('status', 'Generated the "without" side only — create or paste a dictionary id and version for the comparison.', 'warn');
+      }
+      drawHeard();
+    } catch (e) { EL.status('status', e.message, 'err'); }
+    finally { $('btnRun').disabled = false; }
+  };
+
+  function drawHeard() {
+    var tokens = $('text').value.split(/[\s,]+/).filter(function (t) { return t && /[A-Za-z0-9]/.test(t); });
+    var tb = $('heard').querySelector('tbody'); tb.innerHTML = '';
+    tokens.forEach(function (t, i) {
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><code>' + EL.esc(t) + '</code></td>' +
+        '<td><select data-a="' + i + '"><option value="">?</option><option>right</option><option>wrong</option></select></td>' +
+        '<td><select data-b="' + i + '"><option value="">?</option><option>right</option><option>wrong</option></select></td>' +
+        '<td><input type="text" data-n="' + i + '" placeholder="how it should sound"></td>';
+      tb.appendChild(tr);
+    });
+  }
+
+  $('btnMd').onclick = function () {
+    var tb = $('heard').querySelector('tbody');
+    var rows = [].slice.call(tb.children).map(function (tr) {
+      return [tr.children[0].textContent, tr.querySelector('[data-a]').value || '?', tr.querySelector('[data-b]').value || '?',
+        tr.querySelector('[data-n]').value || ''];
+    });
+    EL.copy(EL.toMarkdown(['Token', 'Without dictionary', 'With dictionary', 'Should sound like'], rows,
+      'Pronunciation test — model ' + $('model').value + ', voice ' + $('voice').value +
+      ', dictionary ' + ($('dictId').value || 'none')), 'status');
+  };
+})();
+</script>

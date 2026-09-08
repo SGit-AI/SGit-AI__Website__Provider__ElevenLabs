@@ -307,3 +307,30 @@
   group: Verified in a browser, 5 September 2026
   claim: "*Scoped, not bounded*, observed in one response body: creating a pronunciation dictionary returned **401** — *\"The API key you used is missing the permission `pronunciation_dictionaries_write`\"*. The platform names the missing permission precisely. It has nothing equivalent to say about spend, because there is nothing to say."
   source: "The first run. The only ceiling on that key was the free tier's 10,000 characters a month"
+
+- id: grant-terms
+  state: docs
+  date: 8 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "The **ElevenLabs Grants Program** gives an accepted startup **33,000,000 characters over 12 months** — the page calls it \"over 680 hours of Agents usage\" and \"more than $5,500+ in value\" — plus access to founder events. Applications are rolling, with a decision inside a week. When the 12 months end, or when 10,000 credits remain, the plan converts to Free."
+  source: "elevenlabs.io/startup-grants, read 8 September 2026"
+
+- id: grant-eligibility
+  state: docs
+  date: 8 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "Eligibility, verbatim in substance: a **monetized product use case** with a business or monetization strategy, from a business email; **no short-term or one-off projects**; **no projects for under-18s**; **startups and companies under 25 employees**; **no agencies or consulting firms**; one application per company; and existing enterprise customers are not eligible."
+  source: "elevenlabs.io/startup-grants FAQ, read 8 September 2026"
+
+- id: grant-no-resale
+  state: docs
+  date: 8 Sep 2026
+  group: Read from the vendor's documentation
+  claim: "**Granted characters cannot be resold or exchanged.** *\"You cannot exchange or resell your text characters. Reselling your text characters would be a violation of the ElevenLabs Grant program conditions and your grant plan will be terminated immediately.\"* This is the sentence that decides what a pricing page on this estate may say."
+  source: "elevenlabs.io/startup-grants FAQ, read 8 September 2026"
+
+- id: pricing-proposed
+  state: spec
+  group: Specified, or written and never run
+  claim: "The prices on this site's pricing page are **proposed, not sold**. No customer has paid them, no engagement has run to completion under them, and they are published in the open so that the first customer argues with a number rather than with a silence."
+  source: "Written 8 September 2026; nothing has been invoiced"

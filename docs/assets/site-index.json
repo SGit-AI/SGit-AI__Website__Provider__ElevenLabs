@@ -1,0 +1,676 @@
+{
+ "version": "v0.3.0",
+ "built": "8 September 2026",
+ "pages": [
+  {
+   "url": "/",
+   "title": "ElevenLabs \u2014 text to speech with character-level timestamps",
+   "description": "An independent report on the ElevenLabs API: what it cost on a named workload on a named date, what broke, and which of four client-side credential patterns the product can actually support.",
+   "lead": "This is a report, not a tutorial. The vendor's documentation explains the API better than we can and stays fresher; what follows is what happened when we actually used it \u2014 what it cost on a named workload on a named date, what broke, and which credential patterns the product can support. Sections 8 and 9 are the point of the page.",
+   "headings": [
+    "What this site is, and is not",
+    "1 \u00b7 Disclosure",
+    "2 \u00b7 What it grants",
+    "3 \u00b7 Which pattern \u2014 and for which product",
+    "4 \u00b7 Where the key goes",
+    "5 \u00b7 The bounding primitive",
+    "6 \u00b7 The minimal working example",
+    "7 \u00b7 What we use it for",
+    "8 \u00b7 What it cost",
+    "9 \u00b7 What went wrong",
+    "And what went wrong the first time somebody ran it",
+    "What has not gone wrong, because nobody has tried it"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/ask/",
+   "title": "Ask this site",
+   "description": "A chat pane that answers from the site's own index, in your browser, with no key and no model \u2014 and will read the answer aloud with your own key if you give it one.",
+   "lead": "Two tiers in one pane. The default one needs no key, no model and no request to anybody: it matches your question against every page and every claim in the ledger and shows you what the site actually says. The second reads the answer aloud with your key.",
+   "headings": [
+    "Why it does not have a model behind it",
+    "What the speech tier actually sends",
+    "What it is not"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/bench/",
+   "title": "The bench \u2014 text to speech, with timestamps",
+   "description": "The test bench: connect with your own key, list voices and models, generate with character-level timestamps, watch the words light up, build an SRT. The one page on this site that has actually been run.",
+   "lead": "The original test bench, and the only page here that has been run against the live API \u2014 on 5 September 2026, from a human's own browser. Every verified chip on this site comes from a session with this page.",
+   "headings": [
+    "What this page proved, and what it did not",
+    "The same page, under pattern three",
+    "What it will cost you to run"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/briefs/",
+   "title": "The briefs, and what was done with them",
+   "description": "Every brief this site was built from, published raw, with a decision-by-decision account of what was accepted, what was modified, what was rejected and why.",
+   "lead": "This site was commissioned by briefs. They are published here in full, next to what was actually done with each instruction \u2014 including the three findings that were wrong, the one proposed capability row that was rejected, and the parts that are blocked on somebody else.",
+   "headings": [
+    "Pack one \u00b7 the providers-site pack, 7 September 2026",
+    "What shipped, at v0.2.0",
+    "Three findings in the audit were wrong",
+    "And one finding it could not have made",
+    "The ordering problem in the plan",
+    "Pack two \u00b7 the video-pipeline brief, 7 September 2026",
+    "What the brief changed on this site anyway",
+    "The rule both packs share, and this site keeps"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/comparison/",
+   "title": "Comparison \u2014 provider \u00d7 pattern",
+   "description": "One row per provider and product, one column per credential pattern. Generated from the front-matter of each provider page, so a new provider is one Markdown file rather than a table edit.",
+   "lead": "One row per provider and product, one column per pattern. This table is generated at build time from the patterns: front-matter on each provider page \u2014 the hand-written version of it drifted the moment a second provider appeared.",
+   "headings": [
+    "Read down the columns",
+    "How to add a provider"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/disclosures/",
+   "title": "Disclosures",
+   "description": "Every commercial relationship between this estate and a platform written about here, in one place. There are none. Created before any exists, so that the page's existence is not evidence of one.",
+   "lead": "Every commercial relationship between this estate and any platform written about on this site, in one place \u2014 created before any relationship exists, so that the existence of a page about a vendor is not read as evidence of a relationship with them.",
+   "headings": [
+    "Pending, and recorded before it happens",
+    "The commitments this page makes",
+    "Non-affiliation",
+    "The other direction"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/examples/",
+   "title": "Example files, and the lexicon",
+   "description": "The example scripts and the PLS pronunciation lexicon as downloadable files, with the invocation beside them. All of them written from the vendor's reference, none of them ever run.",
+   "lead": "Files, not screenshots of files. Every one of these was written from the vendor's reference by a session that could not reach the API, and none has ever been executed. They are published because unrun code with a badge is more useful than no code \u2014 and because the first person to run one will know more than the people who wrote it.",
+   "headings": [
+    "The scripts",
+    "The lexicon",
+    "Why they matter more here than usual"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/experiments/",
+   "title": "Experiments \u2014 twelve labs against one API",
+   "description": "A dozen browser labs that exercise the ElevenLabs API feature by feature: voices, models, settings, timestamps, lexicons, concurrency, alignment, dialogue, sound, key scope and cost. Your key, your browser, nothing sent anywhere else.",
+   "lead": "This site is a report, and a report is worth more when the reader can re-run it. These are the labs the evaluation should have had \u2014 one per feature, each with the method written down, each printing a result you can paste back as evidence.",
+   "headings": [
+    "How these are built",
+    "What to run first",
+    "What a lab is not"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/experiments/align-verify/",
+   "title": "Align and verify \u2014 subtitles for old renders, and a QA gate for new ones",
+   "description": "Forced alignment of audio you already have to the script it speaks, and Scribe transcription diffed against the expected text \u2014 the automatic version of catching an error by watching the video.",
+   "lead": "Two endpoints, both priced as speech-to-text, both cheap enough to run on everything you have ever published. One gives subtitles to videos rendered before any of this existed; the other catches the mistakes we have actually shipped.",
+   "headings": [
+    "Forced alignment \u2014 the cheapest useful thing on the list",
+    "Scribe as a QA gate",
+    "What is unverified here"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/captions/",
+   "title": "Captions studio \u2014 from character timings to SRT",
+   "description": "Tune the cue rule against real alignment data: break at N characters, on a gap, or after N seconds. Live cue table, karaoke preview, SRT and VTT download. Works with no key if you paste an alignment.",
+   "lead": "This API returns the start and end time of every character. Everything below is arithmetic on that array \u2014 and the arithmetic is ours, not the vendor's, which means it is ours to get wrong.",
+   "headings": [
+    "The technique, written down",
+    "Why bother, when the platform auto-captions",
+    "What is verified here, and what is not"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/concurrency/",
+   "title": "Concurrency probe \u2014 where is the wall?",
+   "description": "Fire waves of parallel generations at 1, 2, 4, 8\u2026 until something fails, and record the request timeline, the 429s and the highest wave that survived. The one open item on this site that costs money to close.",
+   "lead": "Concurrent request limits scale with the plan, and a render that fires every scene at once \u2014 10 to 16 requests \u2014 meets that limit before it meets any other. We have never provoked one. This lab does, deliberately, for a few cents.",
+   "headings": [
+    "What this tests",
+    "How to read the result",
+    "What to do with the number"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/cost/",
+   "title": "Cost model \u2014 no key, no network",
+   "description": "Paste a script or a reel.json and get characters, requests, per-model cost and plan fit, with every constant visible. Runs entirely in your browser; makes no network call at all.",
+   "lead": "Arithmetic you can check, on text you paste, with no key and no request to anybody. Cost figures go stale faster than anything else on this site \u2014 this page makes the staleness visible instead of hiding it in a table.",
+   "headings": [
+    "The arithmetic, stated",
+    "Against what we actually paid",
+    "Plan fit",
+    "When these numbers go wrong"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/dialogue/",
+   "title": "Multi-speaker dialogue",
+   "description": "One request, several voices, consistent pacing across the turns \u2014 a two-voice cut is one endpoint away from a single-narrator reel.",
+   "lead": "A question and an answer, in two voices, generated in one call so the pacing holds across the turn. Concatenating two separate generations does not give you this, and the difference is audible.",
+   "headings": [
+    "What this tests",
+    "What to listen for",
+    "Cost and availability"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/key-scope/",
+   "title": "Key scope and quota probe",
+   "description": "Read-only probes of every endpoint class your key can reach, plus the subscription object \u2014 and the field that does not exist anywhere in it: a per-key spend limit.",
+   "lead": "Eight GET requests, no generation, no spend. What comes back tells you what your key may do. What does not come back \u2014 anywhere in the API \u2014 is any way to cap what it may cost. That absence is the whole argument of this site, made empirically rather than asserted.",
+   "headings": [
+    "Scoped is not bounded",
+    "How to read the probe",
+    "The tile that says \"none\""
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/models/",
+   "title": "Model A/B \u2014 latency, size and cost on one text",
+   "description": "Race eleven_v3, multilingual_v2, flash and turbo over the same text and voice: wall-clock latency, bytes returned, spoken duration and cost per model, with the results as a markdown table.",
+   "lead": "Four models, one text, one voice, several runs each. The vendor's model table tells you the price and the character limit; it cannot tell you what your text sounds like or how long your connection takes to get it.",
+   "headings": [
+    "What this tests",
+    "Method",
+    "What to write down"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/pronunciation/",
+   "title": "Pronunciation lab \u2014 lexicons, and the test nobody has run",
+   "description": "Edit a PLS lexicon in the browser, create a versioned dictionary from rules, then generate the same text with and without it. The A/B that turns a hypothesis into a lexicon.",
+   "lead": "In this pipeline the narration text is the caption text, so every pronunciation hack is on screen where viewers read it as a typo. A dictionary moves the hack off the screen. Whether these particular rules work has never been tested by anybody.",
+   "headings": [
+    "The problem, concretely",
+    "The two rule types, and the trap",
+    "The open item",
+    "A shortcut worth knowing"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/sound/",
+   "title": "Sound effects and music",
+   "description": "The sound-generation and music endpoints, with a per-second cost meter \u2014 and the house rule they were evaluated against: a two-second sting under the title slide, and nothing else.",
+   "lead": "Two endpoints that are easy to overuse. They are here with a cost meter and a house rule attached, because the interesting question is not can it \u2014 it obviously can \u2014 but should it, under narration dense with numbers.",
+   "headings": [
+    "The numbers",
+    "The rule these were evaluated against",
+    "Where this fits the site's argument"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/text-handling/",
+   "title": "Text handling \u2014 normalisation, stitching and seeds",
+   "description": "Three A/Bs that decide how a script should be written: does the model normalise numbers reliably, does passing neighbouring scenes as context change the read, and does a fixed seed actually repeat?",
+   "lead": "Three questions that decide how a script is written, not how it sounds. Each is a controlled A/B: same voice, same seed, one variable. Together they are the difference between rewriting four script files and leaving them alone.",
+   "headings": [
+    "1 \u00b7 Does it normalise numbers reliably?",
+    "2 \u00b7 Does stitching change the read?",
+    "3 \u00b7 Does a seed repeat?",
+    "What this costs, and what it settles"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/voice-settings/",
+   "title": "Voice-settings sweep",
+   "description": "Sweep one voice setting at a time \u2014 stability, similarity boost, style, speed \u2014 with everything else held constant and the seed fixed, then write down what you heard.",
+   "lead": "Four sliders, and the vendor's guidance on them is qualitative. This lab sweeps one at a time, holds everything else constant, fixes the seed, and makes you write down what you heard \u2014 which is the only part of this that is not arithmetic.",
+   "headings": [
+    "What this tests",
+    "Method",
+    "What it costs"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/experiments/voices/",
+   "title": "Voice explorer",
+   "description": "List every voice the key can reach, filter by accent, gender and use case, shortlist candidates, and hear any of them say your own line rather than the vendor's demo sentence.",
+   "lead": "The vendor's library is large and the useful part of it is small. This lab lists what your key can reach, filters it down, and makes each candidate say your line \u2014 because a voice that sounds excellent reading a marketing sentence can still mangle a product name.",
+   "headings": [
+    "What this tests",
+    "Method, and its one deliberate omission",
+    "What we know, and what we do not",
+    "What it costs"
+   ],
+   "kind": "experiment"
+  },
+  {
+   "url": "/grant/",
+   "title": "The grant case \u2014 what we would do with 33 million characters",
+   "description": "The ElevenLabs Grants Program, its criteria checked one by one against this estate, the one where we are borderline and why, and what we would give back that no other grantee produces: a public, dated, state-badged record of what the API actually did.",
+   "lead": "The programme is called the ElevenLabs Grants Program and it is 33,000,000 characters over twelve months vendor docs 8 Sep 2026. This page checks their criteria against us honestly \u2014 including the one where we are borderline \u2014 and states what we would do that a normal grantee does not.",
+   "headings": [
+    "1 \u00b7 What the programme actually is",
+    "2 \u00b7 The criteria, checked one at a time",
+    "The borderline one, addressed rather than avoided",
+    "3 \u00b7 What 33 million characters would actually be spent on",
+    "4 \u00b7 What we would give back that a normal grantee does not",
+    "5 \u00b7 What we would ask them to extend",
+    "6 \u00b7 The disclosure ordering, which matters more than the money"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/ledger/",
+   "title": "The ledger \u2014 every claim, and how we know it",
+   "description": "Every factual claim this site makes, in one table, with its verification state, its date and the pages that say it. Six states, from verified-by-execution to specified-and-not-shipped.",
+   "lead": "Almost everything written about this API here was written by a machine that could not reach the API. A small, specific set of things was verified in a real browser on 5 September 2026. The distinction between the two is the most useful thing this site has, so it is a table rather than a disclaimer.",
+   "headings": [
+    "The six states",
+    "Open items",
+    "What we would need a human with API access to check"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/pattern-three/",
+   "title": "Pattern three, for a voice API \u2014 the sg.tts specification",
+   "description": "What a browser app would look like if the vault host held the ElevenLabs key and enforced the terms: no key box, a spend cap the app cannot reach, and terms that travel with the content. Specified, not shipped.",
+   "lead": "This is the site's argument made concrete: a browser application using a paid speech API without ever holding the key. Everything on this page is a specification. sg.tts does not exist; nothing here describes software you can run today.",
+   "headings": [
+    "What would exist already, if the verb landed tomorrow",
+    "The verb, as specified",
+    "Why this is the only pattern where the bound holds",
+    "What it would change for this estate",
+    "What would have to ship, precisely",
+    "What would still be true"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/patterns/",
+   "title": "The four client-side credential patterns",
+   "description": "Client side is not one thing. It is four patterns that differ in where the credential lives and what bounds it \u2014 and one of them is the only one where the bounded thing cannot reach the bounding thing.",
+   "lead": "\"Client side\" is not one thing. It is four patterns, and they differ in exactly two ways: where the credential lives, and what bounds it. Every provider page on this family of sites answers \u00a73 by naming one of these \u2014 per product, because a vendor with several products has several answers.",
+   "headings": [
+    "The four patterns",
+    "Why pattern 3 is different in kind",
+    "The one piece of evidence that any of this is enforceable",
+    "Where the two providers sit",
+    "The second axis: what the tool keeps",
+    "What this means for the labs on this site"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/pricing/",
+   "title": "Pricing \u2014 consumption, and what we charge for",
+   "description": "Consumption goes to the vendor on your own key, at their published rate. We charge for deployment and support. We do not resell characters, and the vendor's own terms are why.",
+   "lead": "We do not sell speech. Consumption is billed by the vendor, on your key, at their published rate \u2014 we never touch it. What we sell is the part that is actually ours: getting it deployed against a real workload, and keeping it working. These prices are proposed, not sold specified, not shipped.",
+   "headings": [
+    "The rule that shapes this page",
+    "1 \u00b7 Consumption \u2014 what you pay the vendor",
+    "2 \u00b7 Deployment \u2014 what you pay us",
+    "3 \u00b7 What it costs to leave",
+    "4 \u00b7 The honest part"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/providers/openrouter/",
+   "title": "OpenRouter \u2014 the sibling page, as a structural stub",
+   "description": "Not this site's subject. A stub of the sibling provider page, carried here to prove that adding a provider is one Markdown file with front-matter \u2014 and to supply the comparison table's other rows.",
+   "lead": "This is not an OpenRouter site. It is a deliberately short stub of the sibling provider page, published here for two reasons: it supplies the other rows of the comparison, and it is the proof that adding a provider to this family is one Markdown file with front-matter rather than template surgery.",
+   "headings": [
+    "Why it is the useful contrast",
+    "What it cost us, measured",
+    "What went wrong"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/versions/",
+   "title": "Release history",
+   "description": "Every release of this site, with what changed. The version is owned by admin/build/version.txt, must appear in the release commit's subject, and CI verifies the two agree before it tags anything.",
+   "lead": "Every release of this site, with what changed and when. The estate's convention: one file owns the version, the release commit's subject repeats it, and the pipeline refuses to tag anything if the two disagree.",
+   "headings": [
+    "How a release is made here",
+    "What the gate checks before anything is tagged"
+   ],
+   "kind": "page"
+  },
+  {
+   "url": "/video/",
+   "title": "The first video \u2014 what the render actually did",
+   "description": "The first ever run of the ElevenLabs render path: what broke, what was wrong in the predictions, and the measurement that settles a drift question open since September. Plus the plan the next one follows.",
+   "lead": "On 8 September 2026 the path that had never made a sound made one. Two failures, one prediction wrong, one nobody made, and a measurement that closes an open question \u2014 and a two-minute video at the end of it.",
+   "headings": [
+    "0 \u00b7 What the first run found",
+    "0b \u00b7 The measurement that settles the drift question",
+    "0c \u00b7 What it cost, and where it is",
+    "1 \u00b7 The pipeline, in one paragraph",
+    "2 \u00b7 What this provider would add that the shipped reels do not have",
+    "3 \u00b7 What it would cost",
+    "4 \u00b7 The script rules that cost time when broken",
+    "5 \u00b7 Before spending a render: where the unrun path probably breaks",
+    "6 \u00b7 Three videos worth making first",
+    "7 \u00b7 Where video would live, when there is one",
+    "8 \u00b7 Why this is a plan and not a film",
+    "9 \u00b7 What the first run would settle"
+   ],
+   "kind": "page"
+  }
+ ],
+ "claims": [
+  {
+   "id": "cors-browser",
+   "state": "verified",
+   "date": "5 Sep 2026",
+   "claim": "api.elevenlabs.io answers CORS for browser origins directly. GET /user/subscription, /voices, /models and POST /text-to-speech/{id}/with-timestamps all returned 200 from a null-origin srcdoc iframe. No proxy is needed for a browser-side lab."
+  },
+  {
+   "id": "timestamps-roundtrip",
+   "state": "verified",
+   "date": "5 Sep 2026",
+   "claim": "Three with-timestamps generations of a 187-character sample on voice pNInz6obpgDQGcFmaJgB (premade \"Adam\"), model eleven_v3, returned audio plus a per-character alignment."
+  },
+  {
+   "id": "latency-5s",
+   "state": "verified",
+   "date": "5 Sep 2026",
+   "claim": "Those three generations took 5.0\u20135.8 s each, wall clock, from a residential connection. Three samples is not a latency distribution; it is three samples."
+  },
+  {
+   "id": "csp-blocks",
+   "state": "verified",
+   "date": "5 Sep 2026",
+   "claim": "Inside the SG/App host, every app frame is served connect-src blob: data:, so the bench's first fetch was refused before it left the frame. \"permissions\": {\"network\": true} in app.json omits that meta and the host's HUD then shows a standing \"direct network access\" chip."
+  },
+  {
+   "id": "egress-blocked",
+   "state": "verified",
+   "date": "4\u20135 Sep 2026",
+   "claim": "api.elevenlabs.io:443 is refused to the authoring container by the agent proxy (connect_rejected, organization policy) \u2014 from curl and from Node, on the regional hosts too. Nothing written in that container could be executed there."
+  },
+  {
+   "id": "keys-local-only",
+   "state": "verified",
+   "date": "7 Sep 2026",
+   "claim": "A key typed into any lab on this site is kept in this browser's localStorage (or sg.state inside a vault app) and is sent to exactly one host, api.elevenlabs.io, in the xi-api-key header. There is no other network origin in the built site."
+  },
+  {
+   "id": "bench-cost",
+   "state": "measured",
+   "date": "5 Sep 2026",
+   "claim": "The whole bench session cost about 750 characters \u2248 $0.075 at list price on eleven_v3 \u2014 four generations of a 187-character sample."
+  },
+  {
+   "id": "openrouter-402",
+   "state": "verified",
+   "date": "3 Sep 2026",
+   "claim": "At $4.79 used against a $5.00 provisioned limit, OpenRouter refused every audio request with 402 \u2014 this request requires at least $0.50 in balance for audio output, limit_source: openrouter_key_limit. The bound worked. Raising the limit in the dashboard resumed the work."
+  },
+  {
+   "id": "openrouter-cost-aiuc",
+   "state": "measured",
+   "date": "3 Sep 2026",
+   "claim": "A 3:46 landscape reel \u2014 599 words, 16 requests, openai/gpt-audio \u2014 cost $0.2997; its 2:09 portrait cut, 318 words in 10 requests, cost $0.1708. About $0.08 per minute of speech."
+  },
+  {
+   "id": "openrouter-no-speed",
+   "state": "measured",
+   "date": "2 Sep 2026",
+   "claim": "openai/gpt-audio takes no pace parameter, so a portrait cut that had to fit under YouTube's three-minute Shorts rule lost a third of its script instead of 15% of its pace. ElevenLabs exposes voice_settings.speed; that is the reason this page exists at all."
+  },
+  {
+   "id": "transcript-mismatches",
+   "state": "measured",
+   "date": "3 Sep 2026",
+   "claim": "Across 61 OpenRouter generations, transcript mismatches: 0. The provider returns a transcript of what it spoke and it matched the script every time."
+  },
+  {
+   "id": "no-per-key-spend-limit",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "An ElevenLabs key can be scoped to endpoints in the dashboard. There is no per-key spend limit for the text-to-speech API: the only bound is the plan's monthly character quota, which belongs to the whole account. Scoping is not bounding."
+  },
+  {
+   "id": "agents-only-signed-urls",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "\"Never expose your ElevenLabs API key client-side\", the 15-minute signed URL and the exact-hostname allowlist are Agents (conversational) features. The text-to-speech REST API has no signed-URL and no allowlist mechanism at all."
+  },
+  {
+   "id": "tts-prices",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "List price, September 2026: eleven_v3 and eleven_multilingual_v2 $0.10 per 1,000 characters; eleven_flash_v2_5 and eleven_turbo_v2_5 $0.05. Speech-to-text and forced alignment $0.22 per hour of audio; sound effects $0.12/min; music $0.15/min; dubbing $0.33 (v1) / $2.20 (v2) per minute."
+  },
+  {
+   "id": "plan-quotas",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "Monthly character quotas: Starter $6 \u2014 10k \u00b7 Creator $22 \u2014 220k \u00b7 Pro $99 \u2014 990k, with pay-as-you-go above quota. GET /v1/user/subscription reports character_count, character_limit and the reset date."
+  },
+  {
+   "id": "char-limits",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "Characters per request: eleven_v3 5,000 \u00b7 eleven_multilingual_v2 10,000 \u00b7 eleven_flash_v2_5 and eleven_turbo_v2_5 40,000."
+  },
+  {
+   "id": "speed-range",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "voice_settings.speed accepts 0.7\u20131.2, default 1.0; values at the extremes cost quality. A speed outside that range is a 422, not a clamp."
+  },
+  {
+   "id": "phoneme-models",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "Pronunciation dictionaries take two rule types: alias rules work on every model; phoneme rules (IPA or CMU Arpabet) are honoured only by eleven_flash_v2 and eleven_v3 \u2014 other models ignore them silently. Up to 3 dictionary locators per request."
+  },
+  {
+   "id": "alignment-stt-price",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "POST /v1/forced-alignment takes audio (up to 3 GB / 10 hours) plus the transcript as plain text (max 675,000 characters, not JSON-wrapped) and returns per-character and per-word timing, priced at the speech-to-text rate of $0.22 per hour of audio."
+  },
+  {
+   "id": "dialogue-endpoint",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "POST /v1/text-to-dialogue (and /with-timestamps) takes inputs: [{text, voice_id}, \u2026] and renders a multi-speaker exchange in one call with consistent pacing."
+  },
+  {
+   "id": "api-key-shape",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "Auth is the header xi-api-key: <key> \u2014 not Authorization. Keys are sk_ followed by 48 hex characters, which is why that shape is in this repository's secret scan."
+  },
+  {
+   "id": "error-table",
+   "state": "docs",
+   "date": "5 Sep 2026",
+   "claim": "401 bad or missing key \u00b7 402 quota exhausted or feature not on this plan \u00b7 422 validation (unknown model_id, speed out of range, bad dictionary locator, text over the model's limit) \u00b7 429 concurrency or rate limit \u00b7 5xx theirs. The detail object in the body says which field."
+  },
+  {
+   "id": "sg-tts-spec",
+   "state": "spec",
+   "date": "",
+   "claim": "sg.tts.speak() does not exist. It is a written specification for a verb the SG/Vault host would gain, so that a vault app could generate speech without ever holding the key. The terms file .vault/elevenlabs/config.json is real; the host verb is not."
+  },
+  {
+   "id": "shim-unrun",
+   "state": "unrun",
+   "date": "",
+   "claim": "The render shim (TTS=elevenlabs in the video pipeline's 02-render.mjs) is written and has never been executed \u2014 the container that wrote it could not reach the API."
+  },
+  {
+   "id": "examples-unrun",
+   "state": "unrun",
+   "date": "",
+   "claim": "Every file in examples/ \u2014 00-smoke.sh, voices.sh, tts.sh, tts-timestamps.mjs, align.sh, stt.sh \u2014 is written from the vendor's reference and has never been run against the API by us."
+  },
+  {
+   "id": "labs-unrun",
+   "state": "unrun",
+   "date": "",
+   "claim": "Every lab on this site is unrun by us. They were written against the vendor's published request and response shapes by a session with no access to the API and no key. The first person to press a button will know more about whether they work than the people who wrote them."
+  },
+  {
+   "id": "names-test",
+   "state": "unrun",
+   "date": "",
+   "claim": "The names-pronunciation test has not been run. The bench has had the button since 5 September and nobody has pressed it, so this site cannot say which names eleven_v3 gets wrong."
+  },
+  {
+   "id": "lexicon-hypothesis",
+   "state": "unrun",
+   "date": "",
+   "claim": "pronunciations.pls is a hypothesis. It has never been uploaded, and no alias in it has ever been heard. Publish it as a starting point, not as a lexicon that is known to work."
+  },
+  {
+   "id": "concurrency-unknown",
+   "state": "unrun",
+   "date": "",
+   "claim": "The plan's concurrency limit is unknown to us. Our render fires 10\u201316 requests at once, and a 429 mid-render is the likely first failure on a small plan \u2014 but we have never provoked one."
+  },
+  {
+   "id": "cue-rule",
+   "state": "unrun",
+   "date": "",
+   "claim": "The characters\u2192words\u2192cues grouping rule \u2014 break at 84 characters, or a gap over 0.6 s, or 6 s of running time; wrap at the last space before 42 \u2014 is ours, not the vendor's. It is arithmetic over the alignment array, and no cue it produced has yet been checked against a human reading of the finished video."
+  },
+  {
+   "id": "projected-reel-costs",
+   "state": "projected",
+   "date": "",
+   "claim": "Per-reel ElevenLabs costs for our existing scripts are projected: measured word counts \u00d7 6 characters per word \u00d7 the list rate. $0.18\u20130.36 per landscape reel on v3, half of that on flash. No such render has been paid for."
+  },
+  {
+   "id": "creator-covers-50",
+   "state": "projected",
+   "date": "",
+   "claim": "At about 4,000 characters per video, a Creator plan's 220k monthly characters is roughly 50 videos a month. Arithmetic, not experience \u2014 we have never run a month of it."
+  },
+  {
+   "id": "pipeline-shipped-reels",
+   "state": "measured",
+   "date": "2\u20133 Sep 2026",
+   "claim": "The video pipeline this site would use is real and has shipped four reels, six cuts \u2014 two landscape, two portrait \u2014 with three narration providers: a local model, an OpenRouter-hosted one, and none with this vendor. Every number in its documentation was observed rather than estimated."
+  },
+  {
+   "id": "pipeline-wps",
+   "state": "measured",
+   "date": "7 Sep 2026",
+   "claim": "2.1 words per second is the length rule those renders produced: ten scenes want 200\u2013260 words including intro and outro. It is counted before any audio exists, because a script that is too long is cheaper to fix than a render that is."
+  },
+  {
+   "id": "pipeline-drift",
+   "state": "measured",
+   "date": "3 Sep 2026",
+   "claim": "Those renders drifted 100\u2013500 ms over two minutes between the audio and the recording, and the cause has never been attributed. Character-level alignment makes the attribution possible for the first time \u2014 sum the alignments' last end times and compare with the recorder's own duration \u2014 and it has not been done."
+  },
+  {
+   "id": "mp4-vs-webm",
+   "state": "measured",
+   "date": "7 Sep 2026",
+   "claim": "For the same two minutes of video the MP4 was 3.7 MB against 10.1 MB for the WebM. MP4 also plays natively on iOS Safari and is accepted by messaging apps that refuse WebM, so the delivered file is H.264 + AAC with +faststart."
+  },
+  {
+   "id": "first-run-risks",
+   "state": "unrun",
+   "date": "",
+   "claim": "Four predictions about where the unrun ElevenLabs render path breaks first: pcm_44100 output is gated to higher plans and is the most likely failure; eleven_v3 may not be enabled for API use, and treats stability as three discrete modes rather than a continuum, so an arbitrary value can 422; the alignment may not come back in the shape the shim expects, or at all on some models; and the render's default pool fires two generations at once against an untested concurrency limit."
+  },
+  {
+   "id": "video-cost-projection",
+   "state": "projected",
+   "date": "",
+   "claim": "A two-minute landscape reel is about 1,600 characters \u2248 $0.16 on eleven_v3; a four-minute one about 3,600 \u2248 $0.36; half those on flash. Budget about $1.50 for a first video including the three or four re-renders a first script needs. Arithmetic on measured word counts at list price, not an invoice."
+  },
+  {
+   "id": "first-video",
+   "state": "verified",
+   "date": "8 Sep 2026",
+   "claim": "The eleven_v3 path ran for the first time on 8 September 2026: nine scenes, 1,821 characters, 2:08 of speech, mean round trip 4,703 ms (3,070\u20135,843 ms, sequential), two cuts assembled at 1920\u00d71080 and 1080\u00d71920, and 28 subtitle cues built from the same responses as the audio. Zero re-renders."
+  },
+  {
+   "id": "pcm-gated",
+   "state": "verified",
+   "date": "8 Sep 2026",
+   "claim": "output_format=pcm_44100 is refused on a free-tier key: 403, subscription_required, \"Output format 'pcm_44100' is only available on the Pro tier and above.\" The render shim asks for PCM to skip a decoder; the documented fallback \u2014 request MP3 and decode in the page \u2014 is the right one."
+  },
+  {
+   "id": "v3-on-free",
+   "state": "verified",
+   "date": "8 Sep 2026",
+   "claim": "eleven_v3 is available to a free-tier key: it is listed by GET /v1/models and generated all nine scenes, with stability: 0.5 accepted without a 422. The prediction that v3 might not be enabled for API use was wrong for this account."
+  },
+  {
+   "id": "stitching-v3",
+   "state": "verified",
+   "date": "8 Sep 2026",
+   "claim": "Request stitching is not available on eleven_v3. Sending previous_text/next_text returns 400 unsupported_model: \"Providing previous_text or next_text is not yet supported with the 'eleven_v3' model.\" Nobody predicted this, and the video pipeline passes neighbouring scenes by default \u2014 so the first render failed before it made a sound."
+  },
+  {
+   "id": "alignment-exact",
+   "state": "verified",
+   "date": "8 Sep 2026",
+   "claim": "The alignment's last end time equals the decoded audio duration exactly \u2014 0.0 ms difference on nine scenes out of nine. Decoded every MP3 to PCM and compared. So the 100\u2013500 ms of drift this estate has reported since September is not in the speech: a render that advances by the alignment is correct, and drift comes from the compositor, the recorder or the encoder."
+  },
+  {
+   "id": "shortest-trap",
+   "state": "verified",
+   "date": "8 Sep 2026",
+   "claim": "And this render produced drift of its own, from the encoder: ffmpeg's -shortest with a looped still let the video flush past the end of the audio, adding up to 1.8 s of silent video per scene, 14 s over ten scenes. Replacing it with an explicit -t <alignment end> fixed it exactly. Two lesser traps: an MP3 container's Duration: is a bitrate estimate and read 30\u201350 ms long on every file, and Chromium's --window-size is a window rather than a viewport \u2014 at 1920\u00d71080 the page saw 993 px and every slide was silently cropped."
+  },
+  {
+   "id": "key-scope-observed",
+   "state": "verified",
+   "date": "8 Sep 2026",
+   "claim": "Scoped, not bounded, observed in one response body: creating a pronunciation dictionary returned 401 \u2014 \"The API key you used is missing the permission pronunciation_dictionaries_write\". The platform names the missing permission precisely. It has nothing equivalent to say about spend, because there is nothing to say."
+  },
+  {
+   "id": "grant-terms",
+   "state": "docs",
+   "date": "8 Sep 2026",
+   "claim": "The ElevenLabs Grants Program gives an accepted startup 33,000,000 characters over 12 months \u2014 the page calls it \"over 680 hours of Agents usage\" and \"more than $5,500+ in value\" \u2014 plus access to founder events. Applications are rolling, with a decision inside a week. When the 12 months end, or when 10,000 credits remain, the plan converts to Free."
+  },
+  {
+   "id": "grant-eligibility",
+   "state": "docs",
+   "date": "8 Sep 2026",
+   "claim": "Eligibility, verbatim in substance: a monetized product use case with a business or monetization strategy, from a business email; no short-term or one-off projects; no projects for under-18s; startups and companies under 25 employees; no agencies or consulting firms; one application per company; and existing enterprise customers are not eligible."
+  },
+  {
+   "id": "grant-no-resale",
+   "state": "docs",
+   "date": "8 Sep 2026",
+   "claim": "Granted characters cannot be resold or exchanged. \"You cannot exchange or resell your text characters. Reselling your text characters would be a violation of the ElevenLabs Grant program conditions and your grant plan will be terminated immediately.\" This is the sentence that decides what a pricing page on this estate may say."
+  },
+  {
+   "id": "pricing-proposed",
+   "state": "spec",
+   "date": "",
+   "claim": "The prices on this site's pricing page are proposed, not sold. No customer has paid them, no engagement has run to completion under them, and they are published in the open so that the first customer argues with a number rather than with a silence."
+  }
+ ]
+}

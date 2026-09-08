@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ask this site &mdash; ElevenLabs, reported on</title>
+<meta name="description" content="A chat pane that answers from the site&#x27;s own index, in your browser, with no key and no model — and will read the answer aloud with your own key if you give it one.">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://elevenlabs.providers.sgit.ai/ask/">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="elevenlabs.providers.sgit.ai">
+<meta property="og:url" content="https://elevenlabs.providers.sgit.ai/ask/">
+<meta property="og:title" content="Ask this site">
+<meta property="og:description" content="A chat pane that answers from the site&#x27;s own index, in your browser, with no key and no model — and will read the answer aloud with your own key if you give it one.">
+<meta name="twitter:card" content="summary">
+<link rel="alternate" type="text/markdown" href="index.md" title="This page as markdown">
+<link rel="stylesheet" href="../assets/site.css">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<script src="../assets/lab.js"></script>
+</head>
+<body data-lab="1">
+<nav class="site"><div class="row"><a class="brand" href="../index.html">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai/vault/sg-bridge.html" rel="noopener" title="The window.sg bridge on sgit.ai — the host that would hold the key under pattern three, which is what this site is part of">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="../versions/index.html" title="Site release history">v0.3.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="../index.html">The report</a></div><div class="ni ni-has"><a class="nl" href="../patterns/index.html">Patterns<span class="caret">&#9662;</span></a><div class="sub"><a class="sl" href="../patterns/index.html">The four patterns</a><a class="sl" href="../comparison/index.html">Comparison matrix</a><a class="sl" href="../pattern-three/index.html">Pattern three: sg.tts</a></div></div><div class="ni ni-has"><a class="nl here" href="../experiments/index.html">Try it<span class="caret">&#9662;</span></a><div class="sub"><a class="sl" href="../experiments/index.html">All twelve experiments</a><a class="sl" href="../bench/index.html">The bench</a><a class="sl here" href="../ask/index.html">Ask this site</a><a class="sl" href="../examples/index.html">Example files</a></div></div><div class="ni"><a class="nl" href="../video/index.html">Video</a></div><div class="ni ni-has"><a class="nl" href="../pricing/index.html">Commercial<span class="caret">&#9662;</span></a><div class="sub"><a class="sl" href="../pricing/index.html">Pricing</a><a class="sl" href="../grant/index.html">The grant case</a><a class="sl" href="../disclosures/index.html">Disclosures</a></div></div><div class="ni ni-has"><a class="nl" href="../ledger/index.html">Evidence<span class="caret">&#9662;</span></a><div class="sub"><a class="sl" href="../ledger/index.html">The claim ledger</a><a class="sl" href="../briefs/index.html">The briefs, reviewed</a><a class="sl" href="../versions/index.html">Release history</a></div></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<div class="disclosure-strip"><div class="row"><b>Independent.</b> No commercial relationship with ElevenLabs
+&mdash; no credits, no programme, no agreement &mdash; checked 5 September 2026.
+<a href="../disclosures/index.html">Disclosures</a> &middot; <a href="../ledger/index.html">how every claim here is evidenced</a></div></div>
+<main class="doc">
+<p class="crumb"><a href="../index.html">elevenlabs.providers.sgit.ai</a> / Ask this site</p>
+<h1>Ask this site</h1>
+<p class="lead">Two tiers in one pane. <strong>The default one needs no key, no model and no request to anybody</strong>: it matches your question against every page and every claim in the ledger and shows you what the site actually says. The second reads the answer aloud with your key.</p>
+
+<aside class="toc"><b>On this page</b><a class="lv2" href="#why-it-does-not-have-a-model-behind-it">Why it does not have a model behind it</a><a class="lv2" href="#what-the-speech-tier-actually-sends">What the speech tier actually sends</a><a class="lv2" href="#what-it-is-not">What it is not</a></aside>
+<div class="netchat" id="ask">
+  <div class="nc-head">
+    <b>Ask this site</b>
+    <span class="nc-mode" id="ncMode">tier 1 · local matcher, no key</span>
+    <span class="nc-mode" id="ncVoice">voice off</span>
+  </div>
+  <div class="nc-log" id="ncLog"></div>
+  <form class="nc-form" id="ncForm" autocomplete="off">
+    <input class="nc-input" id="ncInput" placeholder="Where does my key have to live? What did it cost? What broke?" aria-label="Ask a question">
+    <button class="nc-send" type="submit">Ask</button>
+  </form>
+  <div class="nc-foot">
+    <button class="nc-keytoggle" type="button" id="ncKeyToggle">Read the answers aloud with your own key &rarr;</button>
+    <span class="small dim" id="ncCount"></span>
+  </div>
+  <div class="nc-keypanel" id="ncKeyPanel" hidden>
+    <p class="small"><b>Which pattern this is:</b> <a href="../patterns/index.html">pattern 0 with a ceiling</a> — your own key,
+      in your own browser, bounded only by your plan's quota. Defensible because it is yours and no key ships in this
+      page; not a pattern to publish.</p>
+    <p class="small"><b>This is the tier-two version of this pane, and it is a trust decision rather than a feature.</b>
+      With a key it does one extra thing: it sends the answer text — never your question, never the page —
+      to <code>api.elevenlabs.io</code> and plays the speech that comes back. The key is kept in this browser's
+      <code>localStorage</code>, exactly as in <a href="../experiments/index.html">the labs</a>, and this site has no server to send it to.
+      <b>Everything above works with no key at all</b>, which is the point of the tier.</p>
+    <div id="keybar" class="keybar"></div>
+    <div class="row">
+      <select id="ncVoiceSel" style="max-width:20rem"><option value="">— load voices —</option></select>
+      <button class="secondary" id="ncLoadVoices">Load voices</button>
+      <label class="inline"><input type="checkbox" id="ncSpeak"> speak each answer</label>
+      <span class="est" id="ncCost"></span>
+    </div>
+    <audio id="ncAudio" controls style="margin-top:.5rem"></audio>
+    <div class="log" id="log" style="margin-top:.6rem;max-height:120px"></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var IDX = null, spent = 0;
+  var STOP = ('the a an and or of to in on for is are it its this that with as at by be from what which how do does ' +
+    'can you your our get got give does did was were has have had why when who whom will would should could there here ' +
+    'about into over than then them they i me my we us if but not no yes any all each per').split(' ');
+
+  fetch((document.documentElement.getAttribute('data-root') || '') + 'assets/site-index.json')
+    .then(function (r) { return r.json(); })
+    .then(function (j) { IDX = j; $('ncCount').textContent = j.pages.length + ' pages and ' + j.claims.length + ' claims indexed, in this browser'; })
+    .catch(function () { $('ncCount').textContent = 'index unavailable'; });
+
+  var EXAMPLES = [
+    'Where does my key have to live?',
+    'What did it actually cost?',
+    'What broke?',
+    'Can I put a bounded key in the page?',
+    'How do I get subtitles?',
+    'Is there a per-key spend limit?'
+  ];
+
+  function terms(q) {
+    return q.toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').split(/\s+/)
+      .filter(function (w) { return w.length > 2 && STOP.indexOf(w) < 0; });
+  }
+  // Term weights are inverse document frequency over the site's own corpus, so a
+  // question like "how do I get subtitles" is decided by "subtitles" rather than by
+  // "get". Without it the common word wins and the answer is confidently wrong.
+  var IDF = null;
+  function buildIdf() {
+    var docs = IDX.pages.map(function (p) { return (p.title + ' ' + p.description + ' ' + p.lead + ' ' + p.headings.join(' ')).toLowerCase(); })
+      .concat(IDX.claims.map(function (c) { return c.claim.toLowerCase(); }));
+    IDF = { n: docs.length, df: {}, docs: docs };
+  }
+  function idf(t) {
+    if (!IDF) buildIdf();
+    if (IDF.df[t] === undefined) {
+      IDF.df[t] = IDF.docs.reduce(function (a, d) { return a + (count(d, t) ? 1 : 0); }, 0);
+    }
+    return Math.log((IDF.n + 1) / (IDF.df[t] + 1)) + 0.1;
+  }
+  // Whole words, not substrings: matching "live" inside "delivered" is how a matcher
+  // answers a question about key custody with a note about video containers.
+  var RE = {};
+  function re(t) {
+    return RE[t] || (RE[t] = new RegExp('\\b' + t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + 's?\\b', 'g'));
+  }
+  function count(h, t) { return (h.match(re(t)) || []).length; }
+  function score(hay, ts) {
+    var h = hay.toLowerCase(), n = 0;
+    ts.forEach(function (t) {
+      var m = count(h, t);
+      if (m) n += idf(t) * (1 + Math.min(m, 3) * 0.35);
+    });
+    return n;
+  }
+  function search(q) {
+    var ts = terms(q);
+    if (!ts.length || !IDX) return { pages: [], claims: [] };
+    var pages = IDX.pages.map(function (p) {
+      return { p: p, s: score(p.title, ts) * 3 + score(p.description, ts) * 1.5 + score(p.lead, ts) + score(p.headings.join(' '), ts) * 2 };
+    }).filter(function (x) { return x.s > 0; }).sort(function (a, b) { return b.s - a.s; }).slice(0, 3);
+    var claims = IDX.claims.map(function (c) { return { c: c, s: score(c.claim, ts) }; })
+      .filter(function (x) { return x.s > 0; }).sort(function (a, b) { return b.s - a.s; });
+    // Drop anything far below the best hit: three weak matches read as three answers.
+    var best = claims.length ? claims[0].s : 0;
+    claims = claims.filter(function (x) { return x.s >= Math.max(1.2, best * 0.55); }).slice(0, 3);
+    return { pages: pages, claims: claims };
+  }
+
+  function say(html_, cls) {
+    var d = document.createElement('div');
+    d.className = 'nc-msg ' + (cls || 'nc-bot');
+    d.innerHTML = html_;
+    $('ncLog').appendChild(d);
+    $('ncLog').scrollTop = $('ncLog').scrollHeight;
+    return d;
+  }
+  function esc(s) { return EL.esc(s); }
+
+  function answer(q) {
+    var r = search(q);
+    if (!r.pages.length && !r.claims.length) {
+      return say('<p>Nothing on this site matches that, and this tier will not guess: it is a matcher over ' +
+        'the site\'s own index, not a model. Try one of the examples, or read ' +
+        '<a href="../ledger/index.html">the ledger</a>, which lists every claim the site makes.</p>');
+    }
+    var out = '<p>' + (r.claims.length
+      ? 'The closest thing this site actually claims:'
+      : 'Nothing in the ledger matches directly. The closest pages:') + '</p>';
+    if (r.claims.length) {
+      out += '<div class="nc-hits">' + r.claims.map(function (x) {
+        return '<div class="nc-hit"><b>' + esc(x.c.state) + (x.c.date ? ' · ' + esc(x.c.date) : '') + '</b>' +
+          '<span class="nc-hit-thesis">' + esc(x.c.claim) + '</span>' +
+          '<span class="nc-hit-why"><a href="../ledger/index.html#claim-' + esc(x.c.id) + '">in the ledger &rarr;</a></span></div>';
+      }).join('') + '</div>';
+    }
+    if (r.pages.length) {
+      out += '<div class="nc-hits">' + r.pages.map(function (x) {
+        return '<a class="nc-hit" href="' + esc(x.p.url) + '"><b>' + esc(x.p.url) + '</b>' +
+          '<span class="nc-hit-thesis">' + esc(x.p.title) + '</span>' +
+          '<span class="nc-hit-why">' + esc(x.p.description.slice(0, 150)) + '</span></a>';
+      }).join('') + '</div>';
+    }
+    var node = say(out);
+    if ($('ncSpeak') && $('ncSpeak').checked && EL.hasKey()) speak(r, node);
+    return node;
+  }
+
+  // Tier two: the answer is spoken with the reader's own key. The question never leaves
+  // the browser — only the sentence the matcher produced.
+  async function speak(r, node) {
+    var voice = $('ncVoiceSel').value;
+    if (!voice) return EL.status('ncCost', 'Pick a voice first.', 'warn');
+    var line = r.claims.length ? r.claims[0].c.claim.replace(/\s+/g, ' ').slice(0, 400)
+      : 'The closest page is ' + r.pages[0].p.title;
+    try {
+      var out = await EL.speak({ text: line, voice: voice, model: 'eleven_flash_v2_5', timestamps: false });
+      $('ncAudio').src = out.url; $('ncAudio').play().catch(function () {});
+      spent += out.chars;
+      $('ncCost').textContent = spent + ' characters spoken · ' + EL.money(EL.estimate(spent, 'eleven_flash_v2_5')) + ' at the flash rate';
+      node.insertAdjacentHTML('beforeend', '<p class="small dim">Spoken: ' + out.chars + ' characters, ' + out.ms + ' ms.</p>');
+    } catch (e) { node.insertAdjacentHTML('beforeend', '<p class="small nc-err">Speech failed: ' + esc(e.message) + '</p>'); }
+  }
+
+  say('<p><b>This pane answers from the site\'s own index, in your browser.</b> No key, no model, no request to ' +
+      'anybody — it matches your words against every page and every claim in <a href="../ledger/index.html">the ledger</a>, and ' +
+      'shows you what the site actually says rather than a paraphrase of it.</p>' +
+      '<div class="nc-egs">' + EXAMPLES.map(function (e) { return '<button class="nc-eg" type="button">' + esc(e) + '</button>'; }).join('') + '</div>');
+  $('ncLog').addEventListener('click', function (ev) {
+    if (!ev.target.classList.contains('nc-eg')) return;
+    $('ncInput').value = ev.target.textContent; $('ncForm').requestSubmit();
+  });
+  $('ncForm').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var q = $('ncInput').value.trim(); if (!q) return;
+    say('<p>' + esc(q) + '</p>', 'nc-you');
+    $('ncInput').value = '';
+    answer(q);
+  });
+  $('ncKeyToggle').onclick = function () {
+    var p = $('ncKeyPanel'); p.hidden = !p.hidden;
+    this.textContent = p.hidden ? 'Read the answers aloud with your own key →' : 'Hide the key panel ←';
+  };
+  $('ncLoadVoices').onclick = async function () {
+    try { var v = await EL.loadVoices($('ncVoiceSel')); EL.status('ncCost', v.length + ' voices.', 'ok'); }
+    catch (e) { EL.status('ncCost', e.message, 'err'); }
+  };
+  // ?q= makes an answer linkable, and makes this pane testable without a human.
+  function fromUrl() {
+    var q = new URLSearchParams(location.search).get('q');
+    if (!q) return;
+    $('ncInput').value = q;
+    if (IDX) { $('ncForm').requestSubmit(); return; }
+    var tries = 0;
+    var t = setInterval(function () {
+      if (IDX) { clearInterval(t); $('ncForm').requestSubmit(); }
+      else if (++tries > 60) clearInterval(t);
+    }, 100);
+  }
+  fromUrl();
+
+  EL.on('keychange', function () {
+    $('ncVoice').textContent = EL.hasKey() ? 'voice available' : 'voice off';
+    $('ncVoice').className = 'nc-mode' + (EL.hasKey() ? ' on' : '');
+  });
+})();
+</script>
+
+<h2 id="why-it-does-not-have-a-model-behind-it">Why it does not have a model behind it</h2>
+<p>Every other site would put a language model here, and this one deliberately does not. Three reasons, in the order they matter:</p>
+<p><strong>A model would be a second host.</strong> This site's central claim is that every page calls exactly one host, <code>api.elevenlabs.io</code>, in a request you start — and <a href="../ledger/index.html#claim-keys-local-only">a build check fails the site if any other origin appears in it</a> <a class="chip st-v" href="../ledger/index.html#claim-keys-local-only" title="Verified by execution on this date, by us.">verified 7 Sep 2026</a>. Adding a chat model would mean adding a provider, a key and an origin, and the claim would have to go. It is worth more than the feature.</p>
+<p><strong>A matcher cannot make things up.</strong> The pane returns the site's own sentences, with the state and date attached, and links to where each one lives. When it finds nothing it says so rather than generating a plausible paragraph — which on a site whose whole argument is <em>no claim without a state</em> is not a limitation, it is the requirement.</p>
+<p><strong>It is the honest tier-one artefact.</strong> <a href="../patterns/index.html#the-second-axis-what-the-tool-keeps">The capability tier axis</a> says a tier-one tool keeps no state and works for somebody with no key. This pane is that, and then it offers to become tier two — with the key panel written as a trust decision rather than a feature, which is the convention this estate already uses.</p>
+<h2 id="what-the-speech-tier-actually-sends">What the speech tier actually sends</h2>
+<p>If you open the key panel and turn speech on, one thing is sent, to one host: <strong>the answer text</strong>. Not your question, not the page you are on, not an identifier. The sentence spoken is a claim from the ledger — text that is already published on this site — and it goes to <code>api.elevenlabs.io</code> in the same shape as <a href="../experiments/index.html">every lab here</a> <a class="chip st-v" href="../ledger/index.html#claim-first-video" title="Verified by execution on this date, by us.">verified 8 Sep 2026</a>.</p>
+<p>It defaults to <code>eleven_flash_v2_5</code> because an answer is not narration: half the price, and the meter under the panel shows what you have spent <a class="chip st-d" href="../ledger/index.html#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>.</p>
+<h2 id="what-it-is-not">What it is not</h2>
+<p>It is not a support channel, it is not a model, and it is not an index of the vendor's documentation — asking it about an endpoint this site does not report on will correctly return nothing. For the vendor's API reference, <a href="https://elevenlabs.io/docs" rel="noopener">the vendor's own documentation</a> is better and fresher, which is the same rule the rest of this site obeys.</p>
+<p class="pagenav"><a href="../ledger/index.html">Every claim on this site, with its state &rarr;</a>
+<a href="../disclosures/index.html">Disclosures &rarr;</a></p>
+</main>
+<footer class="site"><div class="cols">
+  <div>
+    <div class="brandline">elevenlabs<span>.providers.sgit.ai</span></div>
+    <p class="nonaff"><b>Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. &ldquo;ElevenLabs&rdquo; identifies the API this page reports on; all trademarks belong to their owners.</b></p>
+    <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
+       Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
+       <code>7d1916aca5f3</code>, 7 September 2026.</p>
+    <p class="licence">This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0). The code that builds it is Apache-2.0.</p>
+    <p class="verline">site <a href="../versions/index.html">v0.3.0</a> &middot; <a href="../ledger/index.html">the ledger</a> &middot; <a href="../disclosures/index.html">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+  </div>
+  <div>
+    <h4>The report</h4>
+    <a href="../index.html">ElevenLabs, nine sections</a>
+    <a href="../index.html#8-what-it-cost">&sect;8 What it cost</a>
+    <a href="../index.html#9-what-went-wrong">&sect;9 What went wrong</a>
+    <a href="../examples/index.html">Example files</a>
+    <a href="../video/index.html">The first video</a>
+    <a href="../providers/openrouter/index.html">OpenRouter (structural stub)</a>
+  </div>
+  <div>
+    <h4>Experiments</h4>
+    <a href="../experiments/index.html">All experiments</a>
+    <a href="../bench/index.html">The test bench</a>
+    <a href="../experiments/captions/index.html">Captions studio</a>
+    <a href="../experiments/concurrency/index.html">Concurrency probe</a>
+    <a href="../experiments/cost/index.html">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>Commercial</h4>
+    <a href="../pricing/index.html">Pricing</a>
+    <a href="../grant/index.html">The grant case</a>
+    <a href="../ask/index.html">Ask this site</a>
+  </div>
+  <div>
+    <h4>The argument</h4>
+    <a href="../patterns/index.html">The four patterns</a>
+    <a href="../comparison/index.html">Comparison matrix</a>
+    <a href="../pattern-three/index.html">Pattern three: sg.tts</a>
+    <a href="../ledger/index.html">Claim ledger</a>
+    <a href="../briefs/index.html">The briefs, reviewed</a>
+    <a href="../disclosures/index.html">Disclosures</a>
+    <a href="https://sgit.ai/vault/sg-bridge.html" rel="noopener">The host bridge on sgit.ai</a>
+  </div>
+</div>
+<div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
+is served from this domain. The only network call any page here makes is the one <em>you</em> start, from a lab,
+to <code>api.elevenlabs.io</code>.</p></div>
+</footer>
+</body>
+</html>

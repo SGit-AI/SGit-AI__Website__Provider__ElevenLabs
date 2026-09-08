@@ -49,15 +49,32 @@ SITE = {
     "version": VERSION,
 }
 
+# Two levels, as on the sibling sites: every group label is itself a link to a real
+# page, so nothing is reachable only by opening a menu.
 NAV = [
-    ("The report", "/"),
-    ("Experiments", "/experiments/"),
-    ("Bench", "/bench/"),
-    ("Patterns", "/patterns/"),
-    ("Comparison", "/comparison/"),
-    ("Ledger", "/ledger/"),
-    ("Briefs", "/briefs/"),
-    ("Disclosures", "/disclosures/"),
+    ("The report", "/", []),
+    ("Patterns", "/patterns/", [
+        ("The four patterns", "/patterns/"),
+        ("Comparison matrix", "/comparison/"),
+        ("Pattern three: sg.tts", "/pattern-three/"),
+    ]),
+    ("Try it", "/experiments/", [
+        ("All twelve experiments", "/experiments/"),
+        ("The bench", "/bench/"),
+        ("Ask this site", "/ask/"),
+        ("Example files", "/examples/"),
+    ]),
+    ("Video", "/video/", []),
+    ("Commercial", "/pricing/", [
+        ("Pricing", "/pricing/"),
+        ("The grant case", "/grant/"),
+        ("Disclosures", "/disclosures/"),
+    ]),
+    ("Evidence", "/ledger/", [
+        ("The claim ledger", "/ledger/"),
+        ("The briefs, reviewed", "/briefs/"),
+        ("Release history", "/versions/"),
+    ]),
 ]
 
 LICENCE_STAMP = (
@@ -742,9 +759,21 @@ def relativise(doc, prefix):
 
 def nav_html(current):
     items = []
-    for label, href in NAV:
-        cls = "nl here" if href == current else "nl"
-        items.append(f'<div class="ni"><a class="{cls}" href="{href}">{html.escape(label)}</a></div>')
+    for label, href, subs in NAV:
+        here = href == current or any(s_href == current for _, s_href in subs)
+        cls = "nl here" if here else "nl"
+        if not subs:
+            items.append(f'<div class="ni"><a class="{cls}" href="{href}">{html.escape(label)}</a></div>')
+            continue
+        sub = "".join(
+            f'<a class="sl{" here" if s_href == current else ""}" href="{s_href}">{html.escape(s_label)}</a>'
+            for s_label, s_href in subs
+        )
+        items.append(
+            f'<div class="ni ni-has"><a class="{cls}" href="{href}">{html.escape(label)}'
+            '<span class="caret">&#9662;</span></a>'
+            f'<div class="sub">{sub}</div></div>'
+        )
     return (
         '<nav class="site"><div class="row">'
         '<a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a>'
@@ -777,7 +806,7 @@ def footer_html():
     <a href="/#8-what-it-cost">&sect;8 What it cost</a>
     <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
     <a href="/examples/">Example files</a>
-    <a href="/video/">Narrated videos — the plan</a>
+    <a href="/video/">The first video</a>
     <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
   </div>
   <div>
@@ -787,6 +816,12 @@ def footer_html():
     <a href="/experiments/captions/">Captions studio</a>
     <a href="/experiments/concurrency/">Concurrency probe</a>
     <a href="/experiments/cost/">Cost model (no key)</a>
+  </div>
+  <div>
+    <h4>Commercial</h4>
+    <a href="/pricing/">Pricing</a>
+    <a href="/grant/">The grant case</a>
+    <a href="/ask/">Ask this site</a>
   </div>
   <div>
     <h4>The argument</h4>
@@ -957,6 +992,7 @@ def build(out_dir):
     (out_dir / "sitemap.xml").write_text(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + urls + "</urlset>\n"
     )
+    (out_dir / "assets" / "site-index.json").write_text(site_index(rendered, claims))
     (out_dir / "llms.txt").write_text(llms_txt(rendered))
     (out_dir / "llms-full.txt").write_text(llms_full(rendered))
     print(f"build: {len(rendered)} pages, {len(claims)} claims → {out_dir}")
@@ -964,6 +1000,36 @@ def build(out_dir):
     if unused:
         print("build: claims in the ledger that no page cites: " + ", ".join(unused))
     return rendered
+
+
+def site_index(rendered, claims):
+    """What the ask pane matches against. Built here rather than fetched from
+    anywhere: the pane's default tier answers with no key and no network call
+    beyond this file, which is the only way it can be honest about tier one."""
+    import json
+
+    pages = []
+    for url, (page, ctx, body) in sorted(rendered.items()):
+        fm = page["fm"]
+        headings = [text for lv, _a, text in ctx["toc"]]
+        pages.append({
+            "url": url,
+            "title": fm["title"],
+            "description": fm.get("description", ""),
+            "lead": re.sub(r"<[^>]+>", "", inline(fm.get("lead", ""), ctx)),
+            "headings": headings,
+            "kind": fm.get("kind", "page"),
+        })
+    return json.dumps({
+        "version": SITE["version"],
+        "built": "8 September 2026",
+        "pages": pages,
+        "claims": [
+            {"id": c["id"], "state": c["state"], "date": c.get("date", ""),
+             "claim": re.sub(r"[*`]", "", c["claim"])}
+            for c in claims
+        ],
+    }, indent=1)
 
 
 def llms_txt(rendered):

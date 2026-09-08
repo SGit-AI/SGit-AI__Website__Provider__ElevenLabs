@@ -13,6 +13,15 @@ provenance:
 | ElevenLabs | **None.** A self-paid Creator-tier key, list price. No credits, no programme, no agreement of any kind. | — | 5 September 2026 |
 | OpenRouter | **None.** Pay-as-you-go on a self-minted key, list price. | — | 5 September 2026 |
 
+## Pending, and recorded before it happens
+
+| What | State | Date |
+|---|---|---|
+| **ElevenLabs Grants Program** — an application has been *considered and written up* at [/grant/](/grant/); **no application has been made** | Not applied for | Written 8 September 2026 |
+| A key supplied by the project lead for one run, to make [the first video](/video/) | Used once, on 8 September 2026; not a relationship, not a grant, not a credit | 8 September 2026 |
+
+**The ordering is the commitment.** If an application is made, this table records it **on the day it is made** rather than on the day it is granted, and every page produced with granted characters says so. A site that discovers its own funding halfway down a page has already lost the argument it was making.
+
 ## The commitments this page makes
 
 - If a developer programme, credit grant, discount or commercial agreement of any kind ever starts, it is **recorded here first**, and then in one line at the top of that platform's page, with the date it began.

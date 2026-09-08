@@ -65,3 +65,7 @@ About **$0.08 per minute of speech** {{claim:openrouter-cost-aiuc}}. Speech gene
 - **The limit did its job** — a 402 at $4.79 of $5.00, because audio output requires $0.50 of headroom. The full framing is on [the patterns page](/patterns/), where it belongs: it is the one piece of evidence on this site that a bound is enforceable in practice rather than in a diagram {{claim:openrouter-402}}.
 - **No speed control.** The model takes no pace parameter, so a portrait cut that had to fit under a three-minute limit lost a third of its script instead of 15% of its pace {{claim:openrouter-no-speed}}. That single missing knob is what sent us to evaluate a vendor whose API has one {{claim:speed-range}}.
 - **An outro that lied.** A reel's closing narration said "no API cost" over a slide printing $0.1554, because one outro served both a free cut and a paid one. Caught by reading the closing frame; the rule now is that every outro says "the cost is on the screen".
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

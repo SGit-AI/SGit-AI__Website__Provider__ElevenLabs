@@ -53,3 +53,7 @@ Start with aliases; move a word to a phoneme only when an alias still comes out 
 In the pipeline these came from, **the narration text is the caption text** — the words the voice speaks are drawn on screen. So every pronunciation hack is visible: the scripts in that vault say `sgit dot ai`, `A I U C one`, `S H A two five six`, `version zero point one point twenty-nine`, and viewers read them in the caption band as typos.
 
 A lexicon moves the hack off the screen: the text says `sgit.ai`, the voice says it right, and the caption band reads like prose for the first time. That is a change a viewer would notice before they noticed the voice.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

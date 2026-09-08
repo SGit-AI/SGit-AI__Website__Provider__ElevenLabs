@@ -38,3 +38,7 @@ The same timing array gives three more things the pipeline never had: chapter ma
 ## What is verified here, and what is not
 
 That the endpoint returns an alignment, and that it round-trips from a browser: verified, three samples, 5 September 2026 {{claim:timestamps-roundtrip}}. That the cue rule produces *readable* subtitles: unverified {{claim:cue-rule}}. That the alignment is accurate enough to highlight words in real time without visible lag: unverified — the karaoke preview above is where you would find out.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

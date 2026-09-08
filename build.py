@@ -31,6 +31,7 @@ APPS = ROOT / "apps"
 ASSETS = ROOT / "assets"
 FILES = ROOT / "files"
 DATA = ROOT / "data"
+BRIEFS = ROOT / "briefs"
 OUT = ROOT / "docs"
 
 # The estate convention: one file owns the version, `bin/bump.py` moves it, the
@@ -55,8 +56,13 @@ NAV = [
     ("Patterns", "/patterns/"),
     ("Comparison", "/comparison/"),
     ("Ledger", "/ledger/"),
+    ("Briefs", "/briefs/"),
     ("Disclosures", "/disclosures/"),
 ]
+
+LICENCE_STAMP = (
+    "This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0)."
+)
 
 NON_AFFILIATION = (
     "Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by "
@@ -544,9 +550,7 @@ def block_comparison(ctx):
     )
 
 
-def block_grants(ctx):
-    fm = ctx["fm"]
-    grants = fm.get("grants") or []
+def _grant_rows(grants):
     rows = []
     for g in grants:
         rows.append(
@@ -559,12 +563,45 @@ def block_grants(ctx):
                 b=html.escape(str(g.get("bounded_by", g.get("note", "")))),
             )
         )
+    return "".join(rows)
+
+
+def block_grants(ctx):
+    """Two layers, because they answer different questions: what an agent gains by
+    connecting this provider at all, and what the key we actually use can reach."""
+    fm = ctx["fm"]
+    platform = fm.get("platform_grants") or []
+    rows = _grant_rows(fm.get("grants") or [])
     not_granted = fm.get("not_granted") or []
     ng = ", ".join(f"<code>{html.escape(str(x))}</code>" for x in not_granted)
+    plat = ""
+    if platform:
+        prows = []
+        for g in platform:
+            prows.append(
+                "<tr><td><code>{v}</code></td><td><code>{o}</code></td><td><code>{r}</code></td>"
+                "<td>{rev}</td><td>{p}</td><td>{n}</td></tr>".format(
+                    v=html.escape(str(g.get("verb", ""))),
+                    o=html.escape(str(g.get("object", ""))),
+                    r=html.escape(str(g.get("reach", ""))),
+                    rev="reversible" if g.get("reversible") else '<b class="irrev">irreversible</b>',
+                    p=html.escape(str(g.get("product", ""))),
+                    n=inline(str(g.get("note", "")), ctx),
+                )
+            )
+        plat = (
+            '<h4>What the platform can grant, per product</h4>'
+            '<div class="tablewrap"><table class="grants"><thead><tr><th>verb</th><th>object class</th>'
+            "<th>reach</th><th>reversibility</th><th>product</th><th>note</th></tr></thead><tbody>"
+            + "".join(prows)
+            + "</tbody></table></div>"
+            + '<h4>What <em>our</em> key grants — scoped to text to speech and voices-read</h4>'
+        )
     return (
-        '<div class="tablewrap"><table class="grants"><thead><tr><th>verb</th><th>object class</th><th>reach</th>'
+        plat
+        + '<div class="tablewrap"><table class="grants"><thead><tr><th>verb</th><th>object class</th><th>reach</th>'
         "<th>reversibility</th><th>bounded by</th></tr></thead><tbody>"
-        + "".join(rows)
+        + rows
         + "</tbody></table></div>"
         + (f'<p class="small"><b>Not granted</b> by a key scoped this way, and it should stay that way: {ng}.</p>' if ng else "")
         + '<p class="small dim">The same rows are emitted as front-matter in this page&rsquo;s '
@@ -711,7 +748,9 @@ def nav_html(current):
     return (
         '<nav class="site"><div class="row">'
         '<a class="brand" href="/">elevenlabs<span>.providers.sgit.ai</span></a>'
-        '<a class="parent" href="https://sgit.ai" rel="noopener" title="sgit.ai — the parent project: the encrypted vault layer this site\'s pattern-three argument is about">&#8599; part of <b>sgit.ai</b></a>'
+        '<a class="parent" href="https://sgit.ai/vault/sg-bridge.html" rel="noopener" '
+        'title="The window.sg bridge on sgit.ai — the host that would hold the key under pattern three, which is what this site is part of">'
+        '&#8599; part of <b>sgit.ai</b></a>'
         '<span class="stage-pill">provider report</span>'
         f'<a class="ver" href="/versions/" title="Site release history">{SITE["version"]}</a>'
         '<button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button>'
@@ -729,6 +768,7 @@ def footer_html():
     <p>A report on what one paid API cost us, what broke, and which credential patterns it can actually support.
        Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
        <code>{SITE['vault_commit']}</code>, 7 September 2026.</p>
+    <p class="licence">{LICENCE_STAMP} The code that builds it is Apache-2.0.</p>
     <p class="verline">site <a href="/versions/">{SITE['version']}</a> &middot; <a href="/ledger/">the ledger</a> &middot; <a href="/disclosures/">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
   </div>
   <div>
@@ -737,6 +777,7 @@ def footer_html():
     <a href="/#8-what-it-cost">&sect;8 What it cost</a>
     <a href="/#9-what-went-wrong">&sect;9 What went wrong</a>
     <a href="/examples/">Example files</a>
+    <a href="/video/">Narrated videos — the plan</a>
     <a href="/providers/openrouter/">OpenRouter (structural stub)</a>
   </div>
   <div>
@@ -753,7 +794,9 @@ def footer_html():
     <a href="/comparison/">Comparison matrix</a>
     <a href="/pattern-three/">Pattern three: sg.tts</a>
     <a href="/ledger/">Claim ledger</a>
+    <a href="/briefs/">The briefs, reviewed</a>
     <a href="/disclosures/">Disclosures</a>
+    <a href="https://sgit.ai/vault/sg-bridge.html" rel="noopener">The host bridge on sgit.ai</a>
   </div>
 </div>
 <div class="footnote"><p>No analytics. No cookies. No third-party fonts, scripts or CDN &mdash; every byte of this site
@@ -807,6 +850,9 @@ def page_html(page, ctx, body):
 </head>
 <body{lab}>
 {nav_html(page['nav_match'])}
+<div class="disclosure-strip"><div class="row"><b>Independent.</b> No commercial relationship with ElevenLabs
+&mdash; no credits, no programme, no agreement &mdash; checked 5 September 2026.
+<a href="/disclosures/">Disclosures</a> &middot; <a href="/ledger/">how every claim here is evidenced</a></div></div>
 <main class="doc{' doc-wide' if fm.get('wide') else ''}">
 <p class="crumb"><a href="/">elevenlabs.providers.sgit.ai</a>{page['crumb']}</p>
 <h1>{html.escape(fm['title'])}</h1>
@@ -889,11 +935,21 @@ def build(out_dir):
         target = out_dir / url.strip("/") / "index.html" if url != "/" else out_dir / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(page_html(page, ctx, body))
-        (target.parent / "index.md").write_text(page["src_md"])
+        twin = page["src_md"].rstrip("\n")
+        if LICENCE_STAMP not in twin:
+            twin += f"\n\n---\n\n{LICENCE_STAMP}\n"
+        (target.parent / "index.md").write_text(twin)
 
     # static assets, verbatim
     shutil.copytree(ASSETS, out_dir / "assets")
     shutil.copytree(FILES, out_dir / "files")
+    # the briefs this site was built from, raw, at /briefs/ — the estate's shape.
+    # Copied after the pages so the generated /briefs/index.html is not clobbered.
+    for src in sorted(BRIEFS.rglob("*")):
+        if src.is_file():
+            dst = out_dir / "briefs" / src.relative_to(BRIEFS)
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
     (out_dir / "CNAME").write_text(SITE["domain"] + "\n")
     (out_dir / ".nojekyll").write_text("")
     (out_dir / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {SITE['base']}/sitemap.xml\n")
@@ -922,6 +978,7 @@ def llms_txt(rendered):
         "Every factual claim on this site carries one of six states: verified, measured, vendor docs,",
         "specified-not-shipped, written-not-run, projected. The full list is at /ledger/.",
         "Every page is also served as markdown at <page>/index.md.",
+        f"Licence: {LICENCE_STAMP}",
         "",
         "## Pages",
     ]
@@ -942,6 +999,8 @@ def llms_full(rendered):
         "Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by "
         "ElevenLabs. \"ElevenLabs\" identifies the API this site reports on; all trademarks "
         "belong to their owners.",
+        "",
+        LICENCE_STAMP,
         "",
     ]
     for url, (page, _ctx, _body) in sorted(rendered.items()):

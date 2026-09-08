@@ -34,3 +34,7 @@ The cost estimate above the button is the whole spend, computed before anything 
 Latency mean and spread per model, spoken duration per model, and — the part no table can give you — whether you could tell them apart with your eyes closed. The **Copy results as markdown** button produces a table with a timestamp; paste it into the repository that cares about the answer.
 
 Our own projection says v3 costs about what the incumbent provider costs and flash costs half {{claim:projected-reel-costs}}. Whether the extra buys anything on a technical explainer is exactly the question this lab is for, and we have not answered it {{claim:labs-unrun}}.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

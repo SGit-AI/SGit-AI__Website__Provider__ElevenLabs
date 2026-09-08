@@ -62,6 +62,24 @@ The difference is not cosmetic. In the left-hand version, a cross-site scripting
 - `app.json` would no longer need `"permissions": {"network": true}` for these pages — which is the grant that [bit us on day one](/#9-what-went-wrong) {{claim:csp-blocks}} and which is a real widening for any vault whose app holds private content.
 - ElevenLabs would move, in [the comparison](/comparison/), from *needs a server* to *pattern 3, no server* — because for a vault app **the host is the server** that pattern 2 keeps asking for. That is the generalisation the family of sites exists to test.
 
+## What would have to ship, precisely
+
+So that this page is a specification with a scope rather than an aspiration. Three things, none of them in this repository:
+
+| # | What | Where it would land | State |
+|---|---|---|---|
+| 1 | The host verb — `sg.tts.speak`, `available`, `voices`, `usage` — beside the `sg.llm.*` that already does this shape of thing | The SG/Vault host's bridge | {{badge:spec}} |
+| 2 | The policy read: open the owner-sealed terms file, enforce `maxCharsPerRequest`, meter `maxCostPerSession`, hold a semaphore at `maxConcurrent` | The same host, reusing the model-router's own policy path | {{badge:spec}} |
+| 3 | The consent prompt, raised **outside** the app frame so the app can neither suppress it nor fake it | The host's HUD, which already does this for a model call | {{badge:spec}} |
+
+**What is already real:** the terms file at `.vault/elevenlabs/config.json`, in the same shape and under the same seal as the model router's; and the permission floor that denies `.vault/**` to every app frame under every grant. Two of three pieces, and the missing one is the verb.
+
+**Until all three ship, no page on this site may say pattern three works here** — and the build enforces it: the gate rejects `sg.tts` written in the present tense anywhere in the built site. That check exists because this is exactly the kind of page where a specification quietly becomes a claim.
+
 ## What would still be true
 
 The host is not magic. Under pattern 3 the terms are only as good as the numbers in them, the estimate is an estimate at list price rather than an invoice, and a compromised *host* is a compromised key — the trust moves, it does not vanish. What changes is **who chose the blast radius and where the choice is recorded**: a number in a file that travels with the content, rather than a promise about how carefully an application will behave.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

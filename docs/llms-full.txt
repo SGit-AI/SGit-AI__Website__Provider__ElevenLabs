@@ -1,7 +1,9 @@
 # elevenlabs.providers.sgit.ai — the whole site as markdown
-site v0.1.2 · source vault commit 7d1916aca5f3 · every claim's verification state is at /ledger/
+site v0.2.0 · source vault commit 7d1916aca5f3 · every claim's verification state is at /ledger/
 
 Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. "ElevenLabs" identifies the API this site reports on; all trademarks belong to their owners.
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).
 
 
 ==============================================================================
@@ -19,6 +21,49 @@ provenance:
   commit: 7d1916aca5f3
   date: 7 September 2026
   note: "Prose from platforms/elevenlabs.md, with the figures behind it from four reels' worth of pipeline findings."
+platform_grants:
+  - verb: send
+    object: text
+    reach: endpoint
+    reversible: true
+    product: Text to speech
+    note: the words you send leave for the model
+  - verb: read
+    object: audio+timing
+    reach: self
+    reversible: true
+    product: Text to speech
+    note: "character-level alignment — the capability the vendor does not frame as one"
+  - verb: spend
+    object: characters
+    reach: tenant
+    reversible: true
+    product: any
+    note: bounded by the plan's monthly quota and nothing narrower
+  - verb: create
+    object: voice
+    reach: tenant
+    reversible: true
+    product: Voices — instant and professional cloning
+    note: "**the row a reader will not expect.** A voice that did not exist before, from under two minutes of audio. Deletable, so reversible in the platform's terms — and consent is not a technical control"
+  - verb: read
+    object: audio
+    reach: tenant
+    reversible: true
+    product: Speech to text (Scribe), forced alignment
+    note: transcription of material you supply, priced by the hour
+  - verb: send
+    object: media
+    reach: endpoint
+    reversible: true
+    product: Dubbing
+    note: media you supply, re-voiced in another language
+  - verb: send
+    object: message
+    reach: world
+    reversible: false
+    product: Agents (conversational)
+    note: "**the only irreversible row this vendor offers.** A live agent speaks to a person, and a thing said to somebody cannot be unsaid"
 grants:
   - verb: spend
     object: characters
@@ -71,6 +116,16 @@ patterns:
 
 <div class="note"><p><b>How to read this page.</b> Every factual claim carries a chip saying how we know it: {{badge:verified}} we ran it and watched it work, on that date · {{badge:measured}} our own pipeline produced this number on a named workload · {{badge:docs}} we read it in the vendor's documentation on that date and never executed it · {{badge:spec}} it does not exist yet · {{badge:unrun}} we wrote it and never ran it · {{badge:projected}} arithmetic, with the workings shown. Click any chip for <a href="/ledger/">the ledger</a>, which lists all of them in one table.</p></div>
 
+## What this site is, and is not
+
+**It is narrower than the vendor's own environment, not better.** The vendor serves millions of users across every workload; this site serves one — narrating explainer videos from a scripted pipeline — and reports what that cost, where the key had to live, and what broke. A general-purpose interface cannot be narrow, which is why this one does not try to be: [the labs here](/experiments/) exist because the vendor's own console does not fit this workflow, not because it is inadequate.
+
+**It is a report with a workbench attached, not a tutorial and not an index of somebody else's documentation.** If a section here could be replaced by a link to the vendor, it should be deleted, and the vendor's page is linked with the date we read it. What this site has that nobody else does is [what it cost on a named workload on a named date](/#8-what-it-cost), [what went wrong](/#9-what-went-wrong), and [which credential patterns the product can actually support](/patterns/).
+
+**"Provider" here means one thing only: a service that serves models over an API** — the sense this estate's own code uses, where a constant of that name holds an entry per model service. It does not mean a customer who redistributes capability to the people they serve, which is the other established sense in this estate and is not what any page here is about.
+
+**It is not an endorsement, and not the vendor's.** [No commercial relationship exists](/disclosures/), the page saying so shipped before there was anything to disclose, and every claim carries [the state that says how we know it](/ledger/).
+
 ## 1 · Disclosure
 
 **None.** No credits, programme, or commercial relationship with ElevenLabs as of 5 September 2026. The key used for the one session reported in §8 is a Creator-tier key we pay for ourselves at list price. The full list — which currently has no entries in the "relationship" column — is at [/disclosures/](/disclosures/), and it shipped with this site's first version precisely so that the page's existence is not read as evidence of a relationship.
@@ -81,7 +136,13 @@ The rows an agent's grant gains when this platform is connected, as capability t
 
 {{grants}}
 
-Two things are worth saying in prose. First, **`read × audio+timing × self` is the new capability** — this API returns the start and end time of every character it speaks, which the pipeline that drove this evaluation never had from any other provider. Everything in the [captions studio](/experiments/captions/) is arithmetic on that array. Second, **nothing here grants `send × message × world`.** The pipeline receives audio; publishing a video is a separate, human act. That distinction is the difference between a narration tool and a voice agent, and it is why the Agents product — the only irreversible row this vendor offers — is scoped out of the key rather than merely unused.
+**Read the two tables as one argument.** The first is what an agent gains the moment this provider is connected at all; the second is what the key this evaluation actually used can reach. The gap between them is the work a scope does, and it is the only part of a credential story this vendor lets you control.
+
+**The row worth stopping on is `create × voice × tenant`.** Connecting this provider gives an agent the capability to *produce a voice that did not exist* — instant cloning takes under two minutes of audio. That is a different order of thing from producing audio, no vendor page frames it as a capability, and the platform's controls for it are procedural rather than technical: professional cloning requires verification of the speaker, and instant cloning requires you to have the right to the recording you upload. **Consent is not something the API can check.** Our key is scoped to exclude it, and the [key-scope probe](/experiments/key-scope/) is how you check that yours is too.
+
+**One row a reader might expect is deliberately absent.** It has been proposed that connecting a voice platform grants `send × audio × world`, irreversibly, on the reasoning that audio sent is sent. **Not for this product.** The text-to-speech endpoint returns audio to the caller; nothing leaves for the world, and the estate's own primitive distinguishes `endpoint` reach from `world` reach exactly here. The irreversible row this vendor does offer is Agents, in the table above, and it is scoped out of our key. Saying otherwise would tell a reader that generating narration publishes it — which is [the error §4 exists to prevent](/#4-where-the-key-goes), one product over. {{claim:agents-only-signed-urls}}
+
+Two more things are worth saying in prose. First, **`read × audio+timing × self` is the new capability** — this API returns the start and end time of every character it speaks, which the pipeline that drove this evaluation never had from any other provider. Everything in the [captions studio](/experiments/captions/) is arithmetic on that array. Second, **nothing our key grants reaches the world.** The pipeline receives audio; publishing a video is a separate, human act by a person who watched it first. That distinction is the difference between a narration tool and a voice agent, and it is why Agents is scoped out of the key rather than merely unused.
 
 ## 3 · Which pattern — and for which product
 
@@ -235,6 +296,79 @@ The command-line equivalents of what this page does are [downloadable as files](
 If the request fails with a network error rather than an HTTP status, it is CORS or a host CSP and not your key {{claim:csp-blocks}}: open the console, check for a `connect-src` violation, and see [§9 of the report](/#9-what-went-wrong).
 
 ==============================================================================
+PAGE /briefs/  —  The briefs, and what was done with them
+==============================================================================
+
+---
+title: The briefs, and what was done with them
+description: "Every brief this site was built from, published raw, with a decision-by-decision account of what was accepted, what was modified, what was rejected and why."
+lead: "This site was commissioned by briefs. They are published here **in full**, next to what was actually done with each instruction — including the three findings that were wrong, the one proposed capability row that was rejected, and the parts that are blocked on somebody else."
+order: 85
+toc: true
+provenance:
+  commit: 7d1916aca5f3
+  date: 7 September 2026
+  note: "The raw documents are at /briefs/, licensed CC BY 4.0 as they arrived."
+---
+
+<div class="note"><p><b>Why publish the brief.</b> The same discipline as the rest of this site: <b>the claim and its evidence travel together</b>. A site that publishes what it was asked to build can be checked against it. One that publishes only the result cannot, and asks you to take its judgement on trust — which is the thing this site keeps declining to do.</p></div>
+
+## Pack one · the providers-site pack, 7 September 2026
+
+Six documents: an audit of the live site at v0.1.1, two axes and eleven decisions, an eight-step plan, twelve acceptance tests, eight open questions. **[Read it raw](/briefs/2026-09-07__pack__providers-site/00__README.md)** — [audit](/briefs/2026-09-07__pack__providers-site/01__audit-and-manifest.md) · [architecture](/briefs/2026-09-07__pack__providers-site/02__architecture-and-decisions.md) · [plan](/briefs/2026-09-07__pack__providers-site/03__implementation-plan.md) · [acceptance](/briefs/2026-09-07__pack__providers-site/04__verification-and-acceptance.md) · [open questions](/briefs/2026-09-07__pack__providers-site/05__open-questions.md).
+
+### What shipped, at v0.2.0
+
+| Step | What it asked | What was done |
+|---|---|---|
+| 1 | A capability block: what connecting this provider grants an agent | **Done, in two layers.** The block already existed for our own key; §2 now carries what the *platform* can grant per product above it, including the row the pack was right about — see below |
+| 2 | The capability-tier axis, and its intersection with the credential patterns | **Done.** [The matrix is on the patterns page](/patterns/#the-second-axis-what-the-tool-keeps), and every tool on this site is placed in exactly one cell |
+| 3 | Positioning, a disclosure line at the top of every page, the per-product rule | **Done.** The strip above this page is the disclosure line; the positioning paragraph is on [the report](/#what-this-site-is-and-is-not) |
+| 6 | Tier three resolved either way | **Done, the honest way.** [`/pattern-three/`](/pattern-three/) now names exactly what would have to ship, and carries the specification state at the top |
+| 7 | Composition, and `llms-full.txt` | **Done.** Family links point at pages rather than domains; the *provider* disambiguation is on the report. `llms-full.txt` already shipped at v0.1.0 |
+| 4, 5, 8 | The video walkthrough, the tried-and-abandoned page, what we use it for | **Not done, deliberately.** Each is blocked on something real — see the ordering note below |
+
+### Three findings in the audit were wrong
+
+Checked against the live site rather than recalled, which is the standard the audit set for itself.
+
+<div class="fails"><div class="fail ok"><p class="who">Corrected</p><h3><code>llms-full.txt</code> was not absent</h3><p>It shipped at v0.1.0 and returns 200. The audit's M8 and step 7 asked for a file the site already had. Cheap to check, and the reason the ledger exists.</p></div><div class="fail ok"><p class="who">Corrected</p><h3>The capability block existed</h3><p>M1 called it &ldquo;the largest gap&rdquo; and said nothing on the site did it. §2 has carried verb × object class × reach, with reversibility marked and emitted as front-matter, since v0.1.0. <b>The real gap was narrower and better:</b> the block described what <em>our scoped key</em> grants, not what the <em>platform</em> can grant. That is now two layers.</p></div><div class="fail"><p class="who">Rejected</p><h3><code>send × audio × world</code>, irreversible</h3><p>The pack proposed a row saying that connecting a voice provider grants an agent the capability to send audio into the world, irreversibly. <b>It is the same over-generalisation as the signed-URL claim this site already had to correct, from the same source brief.</b></p><p>The text-to-speech endpoint returns audio <em>to the caller</em>. Nothing leaves for the world; the estate's own primitive distinguishes <code>endpoint</code> reach from <code>world</code> reach precisely here. This vendor's genuinely irreversible row is <b>Agents</b>, which §2 names and which our key is scoped out of. Shipping the proposed row would tell a reader that generating narration publishes it — the error §4 exists to prevent, one product over.</p></div></div>
+
+### And one finding it could not have made
+
+While checking the audit's claim that §4 was built correctly, the citation in §4 turned out to be **invisible**: `<https://…>` is a GFM autolink, this site's renderer had no autolink rule, and the angle brackets reached the browser as an unknown tag — so the URL a reader is told to check was dropped from the page entirely. Fixed in [v0.1.2](/versions/), with a build check so it cannot return.
+
+**A page-level audit cannot catch a URL that is not in the DOM.** That is an argument for the pack's own acceptance tests being machine-checked rather than read, which is where the rest of this site's rules already live.
+
+### The ordering problem in the plan
+
+Three steps are blocked, and two of them are blocked by the plan's own gates:
+
+- **Step 5, what was tried and abandoned**, wants three real entries and no euphemisms. Almost nothing on this site has been run: the honest failures we have are already [the four cards in §9](/#9-what-went-wrong). Until the labs are run it would be padding, and the pack says itself that step 4 seeds it. It is step 4b, not step 5.
+- **Step 4, the video walkthrough**, requires a cost that is *measured* and a walkthrough somebody with a key can follow end to end. **Nobody here has a key**, and the site's own acceptance rule is that none was requested, used or committed at any point in the build. What could be built without one is built: [the video plan](/video/).
+- **Step 8, what we use it for**, is blocked on the project lead's answer to the pack's own open question 3 — which of the named workflows are real and which are intended.
+
+## Pack two · the video-pipeline brief, 7 September 2026
+
+A working, measured video pipeline — 724 KB of tooling, four reels made with it, every number observed — handed over so this site can make narrated videos with the provider it reports on. **[Read it raw](/briefs/2026-09-07__brief__video-pipeline/00__README.md)** — [the brief](/briefs/2026-09-07__brief__video-pipeline/01__BRIEF.md) · [the first-run guide](/briefs/2026-09-07__brief__video-pipeline/02__ELEVENLABS-FIRST-RUN.md).
+
+**What was done: it is published as a plan, with its numbers badged, at [/video/](/video/), and it has not been executed.** Three reasons, in order of weight:
+
+1. **No key, and that is a rule rather than an inconvenience.** This site's acceptance list says no ElevenLabs key was requested, used or committed at any point in its build, and every {{badge:verified}} chip on it comes from a human's own browser rather than from this repository. Asking for a key to make a video would trade the site's most distinctive property for a two-minute film.
+2. **The toolchain is not this site's to hold.** The pack above records the estate's decision that component code stays canonical where it lives and these sites hold the context; the same pack's scope boundary says the video toolchain is out of scope. Vendoring 724 KB of a render pipeline into a report site would contradict both, and the brief's own value — the measured numbers, the failure points, the script rules — transfers without it.
+3. **The interesting half needs a person, not an agent.** The brief's own last section is *what I could not tell you*: whether the shim works, which names the model mispronounces, how the API behaves under the render's concurrency, whether the drift figure changes. Those are answered by running it, once, with a key — and then they are {{badge:verified}} rather than {{badge:unrun}}.
+
+### What the brief changed on this site anyway
+
+- **[/video/](/video/) exists**: the pipeline, what this provider adds to it, the measured costs, the script rules that cost time when broken, the four failure points the unrun path is most likely to hit, and the three videos worth making first.
+- **Its secret-hygiene requirement was already met.** The brief asks for the key-shape grep to be wired into CI as a required check; [that shipped at v0.1.0](/versions/) and its pattern set is a superset of the one the brief specifies.
+- **Its publishing advice is recorded** where the decision will be made: MP4 rather than WebM, the SRT shipped as a `<track>` beside the video, and GitHub's file and bandwidth limits.
+
+## The rule both packs share, and this site keeps
+
+**No claim without a state.** Everything added by either pack obeys the [ledger](/ledger/) contract, including claims about work that does not exist: a specification takes {{badge:spec}}, code written and never executed takes {{badge:unrun}}, and a projection carries its arithmetic. The join is done at build time, so a claim that appears on a page and not in the table fails the build rather than the review.
+
+==============================================================================
 PAGE /comparison/  —  Comparison — provider × pattern
 ==============================================================================
 
@@ -315,7 +449,7 @@ provenance:
 
 **Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. "ElevenLabs" identifies the API this page reports on; all trademarks belong to their owners.**
 
-The same line is in this repository's README and in the footer of every page on this site. This site uses no vendor logo, wordmark, or brand colour — the palette here is the [sgit.ai](https://sgit.ai) house palette, used across the estate. The domain names the API being reported on, in the way a review names the thing it reviews.
+The same line is in this repository's README and in the footer of every page on this site. This site uses no vendor logo, wordmark, or brand colour — the palette here is the sgit.ai house palette, used across the estate. The domain names the API being reported on, in the way a review names the thing it reviews.
 
 ## The other direction
 
@@ -1056,6 +1190,20 @@ The difference is not cosmetic. In the left-hand version, a cross-site scripting
 - `app.json` would no longer need `"permissions": {"network": true}` for these pages — which is the grant that [bit us on day one](/#9-what-went-wrong) {{claim:csp-blocks}} and which is a real widening for any vault whose app holds private content.
 - ElevenLabs would move, in [the comparison](/comparison/), from *needs a server* to *pattern 3, no server* — because for a vault app **the host is the server** that pattern 2 keeps asking for. That is the generalisation the family of sites exists to test.
 
+## What would have to ship, precisely
+
+So that this page is a specification with a scope rather than an aspiration. Three things, none of them in this repository:
+
+| # | What | Where it would land | State |
+|---|---|---|---|
+| 1 | The host verb — `sg.tts.speak`, `available`, `voices`, `usage` — beside the `sg.llm.*` that already does this shape of thing | The SG/Vault host's bridge | {{badge:spec}} |
+| 2 | The policy read: open the owner-sealed terms file, enforce `maxCharsPerRequest`, meter `maxCostPerSession`, hold a semaphore at `maxConcurrent` | The same host, reusing the model-router's own policy path | {{badge:spec}} |
+| 3 | The consent prompt, raised **outside** the app frame so the app can neither suppress it nor fake it | The host's HUD, which already does this for a model call | {{badge:spec}} |
+
+**What is already real:** the terms file at `.vault/elevenlabs/config.json`, in the same shape and under the same seal as the model router's; and the permission floor that denies `.vault/**` to every app frame under every grant. Two of three pieces, and the missing one is the verb.
+
+**Until all three ship, no page on this site may say pattern three works here** — and the build enforces it: the gate rejects `sg.tts` written in the present tense anywhere in the built site. That check exists because this is exactly the kind of page where a specification quietly becomes a claim.
+
 ## What would still be true
 
 The host is not magic. Under pattern 3 the terms are only as good as the numbers in them, the estimate is an estimate at list price rather than an invoice, and a compromised *host* is a compromised key — the trust moves, it does not vanish. What changes is **who chose the blast radius and where the choice is recorded**: a number in a file that travels with the content, rather than a promise about how carefully an application will behave.
@@ -1113,6 +1261,22 @@ Note what makes it evidence rather than anecdote: the bound was **chosen before*
 | ElevenLabs | **0 with a ceiling** — the key's owner testing their own key in their own browser; **2** would need a server we do not run; **3** is specified and not shipped | [The report](/), §3 and §5 {{claim:no-per-key-spend-limit}} |
 
 **ElevenLabs cannot do pattern 1 at all.** A key can be *scoped* to endpoints; it cannot be *bounded* by spend. There is no per-key limit and no reset window shorter than the billing cycle {{claim:no-per-key-spend-limit}}. So "put a bounded key in the page" — the honest answer for the sibling provider — has no implementation here, and a key in a page is pattern 0 with the account's quota as its only ceiling. That single asymmetry is why [the comparison table](/comparison/) is worth generating.
+
+## The second axis: what the tool keeps
+
+The four patterns are a property of **the provider**: where the credential lives and what bounds it. There is a second axis, and it is a property of **our tool**: what state it keeps. It decides whether a tool works for somebody with no key at all, and whether it survives being downloaded and run from somewhere else.
+
+| Tier | What it keeps | Works with no key? | Survives being downloaded? |
+|---|---|---|---|
+| **1** | Nothing. A pure function in a page | **Yes** | Yes, completely |
+| **2** | This browser's `localStorage`, on this device | No | Yes, and it carries no key with it |
+| **3** | A vault, which holds the key the page never sees | Yes — the *vault* holds the key | **No.** A vault app's calls fail on a static host, because the key is sealed to its owner |
+
+**The intersection is the useful statement, and it is one sentence:** a tier-two tool holding a key in `localStorage` is **pattern 0 with a ceiling**, and a tier-three tool is **pattern 3**. Said once, the two axes stop competing to explain the same thing.
+
+<div class="tablewrap"><table class="cmp"><thead><tr><th>&nbsp;</th><th>Tier 1 · no state</th><th>Tier 2 · this device</th><th>Tier 3 · a vault</th></tr></thead><tbody><tr><th scope="row">Pattern 0 · key in the page</th><td><a href="/experiments/cost/">the cost model</a><span class="vnote">no key, no network call at all</span></td><td><a href="/bench/">the bench</a> and ten more labs<span class="vnote">your key, your device, one host</span></td><td><span class="v v-na">&mdash;</span></td></tr><tr><th scope="row">Pattern 1 · bounded key</th><td colspan="3" class="dim">Not available from this provider at any tier — there is no per-key spend limit to mint</td></tr><tr><th scope="row">Pattern 2 · short-lived token</th><td><span class="v v-na">&mdash;</span></td><td><span class="v v-no">&times;</span><span class="vnote">would need a server we run; the vendor mints one for Agents only</span></td><td><span class="v v-na">&mdash;</span></td></tr><tr><th scope="row">Pattern 3 · host holds the key</th><td><span class="v v-na">&mdash;</span></td><td><span class="v v-na">&mdash;</span></td><td><a href="/pattern-three/">sg.tts</a><span class="vnote">specified, not shipped</span></td></tr></tbody></table></div>
+
+**Two honest wrinkles in that grid.** The first: [the captions studio](/experiments/captions/) is a tier-two tool with a tier-one mode — paste an alignment and it needs no key, no network and no account. It is placed at tier two because that is its full form, but the keyless mode is the more interesting half and it is why the cue rule can be tuned by somebody who has never bought a character. The second is the empty column: **tier three has no working tool here.** The site's own recommended pattern is the one it has not demonstrated {{claim:sg-tts-spec}}, and the honest thing is to say so in the same breath as recommending it.
 
 ## What this means for the labs on this site
 
@@ -1205,6 +1369,7 @@ order: 95
 
 <div class="tablewrap"><table class="vers"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead><tbody>
 <!-- releases -->
+    <tr><td class="vnum">v0.2.0</td><td>2026-09-08</td><td>the providers-site pack implemented (two-layer capability block, the tool-state tier axis and its intersection with the patterns, positioning, a disclosure line on every page, pattern three's exact scope, page-level family links); both briefs published raw at /briefs/ under CC BY 4.0 with a page reviewing what was accepted, modified and rejected; the video-pipeline brief processed into /video/ with its measured numbers, its four first-run failure points and the reason no video was made</td></tr>
     <tr><td class="vnum">v0.1.2</td><td>2026-09-07</td><td>fix the vendor citation in section 4 — a bare URL in angle brackets reached the browser as an unknown tag, so the URL a reader is supposed to check was invisible on the page</td></tr>
     <tr><td class="vnum">v0.1.1</td><td>2026-09-07</td><td>make every internal URL relative to its page — the site was serving under a GitHub Pages project path, where root-absolute URLs 404 the stylesheet, the lab runtime and the favicon</td></tr>
     <tr><td class="vnum">v0.1.0</td><td>2026-09-07</td><td>First release. The nine-section report with §8 and §9 given the visual weight; the four credential patterns and the generated provider × pattern matrix; the claim ledger, six verification states, joined to the pages that cite them at build time; the sg.tts specification, future tense throughout; the ported test bench and twelve browser labs, keys in localStorage and one host; the example scripts and the PLS lexicon as downloadable files; disclosures; the CI pipeline (validate → tag → deploy) with a secret scan, a reproducible-build check, the acceptance assertions and the lab runtime's own browser tests.</td></tr>
@@ -1242,3 +1407,116 @@ The four house checks, plus what this particular site promises:
 | **One host** — no third-party resource, and no network origin in any script but `api.elevenlabs.io` | It is the [labs'](/experiments/) central claim, so it is a build failure rather than a promise |
 | **The report's nine sections, in order; every claim cited; the non-affiliation line in every footer; `sg.tts` in the future tense** | The [acceptance checklist](/ledger/), enforced instead of remembered |
 | **The lab runtime parses and passes its own tests** | Thirty-four assertions over the key store and the alignment arithmetic, in a real browser, with no network |
+
+==============================================================================
+PAGE /video/  —  Narrated videos — the plan, and the render nobody has run
+==============================================================================
+
+---
+title: Narrated videos — the plan, and the render nobody has run
+description: "A working, measured video pipeline meets the provider it would narrate with. What it costs, what the alignment buys, the four places the unrun path is most likely to break, and why this page is a plan rather than a film."
+lead: "A pipeline that has shipped four reels meets a narration provider it has never been run against. This page is **the plan and the numbers, not a film** — nothing here has been rendered, and the reason is a rule rather than a shortage of time."
+order: 45
+toc: true
+provenance:
+  commit: 7d1916aca5f3
+  date: 7 September 2026
+  note: "Processed from the video-pipeline brief, published raw at /briefs/2026-09-07__brief__video-pipeline/."
+---
+
+<div class="warnbox"><p><b>No video has been made.</b> {{claim:shim-unrun}} The pipeline is real and its numbers are measured {{claim:pipeline-shipped-reels}}; its ElevenLabs path is written and has never produced a sound. Everything below that describes a render is a plan, and everything that describes a cost is arithmetic. <a href="/briefs/">Why it was not run</a> is a decision with three reasons, and the first is that this site has never held a key.</p></div>
+
+## 1 · The pipeline, in one paragraph
+
+A script file is the source of truth and is written **first**: scenes, each with the narration that is spoken *and* drawn on screen in the caption band, a separate four-to-eight-word caption for the muted viewer, and a shot — a URL, optional steps to click or scroll the page into the right state, and annotation targets. A capture script drives Chromium, resolves each target to a real element, paints a spotlight on it and screenshots. A render script composes each still into a slide, narrates it with whichever provider is named, records the result in real time through a vendored recorder, and remuxes. ffmpeg makes the MP4; a frames script gives you stills to judge it without watching; a doc script writes a storyboard. **The closing slide of every video prints the measured numbers of its own making, including the API cost.**
+
+Four reels have been made this way, with a local model and with a hosted one {{claim:pipeline-shipped-reels}}. The narration provider is a swappable shim, and this vendor is the fourth — the one that has never run {{claim:shim-unrun}}.
+
+## 2 · What this provider would add that the shipped reels do not have
+
+Every item is a claim [the report](/) already makes. Making the video *with* it is the demonstration, which is the reason to bother.
+
+| What | Why it matters here | State |
+|---|---|---|
+| **A speed control on a paid voice** — `voice_settings.speed`, 0.7–1.2 | The incumbent has none, and a portrait cut lost a third of its script rather than 15% of its pace {{claim:openrouter-no-speed}} | {{badge:docs|5 Sep 2026}} |
+| **Character-level timestamps → a real `.srt`** | YouTube's auto-captions render "2,788 nodes" as words and get product names wrong every time. Our own sidecar is strictly better and free once the alignment exists | {{claim:timestamps-roundtrip}} |
+| **Chapters to the sentence** rather than to the scene | From the same alignment array, with no second call | {{claim:cue-rule}} |
+| **A pronunciation dictionary** | In this pipeline the narration text *is* the caption text, so `sgit dot ai` is on screen where a viewer reads it as a typo. A lexicon moves the hack off the screen | {{claim:lexicon-hypothesis}} |
+| **A seed, and prosody continuity across scenes** | A reproducible read, and a reel that sounds like one take rather than sixteen | {{badge:docs|5 Sep 2026}} |
+
+**The video that writes itself:** one *about* the timestamps API, whose own subtitles were generated from the timestamps it is describing, with the cost of making it printed on its closing slide. That is [§8](/#8-what-it-cost) and [§3](/#3-which-pattern-and-for-which-product) argued in ninety seconds, and no vendor page can do it.
+
+## 3 · What it would cost
+
+{{claim:video-cost-projection}} — the arithmetic, not an invoice.
+
+| Workload | Characters | `eleven_v3` @ $0.10/1k | flash @ $0.05/1k |
+|---|---:|---:|---:|
+| One scene (the 187-character bench sample) | 187 | $0.019 | $0.009 |
+| A 2-minute landscape reel, ~260 words | ~1,600 | **$0.16** | $0.08 |
+| A 4-minute landscape reel, ~600 words | ~3,600 | **$0.36** | $0.18 |
+| A portrait cut of the same, tighter script | 60–70% of the above | — | — |
+| A re-render after a script fix | full price again | — | — |
+
+**Budget about $1.50 for a first video** including the three or four re-runs a first script needs, and draft on flash at half the price {{claim:tts-prices}}. The render prints its own cost on the closing slide; the account's character counter is the ground truth, and comparing the two once is [an experiment nobody has run](/experiments/key-scope/).
+
+## 4 · The script rules that cost time when broken
+
+Measured on six cuts, and repeated here because they are the ones that bite {{claim:pipeline-wps}}:
+
+1. **2.1 words per second.** Count words before any audio exists. Ten scenes want 200–260 words including intro and outro.
+2. **The intro previews; scene one starts.** Otherwise the viewer hears the same sentence twice.
+3. **The caption is not the narration.** Four to eight words, different from the sentence spoken over it.
+4. **Element targets, never hand-typed rectangles.** Hand-typed ones were ±15 px off and a human spotted it on the storyboard.
+5. **Anchor above the target.** The resolver takes the first match at or below the anchor, so anchoring on the sentence *under* a table finds the next table, off-screen.
+6. **Read every still before rendering.** About three seconds each, against a render you would otherwise throw away.
+7. **A portrait cut must land under 3:00 with real margin** — 2:51, not 2:58 — or the platform will not treat it as a Short.
+
+## 5 · Before spending a render: where the unrun path probably breaks
+
+Four predictions from the pipeline's author, who wrote the path from the vendor's reference and could not reach the API to test it {{claim:first-run-risks}} {{claim:egress-blocked}}. **Run one scene, not a reel**, and work through these first.
+
+<div class="fails"><div class="fail open"><p class="who">Most likely</p><h3><code>pcm_44100</code> may not be on the plan</h3><p>The shim asks for raw PCM so the bytes go straight into a <code>Float32Array</code> with no decoder. <b>PCM output formats are gated to higher subscription tiers</b>, so on a Creator-tier key this is likely to come back 401 or 422 naming the output format.</p><p><b>The fix is six lines:</b> ask for <code>mp3_44100_128</code> and decode it in the page with <code>decodeAudioData</code>, returning the buffer's own sample rate rather than the constant. Everything downstream reads the sample rate from the return value. <b>Write down which way it went</b> — "PCM worked on tier X" is as useful a finding as the failure.</p></div><div class="fail open"><p class="who">Second most likely</p><h3><code>eleven_v3</code> may not be enabled, or may reject the settings</h3><p>Two risks in one: v3 may not be available for API use on a given key, and it treats stability as <b>three discrete modes</b> rather than a continuum, so the shim's default of 0.5 can 422.</p><p><b>The fallback</b> is <code>eleven_multilingual_v2</code>, which is the stable workhorse and takes a continuous stability. For narrating somebody else's compliance standard: Natural or Robust, <b>never Creative</b> — hallucination in a video about a standard is not a risk worth taking.</p></div><div class="fail open"><p class="who">Check, do not assume</p><h3>The alignment may not come back in the expected shape</h3><p>The shim reads <code>alignment</code> and <code>normalized_alignment</code> and writes both beside the render log. Dump one response before trusting it. <b>If a model returns no alignment, the whole SRT, chapters and karaoke chain is unavailable on that model</b> — and since the alignment is the entire reason to be here, the answer is to change model rather than to work around it.</p></div><div class="fail open"><p class="who">Wastes a whole run</p><h3>The render fires two generations at once</h3><p>Against a concurrency limit nobody has measured {{claim:concurrency-unknown}}. A 429 halfway through a render wastes everything generated before it.</p><p><b>Run the first real reel with a pool of one.</b> It is slower and it cannot 429. Raise it once <a href="/experiments/concurrency/">the probe</a> has found the wall — and then write the number down, because nobody publishes it.</p></div></div>
+
+## 6 · Three videos worth making first
+
+Each is short, and each demonstrates a claim this site already makes.
+
+1. **"The bench, in ninety seconds."** Paste a key, list voices, generate with timestamps, watch the words light up, build the SRT. **Ship its own `.srt` alongside it and say so on screen** — the subtitles are the demonstration, not a nicety.
+2. **"Four patterns."** Slides, no capture at all. The strongest ninety seconds available, because [it is the argument](/patterns/).
+3. **"What it cost and what went wrong."** [§8](/#8-what-it-cost) and [§9](/#9-what-went-wrong) read aloud over the real numbers. Nobody else publishes this, which is exactly why it is worth a video.
+
+Landscape first, then a portrait cut under 3:00, with a title, a description and chapters.
+
+## 7 · Where video would live, when there is one
+
+Decided in advance, because the answer is cheaper before there are twenty files:
+
+- **MP4, H.264 + AAC, `+faststart`** as the delivered file — not WebM {{claim:mp4-vs-webm}}.
+- **The `.srt` beside the MP4**, referenced from the `<video>` element as a `<track>`.
+- **A folder per reel** holding the script, the stills, both cuts, the storyboard, the logs and the findings — the same shape the pipeline already produces, because on a site whose thesis is *show the working*, the storyboard and the findings are themselves the content.
+- **Watch the limits.** 100 MB per file is hard and Pages is a soft 1 GB with 100 GB a month of bandwidth. A 4 MB reel is nothing; twenty reels plus stills is worth a thought before it is a problem.
+
+## 8 · Why this is a plan and not a film
+
+Three reasons, in order of weight, and the [briefs page](/briefs/) carries the full account.
+
+**This site has never held a key** {{claim:keys-local-only}}, and its acceptance list says so as a property rather than a circumstance. Every {{badge:verified}} chip here came from a human's own browser. Trading that for a two-minute film would be a bad exchange.
+
+**The toolchain is not this site's to hold.** The estate's rule is that component code stays canonical where it lives and these sites hold the context; vendoring a render pipeline into a report site contradicts it, and everything the brief is actually worth — the measured numbers, the failure points, the script rules — transfers without the 724 KB.
+
+**The interesting half needs a person.** The brief's own closing section is *what I could not tell you*: whether the shim works, which names the model mispronounces {{claim:names-test}}, how the API behaves under the render's concurrency {{claim:concurrency-unknown}}, whether the drift is in the audio or the recording {{claim:pipeline-drift}}. Those are answered by one person, once, with a key.
+
+## 9 · What the first run would settle
+
+The ledger rows that would change state, in the order a single afternoon would close them:
+
+| Claim | Today | After one render |
+|---|---|---|
+| The ElevenLabs render path {{claim:shim-unrun}} | written, not run | verified, or a documented failure — **both are findings** |
+| The four first-run predictions {{claim:first-run-risks}} | predictions | four answers, and the one that broke is the interesting one |
+| The lexicon {{claim:lexicon-hypothesis}} and the names test {{claim:names-test}} | a hypothesis nobody has heard | a list of what the model gets wrong |
+| The concurrency wall {{claim:concurrency-unknown}} | unknown | a number, published, that nobody else publishes |
+| Where the drift comes from {{claim:pipeline-drift}} | unattributed since September | attributed, in about ten minutes of arithmetic |
+
+**That is the most valuable content this site could gain, and it cannot be written by the machine that built it.**

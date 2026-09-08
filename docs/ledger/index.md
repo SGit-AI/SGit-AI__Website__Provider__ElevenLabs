@@ -44,3 +44,7 @@ Handed back rather than guessed at. This is the list in [`HANDBACK.md`](https://
 7. **Whether the list prices in the tables here still hold.** They carry the date they were read; they are the fastest-staling thing on the site {{claim:tts-prices}}.
 
 None of these needs a key from anyone; each needs somebody's own key, in their own browser, for a few minutes. Results paste back as markdown from every lab.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

@@ -30,3 +30,7 @@ That is a rule, not a finding. It was written from experience with a different m
 ## Where this fits the site's argument
 
 Nowhere, and that is worth saying. These endpoints spend the same account quota as speech and carry the same credential story: a key scoped for narration does not need them, and a key that can reach them can spend the account's whole quota generating five-minute tracks {{claim:no-per-key-spend-limit}}. If you scope a key for a render pipeline, scope these out — and use [the key-scope probe](/experiments/key-scope/) to check that you actually did.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

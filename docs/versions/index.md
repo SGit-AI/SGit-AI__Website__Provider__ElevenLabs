@@ -7,6 +7,7 @@ order: 95
 
 <div class="tablewrap"><table class="vers"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead><tbody>
 <!-- releases -->
+    <tr><td class="vnum">v0.2.0</td><td>2026-09-08</td><td>the providers-site pack implemented (two-layer capability block, the tool-state tier axis and its intersection with the patterns, positioning, a disclosure line on every page, pattern three's exact scope, page-level family links); both briefs published raw at /briefs/ under CC BY 4.0 with a page reviewing what was accepted, modified and rejected; the video-pipeline brief processed into /video/ with its measured numbers, its four first-run failure points and the reason no video was made</td></tr>
     <tr><td class="vnum">v0.1.2</td><td>2026-09-07</td><td>fix the vendor citation in section 4 — a bare URL in angle brackets reached the browser as an unknown tag, so the URL a reader is supposed to check was invisible on the page</td></tr>
     <tr><td class="vnum">v0.1.1</td><td>2026-09-07</td><td>make every internal URL relative to its page — the site was serving under a GitHub Pages project path, where root-absolute URLs 404 the stylesheet, the lab runtime and the favicon</td></tr>
     <tr><td class="vnum">v0.1.0</td><td>2026-09-07</td><td>First release. The nine-section report with §8 and §9 given the visual weight; the four credential patterns and the generated provider × pattern matrix; the claim ledger, six verification states, joined to the pages that cite them at build time; the sg.tts specification, future tense throughout; the ported test bench and twelve browser labs, keys in localStorage and one host; the example scripts and the PLS lexicon as downloadable files; disclosures; the CI pipeline (validate → tag → deploy) with a secret scan, a reproducible-build check, the acceptance assertions and the lab runtime's own browser tests.</td></tr>
@@ -44,3 +45,7 @@ The four house checks, plus what this particular site promises:
 | **One host** — no third-party resource, and no network origin in any script but `api.elevenlabs.io` | It is the [labs'](/experiments/) central claim, so it is a build failure rather than a promise |
 | **The report's nine sections, in order; every claim cited; the non-affiliation line in every footer; `sg.tts` in the future tense** | The [acceptance checklist](/ledger/), enforced instead of remembered |
 | **The lab runtime parses and passes its own tests** | Thirty-four assertions over the key store and the alignment arithmetic, in a real browser, with no network |
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

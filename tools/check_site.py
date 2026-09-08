@@ -151,6 +151,39 @@ def check_no_swallowed_urls(_seen=set()):
             fail(f"{p.relative_to(OUT)}: a bare URL is being parsed as a tag: {m.group(0)[:60]}")
 
 
+def check_composition_links(_=None):
+    """The family's recorded defect: a domain link is a referral, not a composition.
+    An anchor into the estate must land on the page that answers the question its
+    text promises. Canonical and og:url are exempt — they are identity, not links."""
+    for p in pages():
+        for m in re.finditer(r'<a [^>]*href="(https?://[^"]+)"', p.read_text()):
+            url = m.group(1)
+            path = url.split("://", 1)[1]
+            if "/" not in path.rstrip("/") and DOMAIN not in url:
+                fail(f"{p.relative_to(OUT)}: domain-only link {url} — link the page that answers the question")
+
+
+def check_licence_stamp(_=None):
+    """The estate publishes its sites under CC BY 4.0, stamped where a reader or an
+    agent will actually meet it: the footer, every raw markdown document, and both
+    machine-readable indexes. A stamp that drifts is worse than none."""
+    stamp = "Creative Commons Attribution 4.0 International licence (CC BY 4.0)"
+    for p in pages():
+        if stamp not in p.read_text():
+            fail(f"{p.relative_to(OUT)}: no licence stamp in the footer")
+    for md in OUT.rglob("index.md"):
+        if stamp not in md.read_text():
+            fail(f"{md.relative_to(OUT)}: markdown twin carries no licence stamp")
+    for name in ("llms.txt", "llms-full.txt"):
+        if stamp not in (OUT / name).read_text():
+            fail(f"{name} carries no licence stamp")
+    briefs = OUT / "briefs"
+    if briefs.exists():
+        for b in briefs.rglob("*.md"):
+            if "CC BY 4.0" not in b.read_text():
+                fail(f"{b.relative_to(OUT)}: published brief carries no CC BY 4.0 stamp")
+
+
 def check_nine_sections():
     text = (OUT / "index.html").read_text()
     wanted = ["1 · Disclosure", "2 · What it grants", "3 · Which pattern", "4 · Where the key goes",
@@ -263,7 +296,8 @@ def main():
         sys.exit(2)
     for fn in [check_version_agreement, check_links, check_relative_urls, check_canonical_host, check_vault_key_tripwire,
                check_non_affiliation, check_forbidden_words, check_sgtts_tense, check_no_third_party,
-               check_js_origins, check_shortcodes, check_no_swallowed_urls, check_nine_sections,
+               check_js_origins, check_shortcodes, check_no_swallowed_urls, check_composition_links,
+               check_licence_stamp, check_nine_sections,
                check_every_claim_cited, check_key_bar_and_pattern_box, check_cname, check_markdown_twins]:
         fn()
     if failures:

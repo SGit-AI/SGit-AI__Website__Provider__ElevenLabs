@@ -9,6 +9,49 @@ provenance:
   commit: 7d1916aca5f3
   date: 7 September 2026
   note: "Prose from platforms/elevenlabs.md, with the figures behind it from four reels' worth of pipeline findings."
+platform_grants:
+  - verb: send
+    object: text
+    reach: endpoint
+    reversible: true
+    product: Text to speech
+    note: the words you send leave for the model
+  - verb: read
+    object: audio+timing
+    reach: self
+    reversible: true
+    product: Text to speech
+    note: "character-level alignment — the capability the vendor does not frame as one"
+  - verb: spend
+    object: characters
+    reach: tenant
+    reversible: true
+    product: any
+    note: bounded by the plan's monthly quota and nothing narrower
+  - verb: create
+    object: voice
+    reach: tenant
+    reversible: true
+    product: Voices — instant and professional cloning
+    note: "**the row a reader will not expect.** A voice that did not exist before, from under two minutes of audio. Deletable, so reversible in the platform's terms — and consent is not a technical control"
+  - verb: read
+    object: audio
+    reach: tenant
+    reversible: true
+    product: Speech to text (Scribe), forced alignment
+    note: transcription of material you supply, priced by the hour
+  - verb: send
+    object: media
+    reach: endpoint
+    reversible: true
+    product: Dubbing
+    note: media you supply, re-voiced in another language
+  - verb: send
+    object: message
+    reach: world
+    reversible: false
+    product: Agents (conversational)
+    note: "**the only irreversible row this vendor offers.** A live agent speaks to a person, and a thing said to somebody cannot be unsaid"
 grants:
   - verb: spend
     object: characters
@@ -61,6 +104,16 @@ patterns:
 
 <div class="note"><p><b>How to read this page.</b> Every factual claim carries a chip saying how we know it: {{badge:verified}} we ran it and watched it work, on that date · {{badge:measured}} our own pipeline produced this number on a named workload · {{badge:docs}} we read it in the vendor's documentation on that date and never executed it · {{badge:spec}} it does not exist yet · {{badge:unrun}} we wrote it and never ran it · {{badge:projected}} arithmetic, with the workings shown. Click any chip for <a href="/ledger/">the ledger</a>, which lists all of them in one table.</p></div>
 
+## What this site is, and is not
+
+**It is narrower than the vendor's own environment, not better.** The vendor serves millions of users across every workload; this site serves one — narrating explainer videos from a scripted pipeline — and reports what that cost, where the key had to live, and what broke. A general-purpose interface cannot be narrow, which is why this one does not try to be: [the labs here](/experiments/) exist because the vendor's own console does not fit this workflow, not because it is inadequate.
+
+**It is a report with a workbench attached, not a tutorial and not an index of somebody else's documentation.** If a section here could be replaced by a link to the vendor, it should be deleted, and the vendor's page is linked with the date we read it. What this site has that nobody else does is [what it cost on a named workload on a named date](/#8-what-it-cost), [what went wrong](/#9-what-went-wrong), and [which credential patterns the product can actually support](/patterns/).
+
+**"Provider" here means one thing only: a service that serves models over an API** — the sense this estate's own code uses, where a constant of that name holds an entry per model service. It does not mean a customer who redistributes capability to the people they serve, which is the other established sense in this estate and is not what any page here is about.
+
+**It is not an endorsement, and not the vendor's.** [No commercial relationship exists](/disclosures/), the page saying so shipped before there was anything to disclose, and every claim carries [the state that says how we know it](/ledger/).
+
 ## 1 · Disclosure
 
 **None.** No credits, programme, or commercial relationship with ElevenLabs as of 5 September 2026. The key used for the one session reported in §8 is a Creator-tier key we pay for ourselves at list price. The full list — which currently has no entries in the "relationship" column — is at [/disclosures/](/disclosures/), and it shipped with this site's first version precisely so that the page's existence is not read as evidence of a relationship.
@@ -71,7 +124,13 @@ The rows an agent's grant gains when this platform is connected, as capability t
 
 {{grants}}
 
-Two things are worth saying in prose. First, **`read × audio+timing × self` is the new capability** — this API returns the start and end time of every character it speaks, which the pipeline that drove this evaluation never had from any other provider. Everything in the [captions studio](/experiments/captions/) is arithmetic on that array. Second, **nothing here grants `send × message × world`.** The pipeline receives audio; publishing a video is a separate, human act. That distinction is the difference between a narration tool and a voice agent, and it is why the Agents product — the only irreversible row this vendor offers — is scoped out of the key rather than merely unused.
+**Read the two tables as one argument.** The first is what an agent gains the moment this provider is connected at all; the second is what the key this evaluation actually used can reach. The gap between them is the work a scope does, and it is the only part of a credential story this vendor lets you control.
+
+**The row worth stopping on is `create × voice × tenant`.** Connecting this provider gives an agent the capability to *produce a voice that did not exist* — instant cloning takes under two minutes of audio. That is a different order of thing from producing audio, no vendor page frames it as a capability, and the platform's controls for it are procedural rather than technical: professional cloning requires verification of the speaker, and instant cloning requires you to have the right to the recording you upload. **Consent is not something the API can check.** Our key is scoped to exclude it, and the [key-scope probe](/experiments/key-scope/) is how you check that yours is too.
+
+**One row a reader might expect is deliberately absent.** It has been proposed that connecting a voice platform grants `send × audio × world`, irreversibly, on the reasoning that audio sent is sent. **Not for this product.** The text-to-speech endpoint returns audio to the caller; nothing leaves for the world, and the estate's own primitive distinguishes `endpoint` reach from `world` reach exactly here. The irreversible row this vendor does offer is Agents, in the table above, and it is scoped out of our key. Saying otherwise would tell a reader that generating narration publishes it — which is [the error §4 exists to prevent](/#4-where-the-key-goes), one product over. {{claim:agents-only-signed-urls}}
+
+Two more things are worth saying in prose. First, **`read × audio+timing × self` is the new capability** — this API returns the start and end time of every character it speaks, which the pipeline that drove this evaluation never had from any other provider. Everything in the [captions studio](/experiments/captions/) is arithmetic on that array. Second, **nothing our key grants reaches the world.** The pipeline receives audio; publishing a video is a separate, human act by a person who watched it first. That distinction is the difference between a narration tool and a voice agent, and it is why Agents is scoped out of the key rather than merely unused.
 
 ## 3 · Which pattern — and for which product
 
@@ -178,3 +237,7 @@ The section nobody else writes. Four things, in the order they cost us time.
 The most useful thing in this section is the list of failures we have *not yet had the opportunity to have.* {{claim:names-test}} {{claim:cue-rule}} {{claim:labs-unrun}} Every one of them has a lab on this site, and each lab prints a result you can paste back into the vault as evidence.
 
 The full list of what remains unverified — and who could verify it — is [the open items](/ledger/#open-items), which is the last section of the ledger.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

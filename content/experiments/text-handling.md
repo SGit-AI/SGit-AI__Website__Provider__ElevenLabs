@@ -27,6 +27,8 @@ Note what the alignment gives you here: `alignment` is over the text you **sent*
 
 Every scene in a scene-by-scene render is generated cold. `previous_text` and `next_text` pass the neighbouring scenes as context so prosody carries across the cut — and **context text is not billed** {{claim:tts-prices}}, so if it helps at all it is free.
 
+**On `eleven_v3` this is not available at all** {{claim:stitching-v3}} — the API answers `400 unsupported_model`, which the first real render discovered by failing on its very first request. The lab now refuses the combination instead of spending a request to rediscover it, and stitching has to be tested on `eleven_multilingual_v2` or a flash model.
+
 The measurable part is small: spoken length usually changes a little. The audible part is the whole point — whether the reel sounds like one read or like sixteen. Listen to the two clips back to back with the following scene in mind.
 
 ## 3 · Does a seed repeat?

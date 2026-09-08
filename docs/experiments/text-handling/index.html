@@ -19,7 +19,7 @@
 <script src="../../assets/lab.js"></script>
 </head>
 <body data-lab="1">
-<nav class="site"><div class="row"><a class="brand" href="../../index.html">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai/vault/sg-bridge.html" rel="noopener" title="The window.sg bridge on sgit.ai — the host that would hold the key under pattern three, which is what this site is part of">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="../../versions/index.html" title="Site release history">v0.2.0</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="../../index.html">The report</a></div><div class="ni"><a class="nl here" href="../../experiments/index.html">Experiments</a></div><div class="ni"><a class="nl" href="../../bench/index.html">Bench</a></div><div class="ni"><a class="nl" href="../../patterns/index.html">Patterns</a></div><div class="ni"><a class="nl" href="../../comparison/index.html">Comparison</a></div><div class="ni"><a class="nl" href="../../ledger/index.html">Ledger</a></div><div class="ni"><a class="nl" href="../../briefs/index.html">Briefs</a></div><div class="ni"><a class="nl" href="../../disclosures/index.html">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
+<nav class="site"><div class="row"><a class="brand" href="../../index.html">elevenlabs<span>.providers.sgit.ai</span></a><a class="parent" href="https://sgit.ai/vault/sg-bridge.html" rel="noopener" title="The window.sg bridge on sgit.ai — the host that would hold the key under pattern three, which is what this site is part of">&#8599; part of <b>sgit.ai</b></a><span class="stage-pill">provider report</span><a class="ver" href="../../versions/index.html" title="Site release history">v0.2.1</a><button class="nav-toggle" type="button" aria-expanded="false" aria-label="Menu">Menu</button><div class="nav-items"><div class="ni"><a class="nl" href="../../index.html">The report</a></div><div class="ni"><a class="nl here" href="../../experiments/index.html">Experiments</a></div><div class="ni"><a class="nl" href="../../bench/index.html">Bench</a></div><div class="ni"><a class="nl" href="../../patterns/index.html">Patterns</a></div><div class="ni"><a class="nl" href="../../comparison/index.html">Comparison</a></div><div class="ni"><a class="nl" href="../../ledger/index.html">Ledger</a></div><div class="ni"><a class="nl" href="../../briefs/index.html">Briefs</a></div><div class="ni"><a class="nl" href="../../disclosures/index.html">Disclosures</a></div></div><a class="gh" href="https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs" rel="noopener">&#9733; Source</a></div></nav>
 <div class="disclosure-strip"><div class="row"><b>Independent.</b> No commercial relationship with ElevenLabs
 &mdash; no credits, no programme, no agreement &mdash; checked 5 September 2026.
 <a href="../../disclosures/index.html">Disclosures</a> &middot; <a href="../../ledger/index.html">how every claim here is evidenced</a></div></div>
@@ -72,6 +72,10 @@
     <p class="small">A scene-by-scene render generates every scene cold, so each one starts as if the last had never
       happened. Passing the neighbouring scenes as context costs nothing — context text is not billed as generated
       characters — and is supposed to keep prosody continuous across the cut. Whether it audibly does is the question.</p>
+    <p class="small" style="color:#b45309"><b>Not on v3.</b> Observed 8 September 2026: <code>eleven_v3</code> answers
+      <code>400 unsupported_model</code> — <em>&ldquo;Providing previous_text or next_text is not yet supported with the
+      'eleven_v3' model&rdquo;</em>. This lab refuses the combination rather than spending a request on it. Test stitching
+      on <code>eleven_multilingual_v2</code>.</p>
     <div class="grid3">
       <div><label for="prev">Previous scene (context, not spoken)</label><textarea id="prev" style="min-height:70px">The server stores ciphertext under opaque ids.</textarea></div>
       <div><label for="mid">This scene (spoken)</label><textarea id="mid" style="min-height:70px">It never sees a filename, a commit message, or a byte of your content.</textarea></div>
@@ -160,6 +164,12 @@
 
   $('btnStitch').onclick = async function () {
     if (!need()) return;
+    // Observed 8 Sep 2026 on the first real render: eleven_v3 rejects the pair with
+    // 400 unsupported_model. Sending it anyway costs a request and teaches nothing.
+    if ($('model').value.startsWith('eleven_v3')) {
+      return EL.status('stitchStatus', 'eleven_v3 does not accept previous_text/next_text — the API answers ' +
+        '400 unsupported_model. Pick eleven_multilingual_v2 or a flash/turbo model to test stitching.', 'warn');
+    }
     try {
       EL.status('stitchStatus', 'Cold…');
       var cold = await EL.speak(Object.assign(base(), { text: $('mid').value.trim() }));
@@ -221,6 +231,7 @@
 <p>Note what the alignment gives you here: <code>alignment</code> is over the text you <strong>sent</strong>, <code>normalized_alignment</code> over what the model actually <strong>read</strong> — so a caption showing your text should use the first, and a caption showing what was spoken should use the second <a class="chip st-v" href="../../ledger/index.html#claim-timestamps-roundtrip" title="Verified by execution on this date, by us.">verified 5 Sep 2026</a>.</p>
 <h2 id="2-does-stitching-change-the-read">2 · Does stitching change the read?</h2>
 <p>Every scene in a scene-by-scene render is generated cold. <code>previous_text</code> and <code>next_text</code> pass the neighbouring scenes as context so prosody carries across the cut — and <strong>context text is not billed</strong> <a class="chip st-d" href="../../ledger/index.html#claim-tts-prices" title="Read from the vendor&#x27;s documentation on this date. Never executed by us.">vendor docs 5 Sep 2026</a>, so if it helps at all it is free.</p>
+<p><strong>On <code>eleven_v3</code> this is not available at all</strong> <a class="chip st-v" href="../../ledger/index.html#claim-stitching-v3" title="Verified by execution on this date, by us.">verified 8 Sep 2026</a> — the API answers <code>400 unsupported_model</code>, which the first real render discovered by failing on its very first request. The lab now refuses the combination instead of spending a request to rediscover it, and stitching has to be tested on <code>eleven_multilingual_v2</code> or a flash model.</p>
 <p>The measurable part is small: spoken length usually changes a little. The audible part is the whole point — whether the reel sounds like one read or like sixteen. Listen to the two clips back to back with the following scene in mind.</p>
 <h2 id="3-does-a-seed-repeat">3 · Does a seed repeat?</h2>
 <p>The vendor documents <code>seed</code> as best-effort determinism. For a pipeline that wants to re-render a video a year from now and get the same file, "best-effort" is the difference between an archive and a lottery ticket.</p>
@@ -238,7 +249,7 @@
        Part of the <code>*.providers.sgit.ai</code> family. Source material: the video vault at commit
        <code>7d1916aca5f3</code>, 7 September 2026.</p>
     <p class="licence">This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0). The code that builds it is Apache-2.0.</p>
-    <p class="verline">site <a href="../../versions/index.html">v0.2.0</a> &middot; <a href="../../ledger/index.html">the ledger</a> &middot; <a href="../../disclosures/index.html">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
+    <p class="verline">site <a href="../../versions/index.html">v0.2.1</a> &middot; <a href="../../ledger/index.html">the ledger</a> &middot; <a href="../../disclosures/index.html">disclosures</a> &middot; <a href="index.md" title="The same page as plain markdown">this page as markdown</a></p>
   </div>
   <div>
     <h4>The report</h4>

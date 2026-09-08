@@ -28,6 +28,10 @@
     <p class="small">A scene-by-scene render generates every scene cold, so each one starts as if the last had never
       happened. Passing the neighbouring scenes as context costs nothing — context text is not billed as generated
       characters — and is supposed to keep prosody continuous across the cut. Whether it audibly does is the question.</p>
+    <p class="small" style="color:#b45309"><b>Not on v3.</b> Observed 8 September 2026: <code>eleven_v3</code> answers
+      <code>400 unsupported_model</code> — <em>&ldquo;Providing previous_text or next_text is not yet supported with the
+      'eleven_v3' model&rdquo;</em>. This lab refuses the combination rather than spending a request on it. Test stitching
+      on <code>eleven_multilingual_v2</code>.</p>
     <div class="grid3">
       <div><label for="prev">Previous scene (context, not spoken)</label><textarea id="prev" style="min-height:70px">The server stores ciphertext under opaque ids.</textarea></div>
       <div><label for="mid">This scene (spoken)</label><textarea id="mid" style="min-height:70px">It never sees a filename, a commit message, or a byte of your content.</textarea></div>
@@ -116,6 +120,12 @@
 
   $('btnStitch').onclick = async function () {
     if (!need()) return;
+    // Observed 8 Sep 2026 on the first real render: eleven_v3 rejects the pair with
+    // 400 unsupported_model. Sending it anyway costs a request and teaches nothing.
+    if ($('model').value.startsWith('eleven_v3')) {
+      return EL.status('stitchStatus', 'eleven_v3 does not accept previous_text/next_text — the API answers ' +
+        '400 unsupported_model. Pick eleven_multilingual_v2 or a flash/turbo model to test stitching.', 'warn');
+    }
     try {
       EL.status('stitchStatus', 'Cold…');
       var cold = await EL.speak(Object.assign(base(), { text: $('mid').value.trim() }));

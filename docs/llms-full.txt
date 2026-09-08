@@ -1,5 +1,5 @@
 # elevenlabs.providers.sgit.ai — the whole site as markdown
-site v0.2.0 · source vault commit 7d1916aca5f3 · every claim's verification state is at /ledger/
+site v0.2.1 · source vault commit 7d1916aca5f3 · every claim's verification state is at /ledger/
 
 Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. "ElevenLabs" identifies the API this site reports on; all trademarks belong to their owners.
 
@@ -234,6 +234,8 @@ Items 1–3 have a lab each on this site. None of the five has been run.
 
 {{badge:projected}} for the two ElevenLabs columns — no reel has been rendered with this API. {{badge:measured}} for the words and for the right-hand column. The conclusion the arithmetic supports: **v3 costs about what the incumbent costs; flash costs half** — and both are a rounding error against the value of the timestamps, which is the only sound reason to switch.
 
+**And one more measured figure, added 8 September 2026:** the first video made with this API — nine scenes, 1,821 characters, 2:08 of speech, two cuts — cost **$0.18 at list price** and was paid in a free tier's quota rather than in money {{claim:first-video}}. Zero re-renders, because the script was written first. [The full account is on /video/](/video/).
+
 **Plan arithmetic.** At about 4,000 characters per video, a Creator plan's 220,000 monthly characters is roughly 50 videos a month {{claim:creator-covers-50}}. Rates and quotas: {{claim:plan-quotas}}, {{claim:tts-prices}}.
 
 **Run the arithmetic on your own script** in the [cost model](/experiments/cost/) — it needs no key and makes no network call.
@@ -243,6 +245,12 @@ Items 1–3 have a lab each on this site. None of the five has been run.
 The section nobody else writes. Four things, in the order they cost us time.
 
 <div class="fails"><div class="fail"><p class="who">The host, not the vendor</p><h3>The app frame's CSP ate every request</h3><p>The first Connect from inside the vault app failed with <code>connect-src blob: data:</code> — the SG/App host locks every app frame to <em>no network at all</em>, by design, and the bench reported the generic <em>Failed to fetch</em>. Nothing to do with the key, the CORS headers, or the vendor. {{claim:csp-blocks}}</p><p><b>Fixed by</b> <code>"permissions": {"network": true}</code> in <code>app.json</code>, which omits the meta tag and makes the host's HUD show a standing "direct network access" chip, so the exception is never silent. <b>Right for this vault</b> — nothing in it is confidential except the sealed keys, which sit below the permission floor and are unreachable from any frame regardless. <b>Wrong for a vault whose app holds private content</b>: that grant is per-app and it is a real widening.</p></div><div class="fail"><p class="who">Us, not the vendor</p><h3>The container that wrote all of this could not reach the API</h3><p><code>api.elevenlabs.io:443</code> was refused to the authoring container by the egress proxy — <code>connect_rejected</code>, organization policy — from curl and from Node, on the regional hosts too. {{claim:egress-blocked}}</p><p>So the render shim {{claim:shim-unrun}}, every example script {{claim:examples-unrun}}, the pronunciation-dictionary upload {{claim:lexicon-hypothesis}} and every lab on this site {{claim:labs-unrun}} were written from the vendor's reference and have never been executed. <b>This is why the site is badged the way it is.</b> The one exception is the bench, run from a human's own browser, which is the reason there are any {{badge:verified}} chips at all.</p></div><div class="fail ok"><p class="who">Caught in review, before it shipped</p><h3>The mechanism we nearly documented was the wrong product's</h3><p>An earlier draft carried the Agents rules — "never expose your key client-side", the 15-minute signed URL, the hostname allowlist — as if they governed text to speech. They do not: <b>the TTS REST API has neither mechanism.</b> {{claim:agents-only-signed-urls}}</p><p>Had it shipped, a reader could have spent a week building a signed-URL minter for an endpoint that does not accept one. The conclusion survived the correction — TTS still needs a server for pattern 2 — but the mechanism named did not. Hence the rule this page obeys: <b>every quote carries its product.</b></p></div><div class="fail open"><p class="who">Still open</p><h3>Concurrency is unknown, and our render fires 16 requests at once</h3><p>Concurrent request limits scale with the plan. Our render fires every scene in parallel — 10 to 16 requests — so a <code>429</code> mid-render is the most likely first failure on a small plan, and we have never provoked one to find out where the wall is. {{claim:concurrency-unknown}}</p><p>The <a href="/experiments/concurrency/">concurrency probe</a> exists to answer exactly this, at a cost of a few cents. Nobody has run it. Until somebody does, the honest planning number for a Starter or Creator plan is <em>unknown</em>, and the mitigation — a semaphore in the shim — is written but untested.</p></div></div>
+
+### And what went wrong the first time somebody ran it
+
+On 8 September 2026 the render path ran for the first time {{claim:first-video}}. Three of the four things that broke are the vendor's, and one is ours:
+
+<div class="fails"><div class="fail"><p class="who">Their tier gate</p><h3>PCM output is Pro-and-above</h3><p><code>403</code>, naming the format. {{claim:pcm-gated}} The shim asks for PCM to skip a decoder, so on any lower tier that is a dead path with a six-line fallback.</p></div><div class="fail"><p class="who">Their model</p><h3>Stitching is not available on v3</h3><p><code>400 unsupported_model</code> for <code>previous_text</code>/<code>next_text</code>. {{claim:stitching-v3}} The first request failed before any audio existed, and <a href="/experiments/text-handling/">the lab that offered the same combination</a> now refuses it.</p></div><div class="fail ok"><p class="who">Their key scoping, working</p><h3>The 401 that names its own permission</h3><p><em>&ldquo;missing the permission <code>pronunciation_dictionaries_write</code>&rdquo;</em>. {{claim:key-scope-observed}} Precise about what the key may <em>do</em>, silent about what it may <em>spend</em> — which is <a href="/#5-the-bounding-primitive">§5</a> arriving as an error message.</p></div><div class="fail"><p class="who">Ours</p><h3>The encoder added 14 seconds of silence</h3><p>ffmpeg's <code>-shortest</code> with a looped still ran past the end of the audio, up to 1.8 s per scene. {{claim:shortest-trap}} <b>The provider's timing was exact to the millisecond</b> {{claim:alignment-exact}} — the drift was entirely ours, which is the first time this estate has been able to say which.</p></div></div>
 
 ### What has not gone wrong, because nobody has tried it
 
@@ -352,9 +360,11 @@ Three steps are blocked, and two of them are blocked by the plan's own gates:
 
 A working, measured video pipeline — 724 KB of tooling, four reels made with it, every number observed — handed over so this site can make narrated videos with the provider it reports on. **[Read it raw](/briefs/2026-09-07__brief__video-pipeline/00__README.md)** — [the brief](/briefs/2026-09-07__brief__video-pipeline/01__BRIEF.md) · [the first-run guide](/briefs/2026-09-07__brief__video-pipeline/02__ELEVENLABS-FIRST-RUN.md).
 
-**What was done: it is published as a plan, with its numbers badged, at [/video/](/video/), and it has not been executed.** Three reasons, in order of weight:
+**What was done, in two stages.** It was first published as a plan with its numbers badged; then, on 8 September 2026, **the project lead supplied a key and it was run** — the first execution of that path by anyone. [What it found is on /video/](/video/): two refusals, one prediction wrong, one failure nobody predicted, and the measurement that closes the drift question {{claim:alignment-exact}}. The video and its materials are in an encrypted vault rather than in this repository.
 
-1. **No key, and that is a rule rather than an inconvenience.** This site's acceptance list says no ElevenLabs key was requested, used or committed at any point in its build, and every {{badge:verified}} chip on it comes from a human's own browser rather than from this repository. Asking for a key to make a video would trade the site's most distinctive property for a two-minute film.
+The three reasons it was not run *before* that key arrived still stand, and the first one is why the exception is dated rather than quiet:
+
+1. **No key, and that is a rule rather than an inconvenience.** The site is built with no key present, and every {{badge:verified}} chip came from a human's own browser rather than from this repository. **Asking** for a key would have traded that property for a two-minute film; being **given** one, for one run, with the exception recorded and dated, does not — and the key was never written to a file or committed, which the required secret scan enforces.
 2. **The toolchain is not this site's to hold.** The pack above records the estate's decision that component code stays canonical where it lives and these sites hold the context; the same pack's scope boundary says the video toolchain is out of scope. Vendoring 724 KB of a render pipeline into a report site would contradict both, and the brief's own value — the measured numbers, the failure points, the script rules — transfers without it.
 3. **The interesting half needs a person, not an agent.** The brief's own last section is *what I could not tell you*: whether the shim works, which names the model mispronounces, how the API behaves under the render's concurrency, whether the drift figure changes. Those are answered by running it, once, with a key — and then they are {{badge:verified}} rather than {{badge:unrun}}.
 
@@ -976,6 +986,8 @@ Note what the alignment gives you here: `alignment` is over the text you **sent*
 
 Every scene in a scene-by-scene render is generated cold. `previous_text` and `next_text` pass the neighbouring scenes as context so prosody carries across the cut — and **context text is not billed** {{claim:tts-prices}}, so if it helps at all it is free.
 
+**On `eleven_v3` this is not available at all** {{claim:stitching-v3}} — the API answers `400 unsupported_model`, which the first real render discovered by failing on its very first request. The lab now refuses the combination instead of spending a request to rediscover it, and stitching has to be tested on `eleven_multilingual_v2` or a flash model.
+
 The measurable part is small: spoken length usually changes a little. The audible part is the whole point — whether the reel sounds like one read or like sixteen. Listen to the two clips back to back with the following scene in mind.
 
 ## 3 · Does a seed repeat?
@@ -1369,6 +1381,7 @@ order: 95
 
 <div class="tablewrap"><table class="vers"><thead><tr><th>Version</th><th>Date</th><th>What changed</th></tr></thead><tbody>
 <!-- releases -->
+    <tr><td class="vnum">v0.2.1</td><td>2026-09-08</td><td>the first video: the ElevenLabs render path ran for the first time, and the site gained what it found — two tier refusals, a model that rejects stitching, a key that names its own missing permission, and an alignment exact to the millisecond that attributes the estate's drift to the encoder rather than the speech</td></tr>
     <tr><td class="vnum">v0.2.0</td><td>2026-09-08</td><td>the providers-site pack implemented (two-layer capability block, the tool-state tier axis and its intersection with the patterns, positioning, a disclosure line on every page, pattern three's exact scope, page-level family links); both briefs published raw at /briefs/ under CC BY 4.0 with a page reviewing what was accepted, modified and rejected; the video-pipeline brief processed into /video/ with its measured numbers, its four first-run failure points and the reason no video was made</td></tr>
     <tr><td class="vnum">v0.1.2</td><td>2026-09-07</td><td>fix the vendor citation in section 4 — a bare URL in angle brackets reached the browser as an unknown tag, so the URL a reader is supposed to check was invisible on the page</td></tr>
     <tr><td class="vnum">v0.1.1</td><td>2026-09-07</td><td>make every internal URL relative to its page — the site was serving under a GitHub Pages project path, where root-absolute URLs 404 the stylesheet, the lab runtime and the favicon</td></tr>
@@ -1409,13 +1422,13 @@ The four house checks, plus what this particular site promises:
 | **The lab runtime parses and passes its own tests** | Thirty-four assertions over the key store and the alignment arithmetic, in a real browser, with no network |
 
 ==============================================================================
-PAGE /video/  —  Narrated videos — the plan, and the render nobody has run
+PAGE /video/  —  The first video — what the render actually did
 ==============================================================================
 
 ---
-title: Narrated videos — the plan, and the render nobody has run
-description: "A working, measured video pipeline meets the provider it would narrate with. What it costs, what the alignment buys, the four places the unrun path is most likely to break, and why this page is a plan rather than a film."
-lead: "A pipeline that has shipped four reels meets a narration provider it has never been run against. This page is **the plan and the numbers, not a film** — nothing here has been rendered, and the reason is a rule rather than a shortage of time."
+title: The first video — what the render actually did
+description: "The first ever run of the ElevenLabs render path: what broke, what was wrong in the predictions, and the measurement that settles a drift question open since September. Plus the plan the next one follows."
+lead: "On 8 September 2026 the path that had never made a sound made one. **Two failures, one prediction wrong, one nobody made, and a measurement that closes an open question** — and a two-minute video at the end of it."
 order: 45
 toc: true
 provenance:
@@ -1424,7 +1437,31 @@ provenance:
   note: "Processed from the video-pipeline brief, published raw at /briefs/2026-09-07__brief__video-pipeline/."
 ---
 
-<div class="warnbox"><p><b>No video has been made.</b> {{claim:shim-unrun}} The pipeline is real and its numbers are measured {{claim:pipeline-shipped-reels}}; its ElevenLabs path is written and has never produced a sound. Everything below that describes a render is a plan, and everything that describes a cost is arithmetic. <a href="/briefs/">Why it was not run</a> is a decision with three reasons, and the first is that this site has never held a key.</p></div>
+<div class="note"><p><b>This page changed state on 8 September 2026.</b> {{claim:first-video}} A key was supplied by the project lead for one run, held in one command's environment and written to no file. <b>The video and every material that made it live in an encrypted vault, not in this repository</b> — the repository carries the report and the findings, which is the half that is useful to a reader. What follows is what the run found; the plan it followed is further down, unchanged.</p></div>
+
+## 0 · What the first run found
+
+Four of the five predictions in the handover brief were testable. One was confirmed, one was wrong for this account, one could not be tested, and **one failure nobody predicted stopped the very first request**.
+
+<div class="fails"><div class="fail"><p class="who">Confirmed — and it was the one called most likely</p><h3><code>pcm_44100</code> is refused below the Pro tier</h3><p><code>403 subscription_required</code>: <em>"Output format 'pcm_44100' is only available on the Pro tier and above."</em> {{claim:pcm-gated}} The shim asks for raw PCM to avoid a decoder; on anything below Pro that is a dead path, and the documented fallback — MP3 plus <code>decodeAudioData</code> — is the right one.</p></div><div class="fail"><p class="who">Nobody predicted this</p><h3>Stitching is rejected outright on v3</h3><p><code>400 unsupported_model</code>: <em>"Providing previous_text or next_text is not yet supported with the 'eleven_v3' model."</em> {{claim:stitching-v3}} The pipeline passes neighbouring scenes by default and this site's own <a href="/experiments/text-handling/">text-handling lab</a> offered the same combination, so <b>the first request failed before any audio existed</b>. The lab now refuses the combination rather than sending it.</p></div><div class="fail ok"><p class="who">Prediction wrong, for this account</p><h3><code>eleven_v3</code> runs on a free-tier key</h3><p>It is listed by <code>GET /v1/models</code> and it generated all nine scenes, with <code>stability: 0.5</code> accepted and no 422. {{claim:v3-on-free}} The guide's worry was reasonable and this account did not share it — which is why the answer had to be run rather than reasoned.</p></div><div class="fail ok"><p class="who">Scoped, not bounded — in one response body</p><h3>The key said exactly which permission it lacked</h3><p>Creating a pronunciation dictionary returned <code>401</code>: <em>"missing the permission <code>pronunciation_dictionaries_write</code>"</em>. {{claim:key-scope-observed}} The platform names a missing permission precisely and has nothing equivalent to say about spend. <b>The only ceiling on that key was the free tier's 10,000 characters a month</b> — which is the argument on <a href="/#5-the-bounding-primitive">§5</a>, arriving as an error message.</p></div></div>
+
+## 0b · The measurement that settles the drift question
+
+This estate has reported **100–500 ms of drift over two minutes** across four reels since September, cause unattributed. Decoding every MP3 to PCM and comparing with the alignment:
+
+<div class="tiles"><div class="tile cool"><b>0.0 ms</b><span>difference between the alignment's last end time and the decoded audio</span><em>nine scenes out of nine {{claim:alignment-exact}}</em></div><div class="tile cool"><b>9 / 9</b><span>scenes where the timing was exact, not approximate</span><em>the alignment <em>is</em> the duration</em></div><div class="tile hot"><b>up to 1.8 s</b><span>of silent video per scene added by ffmpeg's <code>-shortest</code></span><em>our encoder, not their speech {{claim:shortest-trap}}</em></div><div class="tile hot"><b>993 px</b><span>the viewport Chromium gave for a <code>--window-size</code> of 1080</span><em>every slide silently cropped until it was measured</em></div></div>
+
+**So the drift is not in the audio.** A render that advances by the alignment is correct; one that trusts an encoder to stop when the audio does is not — and this render proved it by doing exactly that, adding 14 seconds across ten scenes before the bug was found. The fix is `-t <alignment end>` instead of `-shortest`.
+
+That is a question closed, a fortnight after it was asked, for the price of decoding nine files.
+
+## 0c · What it cost, and where it is
+
+<div class="tiles"><div class="tile cool"><b>1,821</b><span>characters, in 9 requests, no re-renders</span><em>the script was written first and not changed after the audio existed</em></div><div class="tile cool"><b>$0.18</b><span>at the published list rate for <code>eleven_v3</code></span><em>a free-tier key, so it was paid in quota rather than money</em></div><div class="tile cool"><b>2:15</b><span>two cuts — 1920×1080 at 4.45 MB, 1080×1920 at 4.30 MB</span><em>the portrait cut reuses the same audio and cost nothing</em></div><div class="tile cool"><b>28</b><span>subtitle cues, from the same responses as the audio</span><em>no second call, no alignment pass, no transcription</em></div></div>
+
+**The video, the nine narrations, the alignments, the slides, the subtitles and the findings are in an encrypted vault, not in this repository.** A report site should carry the report; 9 MB of media per reel belongs where media belongs, and the estate already has a place for it. What is published here is what a reader can use: the numbers, the failures, and the method.
+
+**What this run cannot tell you is how it sounds.** The agent that made it cannot listen to it. Every figure above is measured; no claim is made about the quality of the read, or about how `eleven_v3` pronounces `sgit` — [the site's oldest open item](/ledger/#open-items) is still open, and the first person to play the file closes it.
 
 ## 1 · The pipeline, in one paragraph
 

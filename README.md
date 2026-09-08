@@ -113,9 +113,12 @@ is treated as a release branch too — when `dev` is created, drop `main` from t
 
 ## Keys
 
-**No ElevenLabs API key was requested, used, or committed at any point in building this site**, and none
-is needed to build it. A key you type into a lab is kept in *your* browser's `localStorage` and sent to
-exactly one host. There is no server here to send it to.
+**No ElevenLabs API key is needed to build this site, and none was used to build it** — every page through
+v0.2.0 was written, and every check still runs, with no key present. **On 8 September 2026 the project lead
+supplied a key for one run**, to make [the first video](https://elevenlabs.providers.sgit.ai/video/); it was
+held in one command's environment, written to no file, and **never committed** — the secret scan is a required
+CI check precisely so that sentence is enforced rather than promised. A key you type into a lab is kept in
+*your* browser's `localStorage` and sent to exactly one host. There is no server here to send it to.
 
 ## Corrections
 

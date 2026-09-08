@@ -3,9 +3,11 @@
 Written 7 September 2026, at the end of the build. Nothing in this list was guessed at on the site; every
 item is badged there and appears in [`/ledger/`](https://elevenlabs.providers.sgit.ai/ledger/).
 
-**No ElevenLabs API key was requested, used, or committed while building this site.** Nothing in the build
-calls the API, and nothing needs to. Every item below needs somebody's *own* key, in their *own* browser,
-for a few minutes.
+**No ElevenLabs API key is needed to build this site, and none was used to build it.** Nothing in the build
+calls the API. **One exception, dated:** on 8 September 2026 the project lead supplied a key for a single run
+that produced the first video and the findings on `/video/`; it lived in one command's environment and was
+never written to a file or committed. Everything still open below needs somebody's *own* key, in their *own*
+browser, for a few minutes.
 
 ## 1 · Claims that need re-verification by somebody with API access
 
@@ -13,8 +15,8 @@ In the order that closes the most open items for the least money. Total, at list
 
 | # | Claim to settle | Where | Cost | Ledger id |
 |---|---|---|---|---|
-| 1 | Does the key work at all, and what is the quota? | `files/examples/00-smoke.sh` | free + one sentence | `examples-unrun` |
-| 2 | **Which names does `eleven_v3` mispronounce?** Nobody has ever pressed this button | [/bench/](https://elevenlabs.providers.sgit.ai/bench/) §5 | ~$0.012 | `names-test` |
+| 1 | ~~Does the key work at all, and what is the quota?~~ | **Closed 8 Sep 2026** — see [/video/](https://elevenlabs.providers.sgit.ai/video/) | — | `first-video` |
+| 2 | **Which names does `eleven_v3` mispronounce?** Still open, and now there is a recording to listen to: scenes 1 and 9 of the first video say `open-source.sgit.ai` | [/bench/](https://elevenlabs.providers.sgit.ai/bench/) §5, or press play on the video | ~$0.012 | `names-test` |
 | 3 | Do the aliases in `pronunciations.pls` fix them? | [/experiments/pronunciation/](https://elevenlabs.providers.sgit.ai/experiments/pronunciation/) | ~$0.02 | `lexicon-hypothesis` |
 | 4 | Where is the concurrency wall on the plan in use? | [/experiments/concurrency/](https://elevenlabs.providers.sgit.ai/experiments/concurrency/) | ~$0.05 | `concurrency-unknown` |
 | 5 | Does the cue rule produce readable subtitles on a real reel? | [/experiments/captions/](https://elevenlabs.providers.sgit.ai/experiments/captions/) | ~$0.04 | `cue-rule` |

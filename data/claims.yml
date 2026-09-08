@@ -258,3 +258,52 @@
   group: Specified, or written and never run
   claim: "A two-minute landscape reel is about 1,600 characters ≈ **$0.16** on `eleven_v3`; a four-minute one about 3,600 ≈ **$0.36**; half those on flash. Budget about **$1.50 for a first video** including the three or four re-renders a first script needs. Arithmetic on measured word counts at list price, not an invoice."
   source: "Characters × the rate in the pricing claim, against measured scripts"
+
+- id: first-video
+  state: verified
+  date: 8 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "The `eleven_v3` path ran for the first time on **8 September 2026**: nine scenes, **1,821 characters**, 2:08 of speech, mean round trip **4,703 ms** (3,070–5,843 ms, sequential), two cuts assembled at 1920×1080 and 1080×1920, and 28 subtitle cues built from the same responses as the audio. Zero re-renders."
+  source: "A Claude Code session with a key supplied by the project lead for that run; materials in a vault, not in this repository"
+
+- id: pcm-gated
+  state: verified
+  date: 8 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "`output_format=pcm_44100` is refused on a free-tier key: **403**, `subscription_required`, *\"Output format 'pcm_44100' is only available on the Pro tier and above.\"* The render shim asks for PCM to skip a decoder; the documented fallback — request MP3 and decode in the page — is the right one."
+  source: "The first run. This was the failure the first-run guide called most likely, and it was"
+
+- id: v3-on-free
+  state: verified
+  date: 8 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "`eleven_v3` **is** available to a free-tier key: it is listed by `GET /v1/models` and generated all nine scenes, with `stability: 0.5` accepted without a 422. The prediction that v3 might not be enabled for API use was wrong for this account."
+  source: "The first run"
+
+- id: stitching-v3
+  state: verified
+  date: 8 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "**Request stitching is not available on `eleven_v3`.** Sending `previous_text`/`next_text` returns **400** `unsupported_model`: *\"Providing previous_text or next_text is not yet supported with the 'eleven_v3' model.\"* Nobody predicted this, and the video pipeline passes neighbouring scenes by default — so the first render failed before it made a sound."
+  source: "The first run, on the first request"
+
+- id: alignment-exact
+  state: verified
+  date: 8 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "**The alignment's last end time equals the decoded audio duration exactly — 0.0 ms difference on nine scenes out of nine.** Decoded every MP3 to PCM and compared. So the 100–500 ms of drift this estate has reported since September is **not in the speech**: a render that advances by the alignment is correct, and drift comes from the compositor, the recorder or the encoder."
+  source: "Nine MP3s decoded to 44.1 kHz mono PCM and measured against their alignments"
+
+- id: shortest-trap
+  state: verified
+  date: 8 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "And this render produced drift of its own, from the encoder: ffmpeg's `-shortest` with a looped still let the video flush past the end of the audio, adding **up to 1.8 s of silent video per scene, 14 s over ten scenes**. Replacing it with an explicit `-t <alignment end>` fixed it exactly. Two lesser traps: an MP3 container's `Duration:` is a bitrate estimate and read 30–50 ms long on every file, and Chromium's `--window-size` is a window rather than a viewport — at 1920×1080 the page saw 993 px and every slide was silently cropped."
+  source: "The first run, and the three bugs it took to get a correct file"
+
+- id: key-scope-observed
+  state: verified
+  date: 8 Sep 2026
+  group: Verified in a browser, 5 September 2026
+  claim: "*Scoped, not bounded*, observed in one response body: creating a pronunciation dictionary returned **401** — *\"The API key you used is missing the permission `pronunciation_dictionaries_write`\"*. The platform names the missing permission precisely. It has nothing equivalent to say about spend, because there is nothing to say."
+  source: "The first run. The only ceiling on that key was the free tier's 10,000 characters a month"

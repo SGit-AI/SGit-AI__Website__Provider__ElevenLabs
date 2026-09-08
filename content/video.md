@@ -1,7 +1,7 @@
 ---
-title: Narrated videos — the plan, and the render nobody has run
-description: "A working, measured video pipeline meets the provider it would narrate with. What it costs, what the alignment buys, the four places the unrun path is most likely to break, and why this page is a plan rather than a film."
-lead: "A pipeline that has shipped four reels meets a narration provider it has never been run against. This page is **the plan and the numbers, not a film** — nothing here has been rendered, and the reason is a rule rather than a shortage of time."
+title: The first video — what the render actually did
+description: "The first ever run of the ElevenLabs render path: what broke, what was wrong in the predictions, and the measurement that settles a drift question open since September. Plus the plan the next one follows."
+lead: "On 8 September 2026 the path that had never made a sound made one. **Two failures, one prediction wrong, one nobody made, and a measurement that closes an open question** — and a two-minute video at the end of it."
 order: 45
 toc: true
 provenance:
@@ -10,7 +10,31 @@ provenance:
   note: "Processed from the video-pipeline brief, published raw at /briefs/2026-09-07__brief__video-pipeline/."
 ---
 
-<div class="warnbox"><p><b>No video has been made.</b> {{claim:shim-unrun}} The pipeline is real and its numbers are measured {{claim:pipeline-shipped-reels}}; its ElevenLabs path is written and has never produced a sound. Everything below that describes a render is a plan, and everything that describes a cost is arithmetic. <a href="/briefs/">Why it was not run</a> is a decision with three reasons, and the first is that this site has never held a key.</p></div>
+<div class="note"><p><b>This page changed state on 8 September 2026.</b> {{claim:first-video}} A key was supplied by the project lead for one run, held in one command's environment and written to no file. <b>The video and every material that made it live in an encrypted vault, not in this repository</b> — the repository carries the report and the findings, which is the half that is useful to a reader. What follows is what the run found; the plan it followed is further down, unchanged.</p></div>
+
+## 0 · What the first run found
+
+Four of the five predictions in the handover brief were testable. One was confirmed, one was wrong for this account, one could not be tested, and **one failure nobody predicted stopped the very first request**.
+
+<div class="fails"><div class="fail"><p class="who">Confirmed — and it was the one called most likely</p><h3><code>pcm_44100</code> is refused below the Pro tier</h3><p><code>403 subscription_required</code>: <em>"Output format 'pcm_44100' is only available on the Pro tier and above."</em> {{claim:pcm-gated}} The shim asks for raw PCM to avoid a decoder; on anything below Pro that is a dead path, and the documented fallback — MP3 plus <code>decodeAudioData</code> — is the right one.</p></div><div class="fail"><p class="who">Nobody predicted this</p><h3>Stitching is rejected outright on v3</h3><p><code>400 unsupported_model</code>: <em>"Providing previous_text or next_text is not yet supported with the 'eleven_v3' model."</em> {{claim:stitching-v3}} The pipeline passes neighbouring scenes by default and this site's own <a href="/experiments/text-handling/">text-handling lab</a> offered the same combination, so <b>the first request failed before any audio existed</b>. The lab now refuses the combination rather than sending it.</p></div><div class="fail ok"><p class="who">Prediction wrong, for this account</p><h3><code>eleven_v3</code> runs on a free-tier key</h3><p>It is listed by <code>GET /v1/models</code> and it generated all nine scenes, with <code>stability: 0.5</code> accepted and no 422. {{claim:v3-on-free}} The guide's worry was reasonable and this account did not share it — which is why the answer had to be run rather than reasoned.</p></div><div class="fail ok"><p class="who">Scoped, not bounded — in one response body</p><h3>The key said exactly which permission it lacked</h3><p>Creating a pronunciation dictionary returned <code>401</code>: <em>"missing the permission <code>pronunciation_dictionaries_write</code>"</em>. {{claim:key-scope-observed}} The platform names a missing permission precisely and has nothing equivalent to say about spend. <b>The only ceiling on that key was the free tier's 10,000 characters a month</b> — which is the argument on <a href="/#5-the-bounding-primitive">§5</a>, arriving as an error message.</p></div></div>
+
+## 0b · The measurement that settles the drift question
+
+This estate has reported **100–500 ms of drift over two minutes** across four reels since September, cause unattributed. Decoding every MP3 to PCM and comparing with the alignment:
+
+<div class="tiles"><div class="tile cool"><b>0.0 ms</b><span>difference between the alignment's last end time and the decoded audio</span><em>nine scenes out of nine {{claim:alignment-exact}}</em></div><div class="tile cool"><b>9 / 9</b><span>scenes where the timing was exact, not approximate</span><em>the alignment <em>is</em> the duration</em></div><div class="tile hot"><b>up to 1.8 s</b><span>of silent video per scene added by ffmpeg's <code>-shortest</code></span><em>our encoder, not their speech {{claim:shortest-trap}}</em></div><div class="tile hot"><b>993 px</b><span>the viewport Chromium gave for a <code>--window-size</code> of 1080</span><em>every slide silently cropped until it was measured</em></div></div>
+
+**So the drift is not in the audio.** A render that advances by the alignment is correct; one that trusts an encoder to stop when the audio does is not — and this render proved it by doing exactly that, adding 14 seconds across ten scenes before the bug was found. The fix is `-t <alignment end>` instead of `-shortest`.
+
+That is a question closed, a fortnight after it was asked, for the price of decoding nine files.
+
+## 0c · What it cost, and where it is
+
+<div class="tiles"><div class="tile cool"><b>1,821</b><span>characters, in 9 requests, no re-renders</span><em>the script was written first and not changed after the audio existed</em></div><div class="tile cool"><b>$0.18</b><span>at the published list rate for <code>eleven_v3</code></span><em>a free-tier key, so it was paid in quota rather than money</em></div><div class="tile cool"><b>2:15</b><span>two cuts — 1920×1080 at 4.45 MB, 1080×1920 at 4.30 MB</span><em>the portrait cut reuses the same audio and cost nothing</em></div><div class="tile cool"><b>28</b><span>subtitle cues, from the same responses as the audio</span><em>no second call, no alignment pass, no transcription</em></div></div>
+
+**The video, the nine narrations, the alignments, the slides, the subtitles and the findings are in an encrypted vault, not in this repository.** A report site should carry the report; 9 MB of media per reel belongs where media belongs, and the estate already has a place for it. What is published here is what a reader can use: the numbers, the failures, and the method.
+
+**What this run cannot tell you is how it sounds.** The agent that made it cannot listen to it. Every figure above is measured; no claim is made about the quality of the read, or about how `eleven_v3` pronounces `sgit` — [the site's oldest open item](/ledger/#open-items) is still open, and the first person to play the file closes it.
 
 ## 1 · The pipeline, in one paragraph
 

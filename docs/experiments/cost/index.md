@@ -39,3 +39,7 @@ At about 4,000 characters per video, a Creator plan's 220,000 characters is roug
 ## When these numbers go wrong
 
 The day the vendor changes a price. Everything here carries the date it was read, and the [ledger](/ledger/) marks the whole class of pricing claims as vendor-documentation rather than measurement {{claim:tts-prices}}. If you find a rate that has moved, that is a correction worth sending: it invalidates a row on this site rather than a paragraph.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

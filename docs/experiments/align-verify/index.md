@@ -42,3 +42,7 @@ A provider-independent gate is worth more than a provider's own transcript check
 ## What is unverified here
 
 Everything. The request shapes come from the vendor's reference {{claim:alignment-stt-price}} {{claim:labs-unrun}}; the response parsing in this lab handles both the word-array and character-array shapes because we have not seen either one come back. If the field names have moved, the log will say so before the table does.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

@@ -38,3 +38,7 @@ At list price, the sample in the text box is 187 characters — about **$0.019**
 The command-line equivalents of what this page does are [downloadable as files](/examples/) — `00-smoke.sh`, `tts-timestamps.mjs` and the rest — badged unrun, with the pipeline invocation beside them {{claim:examples-unrun}}.
 
 If the request fails with a network error rather than an HTTP status, it is CORS or a host CSP and not your key {{claim:csp-blocks}}: open the console, check for a `connect-src` violation, and see [§9 of the report](/#9-what-went-wrong).
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

@@ -32,3 +32,7 @@ The ramp mode fires waves of 1, 2, 4, 8… and stops at the first wave with a fa
 ## What to do with the number
 
 Put it in the semaphore. In the pipeline this came from, that is `limits.maxConcurrent` in the vault's terms file — which is also exactly the field [the pattern-three host](/pattern-three/) would enforce on behalf of an app that cannot be trusted to enforce it itself {{claim:sg-tts-spec}}. Until somebody runs this, that field holds a guess.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

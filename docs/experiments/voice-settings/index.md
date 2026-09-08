@@ -31,3 +31,7 @@ Latency is reported but is **not** the point here: a sweep is sequential, so the
 ## What it costs
 
 Five values of a 90-character line is about **$0.045** on v3, half that on flash {{claim:tts-prices}}. A full sweep of all four settings is under a quarter of a dollar, which is less than the cost of arguing about it.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

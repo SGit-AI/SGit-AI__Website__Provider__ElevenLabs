@@ -66,6 +66,14 @@ table.vers td{font-size:.85rem}
   nav.site .ni > .nl{display:block;padding:.42rem .2rem;font-size:.95rem}
 }
 
+.disclosure-strip{background:var(--panel2);border-bottom:1px solid var(--line);font-size:.76rem;color:var(--dim)}
+.disclosure-strip .row{max-width:var(--wide);margin:0 auto;padding:.4rem 1.1rem}
+.disclosure-strip b{color:var(--ink)}
+.disclosure-strip a{color:var(--accent-dk)}
+footer.site .licence{font-size:.72rem;color:var(--dim2);margin-top:.8rem}
+.irrev{color:var(--red)}
+table.grants h4,main.doc h4.grant-layer{margin:1.2rem 0 .3rem}
+
 /* ---------- document ---------- */
 main.doc{max-width:var(--measure);margin:0 auto;padding:2.2rem 1.4rem 3rem}
 main.doc.doc-wide{max-width:1180px}
@@ -161,6 +169,10 @@ table.cmp td .vnote{display:block;font-size:.7rem;color:var(--dim);line-height:1
 .legend .v{font-size:.9rem}
 table.ledger td:first-child{width:52%}
 table.grants td{font-size:.85rem}
+/* a capability tuple is three short tokens; breaking `endpoint` across two lines
+   makes a table of them unreadable */
+table.grants td code{overflow-wrap:normal;white-space:nowrap}
+table.grants th:nth-child(-n+3),table.grants td:nth-child(-n+3){white-space:nowrap}
 
 /* ---------- labs ---------- */
 .lab{margin:1.6rem 0}

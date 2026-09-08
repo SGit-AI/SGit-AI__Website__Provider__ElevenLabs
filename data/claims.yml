@@ -218,3 +218,43 @@
   group: Specified, or written and never run
   claim: "At about 4,000 characters per video, a Creator plan's 220k monthly characters is roughly **50 videos a month**. Arithmetic, not experience — we have never run a month of it."
   source: "220,000 ÷ 4,000, against measured script sizes"
+
+- id: pipeline-shipped-reels
+  state: measured
+  date: 2–3 Sep 2026
+  group: Measured on our own workloads
+  claim: "The video pipeline this site would use is real and has shipped **four reels, six cuts** — two landscape, two portrait — with three narration providers: a local model, an OpenRouter-hosted one, and none with this vendor. Every number in its documentation was observed rather than estimated."
+  source: "The pipeline's own render logs and per-reel findings, handed over 7 Sep 2026"
+
+- id: pipeline-wps
+  state: measured
+  date: 7 Sep 2026
+  group: Measured on our own workloads
+  claim: "**2.1 words per second** is the length rule those renders produced: ten scenes want 200–260 words including intro and outro. It is counted before any audio exists, because a script that is too long is cheaper to fix than a render that is."
+  source: "Six cuts, measured against their scripts"
+
+- id: pipeline-drift
+  state: measured
+  date: 3 Sep 2026
+  group: Measured on our own workloads
+  claim: "Those renders drifted **100–500 ms over two minutes** between the audio and the recording, and the cause has never been attributed. Character-level alignment makes the attribution possible for the first time — sum the alignments' last end times and compare with the recorder's own duration — and it has not been done."
+  source: "Render logs across four reels; the comparison is ten minutes of work nobody has spent"
+
+- id: mp4-vs-webm
+  state: measured
+  date: 7 Sep 2026
+  group: Measured on our own workloads
+  claim: "For the same two minutes of video the MP4 was **3.7 MB against 10.1 MB** for the WebM. MP4 also plays natively on iOS Safari and is accepted by messaging apps that refuse WebM, so the delivered file is H.264 + AAC with `+faststart`."
+  source: "The pipeline's own encodes"
+
+- id: first-run-risks
+  state: unrun
+  group: Specified, or written and never run
+  claim: "Four predictions about where the unrun ElevenLabs render path breaks first: `pcm_44100` output is gated to higher plans and is the most likely failure; `eleven_v3` may not be enabled for API use, and treats stability as three discrete modes rather than a continuum, so an arbitrary value can 422; the alignment may not come back in the shape the shim expects, or at all on some models; and the render's default pool fires two generations at once against an untested concurrency limit."
+  source: "Reasoned from the vendor's reference by the pipeline's author, who could not reach the API. Predictions, not findings"
+
+- id: video-cost-projection
+  state: projected
+  group: Specified, or written and never run
+  claim: "A two-minute landscape reel is about 1,600 characters ≈ **$0.16** on `eleven_v3`; a four-minute one about 3,600 ≈ **$0.36**; half those on flash. Budget about **$1.50 for a first video** including the three or four re-renders a first script needs. Arithmetic on measured word counts at list price, not an invoice."
+  source: "Characters × the rate in the pricing claim, against measured scripts"

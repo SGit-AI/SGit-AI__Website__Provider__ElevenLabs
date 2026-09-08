@@ -38,3 +38,7 @@ The [cost model](/experiments/cost/) needs no key at all and answers the questio
 ## What a lab is not
 
 It is not a product, it is not a proxy, and it is not a pattern to copy into an application you ship. Each of these asks you to put a full account credential into a web page, which is [pattern 0 with a ceiling](/patterns/) — defensible for the key's owner testing their own key, indefensible for anything with users. The publishable version of these pages has no key box at all, and it is [specified rather than built](/pattern-three/) {{claim:sg-tts-spec}}.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

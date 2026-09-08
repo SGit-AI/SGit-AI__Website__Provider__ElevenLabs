@@ -39,3 +39,7 @@ Section 4 is the point of the page. Generate both sides, listen, mark each token
 ## A shortcut worth knowing
 
 On `eleven_v3` you can write IPA inline in the text between slashes — `/ˈsɪdʒɪt/` — which is a fast way to find a transcription that works *before* committing it to a dictionary version {{claim:labs-unrun}}. Find it inline, then move it into a rule; do not ship inline phonetics in narration text, because that text is what appears on screen.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

@@ -12,7 +12,10 @@ PATTERNS=(
   'sk_[A-Za-z0-9]{32,}'                 # ElevenLabs
   'sk-or-v1-[A-Za-z0-9]{16,}'           # OpenRouter
   'sk-[A-Za-z0-9]{32,}'                 # OpenAI-shaped
-  'xi-api-key:[[:space:]]*sk_'          # a key pasted into a curl example
+  # A key pasted into a curl example. The trailing length qualifier matters: the
+  # published briefs quote this scan's own grep pattern, and a header name next to
+  # an empty placeholder is documentation, not a leak.
+  'xi-api-key:[[:space:]]*sk_[A-Za-z0-9]{20,}'
   'sgit_private_vault_[A-Za-z0-9]+'     # vault keys
   'hf_[A-Za-z0-9]{20,}'                 # Hugging Face
   'AKIA[0-9A-Z]{16}'                    # AWS

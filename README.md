@@ -44,6 +44,7 @@ present tense.
 | `tools/` | The secret scan, the acceptance checks, the JavaScript syntax check, the lab self-test |
 | `admin/build/` | `version.txt` owns the site version; `validate.sh` is the pre-release gate |
 | `bin/bump.py` | The one command that bumps a release, in both the places that own it |
+| `briefs/` | The briefs this site was built from, raw, published at `/briefs/` under CC BY 4.0 |
 | `docs/` | The built site, committed. GitHub Pages serves this directory |
 
 ## Build
@@ -123,4 +124,11 @@ a lab is broken, open an issue — a correction changes a row in the ledger, wit
 rather than quietly rewriting a paragraph. See [`HANDBACK.md`](HANDBACK.md) for the list of claims that
 need somebody with API access to check.
 
-Apache-2.0.
+## Licence
+
+**The site's content** — every page, every markdown twin, `llms.txt`, `llms-full.txt` and the
+published briefs — is **CC BY 4.0**, as across the `*.sgit.ai` network. The stamp is in the page
+footer, at the foot of every raw markdown document and in both machine-readable indexes, and a
+build check enforces it so it cannot drift.
+
+**The code that builds it** — `build.py`, `assets/`, `apps/`, `tools/` — is **Apache-2.0**.

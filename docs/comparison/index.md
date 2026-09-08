@@ -44,3 +44,7 @@ patterns:
 ```
 
 `verdict` is one of `yes` · `no` · `never` · `spec` · `na`. The [OpenRouter page](/providers/openrouter/) on this site exists as the proof: it is a stub of the sibling site's content, carrying nothing but front-matter and a short body, and it is where the second and third rows of the table above come from.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

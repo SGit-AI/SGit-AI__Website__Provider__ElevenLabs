@@ -48,8 +48,28 @@ Note what makes it evidence rather than anecdote: the bound was **chosen before*
 
 **ElevenLabs cannot do pattern 1 at all.** A key can be *scoped* to endpoints; it cannot be *bounded* by spend. There is no per-key limit and no reset window shorter than the billing cycle {{claim:no-per-key-spend-limit}}. So "put a bounded key in the page" — the honest answer for the sibling provider — has no implementation here, and a key in a page is pattern 0 with the account's quota as its only ceiling. That single asymmetry is why [the comparison table](/comparison/) is worth generating.
 
+## The second axis: what the tool keeps
+
+The four patterns are a property of **the provider**: where the credential lives and what bounds it. There is a second axis, and it is a property of **our tool**: what state it keeps. It decides whether a tool works for somebody with no key at all, and whether it survives being downloaded and run from somewhere else.
+
+| Tier | What it keeps | Works with no key? | Survives being downloaded? |
+|---|---|---|---|
+| **1** | Nothing. A pure function in a page | **Yes** | Yes, completely |
+| **2** | This browser's `localStorage`, on this device | No | Yes, and it carries no key with it |
+| **3** | A vault, which holds the key the page never sees | Yes — the *vault* holds the key | **No.** A vault app's calls fail on a static host, because the key is sealed to its owner |
+
+**The intersection is the useful statement, and it is one sentence:** a tier-two tool holding a key in `localStorage` is **pattern 0 with a ceiling**, and a tier-three tool is **pattern 3**. Said once, the two axes stop competing to explain the same thing.
+
+<div class="tablewrap"><table class="cmp"><thead><tr><th>&nbsp;</th><th>Tier 1 · no state</th><th>Tier 2 · this device</th><th>Tier 3 · a vault</th></tr></thead><tbody><tr><th scope="row">Pattern 0 · key in the page</th><td><a href="/experiments/cost/">the cost model</a><span class="vnote">no key, no network call at all</span></td><td><a href="/bench/">the bench</a> and ten more labs<span class="vnote">your key, your device, one host</span></td><td><span class="v v-na">&mdash;</span></td></tr><tr><th scope="row">Pattern 1 · bounded key</th><td colspan="3" class="dim">Not available from this provider at any tier — there is no per-key spend limit to mint</td></tr><tr><th scope="row">Pattern 2 · short-lived token</th><td><span class="v v-na">&mdash;</span></td><td><span class="v v-no">&times;</span><span class="vnote">would need a server we run; the vendor mints one for Agents only</span></td><td><span class="v v-na">&mdash;</span></td></tr><tr><th scope="row">Pattern 3 · host holds the key</th><td><span class="v v-na">&mdash;</span></td><td><span class="v v-na">&mdash;</span></td><td><a href="/pattern-three/">sg.tts</a><span class="vnote">specified, not shipped</span></td></tr></tbody></table></div>
+
+**Two honest wrinkles in that grid.** The first: [the captions studio](/experiments/captions/) is a tier-two tool with a tier-one mode — paste an alignment and it needs no key, no network and no account. It is placed at tier two because that is its full form, but the keyless mode is the more interesting half and it is why the cue rule can be tuned by somebody who has never bought a character. The second is the empty column: **tier three has no working tool here.** The site's own recommended pattern is the one it has not demonstrated {{claim:sg-tts-spec}}, and the honest thing is to say so in the same breath as recommending it.
+
 ## What this means for the labs on this site
 
 Every [experiment here](/experiments/) asks you to paste your own key into your own browser. That is **pattern 0 with a ceiling, deliberately, in the narrow case where it is defensible**: the key's owner, testing their own key, on their own device, with no key shipped in the page and nothing sent anywhere but the vendor {{claim:keys-local-only}}. It is not a pattern to publish, and the box saying so sits at the top of every lab rather than in a footnote.
 
 The version of those labs that would be publishable is [pattern three](/pattern-three/), where the page has no key box at all. It does not exist yet {{claim:sg-tts-spec}}.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

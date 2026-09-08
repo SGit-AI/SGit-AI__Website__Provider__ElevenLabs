@@ -32,3 +32,7 @@ For a single-narrator explainer this is one endpoint away rather than a rewrite,
 Billed as characters, at the model's rate — the same arithmetic as ordinary speech {{claim:tts-prices}}. Availability is per-account: if the endpoint is not on your plan the call comes back 402 or 404 {{claim:error-table}}, which is the vendor answering a question about your subscription rather than a fault in this page. The log shows the status and the `detail` body, which is the useful part.
 
 Nobody here has run it {{claim:labs-unrun}}.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

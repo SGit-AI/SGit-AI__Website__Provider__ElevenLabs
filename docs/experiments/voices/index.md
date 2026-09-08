@@ -38,3 +38,7 @@ For narration of technical explainers, the labels worth filtering on are `use_ca
 ## What it costs
 
 Listing is free. Each "speak my line" is one generation of your text — around **$0.006 for a 60-character line** on flash, twice that on v3 {{claim:tts-prices}}. Trying eight voices on one line costs less than a bus fare and settles an argument that otherwise runs for a week.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

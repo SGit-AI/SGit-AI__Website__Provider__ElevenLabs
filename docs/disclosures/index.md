@@ -24,8 +24,12 @@ provenance:
 
 **Independent work by SGit-AI. Not affiliated with, endorsed by, or sponsored by ElevenLabs. "ElevenLabs" identifies the API this page reports on; all trademarks belong to their owners.**
 
-The same line is in this repository's README and in the footer of every page on this site. This site uses no vendor logo, wordmark, or brand colour — the palette here is the [sgit.ai](https://sgit.ai) house palette, used across the estate. The domain names the API being reported on, in the way a review names the thing it reviews.
+The same line is in this repository's README and in the footer of every page on this site. This site uses no vendor logo, wordmark, or brand colour — the palette here is the sgit.ai house palette, used across the estate. The domain names the API being reported on, in the way a review names the thing it reviews.
 
 ## The other direction
 
 If you work at a vendor written about here and something on this site is **wrong**, the correction path is the repository's issues: <https://github.com/SGit-AI/SGit-AI__Website__Provider__ElevenLabs>. Corrections of fact are made with the date they were made, and the [ledger](/ledger/) keeps the state of every claim visible, so a correction changes a row rather than quietly rewriting a paragraph.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

@@ -38,3 +38,7 @@ Two generations, identical everything, same seed. Compare byte length and per-wo
 ## What this costs, and what it settles
 
 About **$0.05** for all three sections on v3 at the default texts {{claim:tts-prices}}. What it settles: whether four script files get rewritten, whether the render passes neighbouring scenes, and whether renders are reproducible from parameters or need their audio archived. None of it has been run {{claim:labs-unrun}}.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).

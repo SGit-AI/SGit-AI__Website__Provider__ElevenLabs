@@ -34,3 +34,7 @@ That is the difference between this vendor and the sibling one, and it is not a 
 The fourth tile in section 3 has no data behind it, because there is no field to read. Every other number on that row comes from `GET /v1/user/subscription`: characters used, characters allowed, the reset date — all **account-level** {{claim:plan-quotas}}. The API has no concept of a per-key budget, so a lab cannot show you one.
 
 That is the empirical form of the claim the [report](/#5-the-bounding-primitive) makes in prose, and it is why [pattern 1](/patterns/) is marked unavailable in [the comparison](/comparison/) rather than merely discouraged.
+
+---
+
+This document is released under the Creative Commons Attribution 4.0 International licence (CC BY 4.0).
